@@ -2,18 +2,18 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_file_io
-#define __H__slimesh_file_io
+#ifndef __H__lume_file_io
+#define __H__lume_file_io
 
 #include <string>
 #include <exception>
 #include "custom_exception.h"
 #include "mesh.h"
 
-namespace slimesh {
+namespace lume {
 
 
-DECLARE_CUSTOM_EXCEPTION (FileIOError, SlimeshError);
+DECLARE_CUSTOM_EXCEPTION (FileIOError, LumeError);
 
 DECLARE_CUSTOM_EXCEPTION (FileSuffixError, FileIOError);
 DECLARE_CUSTOM_EXCEPTION (FileNotFoundError, FileIOError);
@@ -21,6 +21,6 @@ DECLARE_CUSTOM_EXCEPTION (FileParseError, FileIOError);
 
 SPMesh CreateMeshFromFile (std::string filename);
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_file_io
+#endif	//__H__lume_file_io

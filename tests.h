@@ -2,15 +2,15 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_tests
-#define __H__slimesh_tests
+#ifndef __H__lume_tests
+#define __H__lume_tests
 
-namespace slimesh {
+namespace lume {
 namespace tests {
 
 bool RunTests ();
 
 }//	end of namespace tests
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_tests
+#endif	//__H__lume_tests

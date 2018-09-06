@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_annex_storage
-#define __H__slimesh_annex_storage
+#ifndef __H__lume_annex_storage
+#define __H__lume_annex_storage
 
 #include <map>
 #include <memory>
@@ -12,7 +12,7 @@
 #include "annex.h"
 #include "custom_exception.h"
 
-namespace slimesh {
+namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
 
@@ -74,6 +74,6 @@ private:
 	annex_map_t	m_annexMap;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_annex_storage
+#endif	//__H__lume_annex_storage

@@ -1,5 +1,5 @@
-#ifndef __H__slimesh__mesh
-#define __H__slimesh__mesh
+#ifndef __H__lume__mesh
+#define __H__lume__mesh
 
 #include <map>
 #include <memory>
@@ -14,7 +14,7 @@
 #include "grob_hash.h"
 #include "types.h"
 
-namespace slimesh {
+namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (AnnexTypeError, AnnexError);
 
@@ -231,12 +231,12 @@ inline std::ostream& operator<< (std::ostream& out, const Mesh::AnnexKey& v) {
 using SPMesh = std::shared_ptr <Mesh>;
 using CSPMesh = std::shared_ptr <const Mesh>;
 
-}// end of namespace slimesh
+}// end of namespace lume
 
 
 namespace std {
-	inline string to_string (const slimesh::Mesh::AnnexKey& v) {
+	inline string to_string (const lume::Mesh::AnnexKey& v) {
 		return v.name;
 	}
 }
-#endif	//__H__slimesh__mesh
+#endif	//__H__lume__mesh

@@ -16,10 +16,10 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 namespace tests {
 
-DECLARE_CUSTOM_EXCEPTION (TestError, SlimeshError);
+DECLARE_CUSTOM_EXCEPTION (TestError, LumeError);
 
 #define FAIL(msg)	{std::stringstream ss; ss << msg; throw(TestError(ss.str()));}
 #define COND_FAIL(cond, msg)	if(cond){FAIL(msg);}
@@ -65,7 +65,7 @@ static void TestCreateMeshFromFile ()
 			SPMesh mesh = CreateMeshFromFile (meshName);
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			cout << "    fail: '" << meshName << "'" << endl;
 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 		}
@@ -115,7 +115,7 @@ static void TestGrobArrays ()
 
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			cout << "    fail: '" << meshName << "'" << endl;
 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 		}
@@ -166,7 +166,7 @@ static void TestGrobIterator ()
 
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			cout << "    fail: '" << meshName << "'" << endl;
 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 		}
@@ -218,7 +218,7 @@ static void TestFillElemIndexMap ()
 
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			cout << "    fail: '" << meshName << "'" << endl;
 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 		}
@@ -255,7 +255,7 @@ static void TestGrobValences ()
 
 		cout << "    ok: '" << meshName << "'" << endl;
 	}
-	catch (SlimeshError& e) {
+	catch (LumeError& e) {
 		cout << "    fail: '" << meshName << "'" << endl;
 		FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 	}
@@ -309,7 +309,7 @@ static void TestNeighborhoods ()
 
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			cout << "    fail: '" << meshName << "'" << endl;
 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 		}
@@ -348,7 +348,7 @@ static void TestNeighborhoods ()
 
 // 			cout << "    ok: '" << meshName << "'" << endl;
 // 		}
-// 		catch (SlimeshError& e) {
+// 		catch (LumeError& e) {
 // 			cout << "    fail: '" << meshName << "'" << endl;
 // 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
 // 		}
@@ -374,7 +374,7 @@ namespace impl {
 
 			cout << "    ok: '" << meshName << "' and '" << rimMeshName << "'" << endl;
 		}
-		catch (SlimeshError& e) {
+		catch (LumeError& e) {
 			FAIL ("Failed for '" << meshName << "' and '" << rimMeshName << "' with message: " << e.what());
 		}
 	}
@@ -448,4 +448,4 @@ bool RunTests ()
 
 
 }//	end of namespace tests
-}//	end of namespace slimesh
+}//	end of namespace lume

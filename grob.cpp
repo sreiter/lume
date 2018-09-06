@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 namespace impl {
 
 void PrintGrobDescs ()
@@ -98,4 +98,4 @@ const std::string& GrobSetName (grob_set_t grobSet)
 	return names[grobSet];
 }
 
-}// end of namespace slimesh
+}// end of namespace lume

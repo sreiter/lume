@@ -2,14 +2,14 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_neighborhoods
-#define __H__slimesh_neighborhoods
+#ifndef __H__lume_neighborhoods
+#define __H__lume_neighborhoods
 
 #include "grob_index.h"
 #include "mesh.h" // use forward instead
 #include "neighbors.h"
 
-namespace slimesh {
+namespace lume {
 
 
 /// Gives access to the neighbors of all enteties of the mesh
@@ -36,6 +36,6 @@ private:
     GrobSet			m_neighborGrobTypes;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_neighborhoods
+#endif	//__H__lume_neighborhoods

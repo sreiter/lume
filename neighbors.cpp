@@ -4,7 +4,7 @@
 
 #include "neighbors.h"
 
-namespace slimesh {
+namespace lume {
 
 Neighbors::
 Neighbors () :
@@ -36,4 +36,4 @@ neighbor (const index_t i) const
 }
 
 
-}//	end of namespace slimesh
+}//	end of namespace lume

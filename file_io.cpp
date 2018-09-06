@@ -19,7 +19,7 @@
 using namespace std;
 using namespace rapidxml;
 
-namespace slimesh {
+namespace lume {
 
 std::shared_ptr <Mesh> CreateMeshFromSTL (std::string filename)
 {
@@ -418,4 +418,4 @@ std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
 	return SPMesh ();
 }
 
-}// end of namespace slimesh
+}// end of namespace lume

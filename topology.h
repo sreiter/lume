@@ -1,5 +1,5 @@
-#ifndef __H__slimesh__topology
-#define __H__slimesh__topology
+#ifndef __H__lume__topology
+#define __H__lume__topology
 
 #include <utility>
 #include "array_annex.h"
@@ -7,7 +7,7 @@
 #include "grob_hash.h"
 #include "grob_index.h"
 
-namespace slimesh {
+namespace lume {
 
 class Mesh;
 
@@ -118,10 +118,10 @@ void CreateAssociatedElemMap (TIndexVector& elemMapOut,
 
 
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
 
 // INCLUDE IMPLEMENTATION
 #include "topology_impl.h"
 
-#endif	//__H__slimesh__topology
+#endif	//__H__lume__topology

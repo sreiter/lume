@@ -2,13 +2,13 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_grob_iterator
-#define __H__slimesh_grob_iterator
+#ifndef __H__lume_grob_iterator
+#define __H__lume_grob_iterator
 
 #include "grob.h"
 #include <iterator>
 
-namespace slimesh {
+namespace lume {
 
 class GrobIterator {
 public:
@@ -98,6 +98,6 @@ private:
 	index_t m_numCorners;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_grob_iterator
+#endif	//__H__lume_grob_iterator

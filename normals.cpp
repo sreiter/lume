@@ -2,7 +2,7 @@
 #include "mesh.h"
 #include "vec_math_raw.h"
 
-namespace slimesh {
+namespace lume {
 
 real_t* TriangleNormal3 (real_t* normalOut,
                          const real_t* c0,
@@ -60,4 +60,4 @@ ComputeFaceVertexNormals3 (Mesh& mesh,
 	VecTupNormalize (UNPACK_DST(normalArray));
 }
 
-}// end of namespace slimesh
+}// end of namespace lume

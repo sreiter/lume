@@ -2,15 +2,15 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_subset_info_annex
-#define __H__slimesh_subset_info_annex
+#ifndef __H__lume_subset_info_annex
+#define __H__lume_subset_info_annex
 
 #include <string>
 #include <vector>
 #include "annex.h"
 #include "types.h"
 
-namespace slimesh {
+namespace lume {
 
 class SubsetInfoAnnex : public Annex
 {
@@ -100,6 +100,6 @@ private:
 using SPSubsetInfoAnnex = std::shared_ptr <SubsetInfoAnnex>;
 using CSPSubsetInfoAnnex = std::shared_ptr <const SubsetInfoAnnex>;
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_subset_info_annex
+#endif	//__H__lume_subset_info_annex

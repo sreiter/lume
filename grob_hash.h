@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_grob_hash
-#define __H__slimesh_grob_hash
+#ifndef __H__lume_grob_hash
+#define __H__lume_grob_hash
 
 #include <unordered_set>
 #include <unordered_map>
@@ -11,13 +11,13 @@
 
 namespace std
 {
-    template<> struct hash<slimesh::Grob>
+    template<> struct hash<lume::Grob>
     {
-        typedef slimesh::Grob argument_type;
+        typedef lume::Grob argument_type;
         typedef std::size_t result_type;
         result_type operator()(argument_type const& grob) const noexcept
         {
-        	using namespace slimesh;
+        	using namespace lume;
         	const index_t numCorners = grob.num_corners();
         	std::size_t h = 0;
         	for(index_t i = 0; i < numCorners; ++i){
@@ -30,11 +30,11 @@ namespace std
 }//	end of namespace std
 
 
-namespace slimesh {
+namespace lume {
 	using GrobHash = std::unordered_set <Grob>;
 
 	template <class T>
 	using GrobHashMap = std::unordered_map <Grob, T>;
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_grob_hash
+#endif	//__H__lume_grob_hash

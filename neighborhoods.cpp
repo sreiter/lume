@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 
 Neighborhoods::
 Neighborhoods ()
@@ -81,4 +81,4 @@ base_index (const GrobIndex gi) const
 }
 
 
-}//	end of namespace slimesh
+}//	end of namespace lume

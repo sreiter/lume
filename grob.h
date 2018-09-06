@@ -1,11 +1,11 @@
-#ifndef __H__slimesh__grob
-#define __H__slimesh__grob
+#ifndef __H__lume__grob
+#define __H__lume__grob
 
 #include <cstdint>
 #include <string>
 #include "types.h"
 
-namespace slimesh {
+namespace lume {
 
 enum grob_t {
 	VERTEX,
@@ -745,6 +745,6 @@ private:
 	index_t m_offset;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh__grob
+#endif	//__H__lume__grob

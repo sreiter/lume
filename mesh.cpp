@@ -2,6 +2,6 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 
-}// end of namespace slimesh
+}// end of namespace lume

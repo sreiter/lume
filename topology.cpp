@@ -7,14 +7,14 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 
 TotalToGrobIndexMap::
 TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs) :
     m_grobSet (gs)
 {
     if (gs.size() > MAX_GROB_SET_SIZE)
-    	SlimeshError ("Internal error: MAX_GROB_SET_SIZE is wrong!");
+    	LumeError ("Internal error: MAX_GROB_SET_SIZE is wrong!");
 
     m_baseInds[0] = 0;
     for(index_t i = 0; i < gs.size(); ++i) {
@@ -34,7 +34,7 @@ operator () (const index_t ind) const
         	return make_pair (ind - m_baseInds[i], m_grobSet.grob_type(index_t(i)));
     }
 
-    throw SlimeshError (string("TotalToGrobIndexMap: Couldn't map index ").
+    throw LumeError (string("TotalToGrobIndexMap: Couldn't map index ").
     					append (to_string(ind)).
     					append (" to GrobSet ").
     					append (m_grobSet.name()));
@@ -104,7 +104,7 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 		}
 	}
 	else {
-		throw SlimeshError ("ComputeGrobValences is currently only implemented for grobs.dim() < nbrGrobs.dim(). Sorry.");
+		throw LumeError ("ComputeGrobValences is currently only implemented for grobs.dim() < nbrGrobs.dim(). Sorry.");
 	}
 }
 
@@ -148,8 +148,8 @@ void CreateEdgeInds (Mesh& mesh)
 		}
 	}
 	
-	mesh.inds(slimesh::EDGE)->clear();
-	GrobHashToIndexArray (mesh.inds(slimesh::EDGE)->underlying_array(), hash);
+	mesh.inds(EDGE)->clear();
+	GrobHashToIndexArray (mesh.inds(EDGE)->underlying_array(), hash);
 }
 
 

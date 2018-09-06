@@ -2,12 +2,12 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_neighbors
-#define __H__slimesh_neighbors
+#ifndef __H__lume_neighbors
+#define __H__lume_neighbors
 
 #include "grob_index.h"
 
-namespace slimesh {
+namespace lume {
 	
 class Neighbors {
 public:
@@ -27,6 +27,6 @@ private:
 	const index_t* 	m_nbrs;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_neighbors
+#endif	//__H__lume_neighbors

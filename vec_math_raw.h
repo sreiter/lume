@@ -1,10 +1,10 @@
-#ifndef __H__slimesh__vec_math_raw
-#define __H__slimesh__vec_math_raw
+#ifndef __H__lume__vec_math_raw
+#define __H__lume__vec_math_raw
 
 #include <cmath>
 #include "types.h"
 
-namespace slimesh {
+namespace lume {
 
 
 template <class real_t>
@@ -251,6 +251,6 @@ real_t* VecCross3 (real_t* vOut, const real_t* v0, const real_t* v1)
 	return vOut;
 }
 
-}// end of namespace slimesh
+}// end of namespace lume
 
-#endif	//__H__slimesh__vec_math_raw
+#endif	//__H__lume__vec_math_raw

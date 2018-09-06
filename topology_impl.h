@@ -2,12 +2,12 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_topology_impl
-#define __H__slimesh_topology_impl
+#ifndef __H__lume_topology_impl
+#define __H__lume_topology_impl
 
 #include "topology.h"
 
-namespace slimesh {
+namespace lume {
 
 template <class TIndexVector>
 void GrobHashToIndexArray (TIndexVector& indArrayInOut,
@@ -97,7 +97,7 @@ void CreateAssociatedElemMap (TIndexVector& elemMapOut,
 		}
 	}
 	else {
-		throw SlimeshError ("CreateAssociatedElemMap: Currently, nbr dimension > elem dimension has to hold true");
+		throw LumeError ("CreateAssociatedElemMap: Currently, nbr dimension > elem dimension has to hold true");
 	}
 
 	// Compute an offset into elemMapOut for each element (convert count -> offset)
@@ -130,6 +130,6 @@ void CreateAssociatedElemMap (TIndexVector& elemMapOut,
 	}
 }
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_topology_impl
+#endif	//__H__lume_topology_impl

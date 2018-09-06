@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_custom_exception
-#define __H__slimesh_custom_exception
+#ifndef __H__lume_custom_exception
+#define __H__lume_custom_exception
 
 #include <stdexcept>
 
@@ -16,11 +16,11 @@
 		className (const std::string& what) : baseClass (what) {}\
 	}; 
 	
-namespace slimesh {
+namespace lume {
 
 /// The base class for all exceptions thrown by slimesh
-DECLARE_CUSTOM_EXCEPTION (SlimeshError, std::runtime_error);
+DECLARE_CUSTOM_EXCEPTION (LumeError, std::runtime_error);
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_custom_exception
+#endif	//__H__lume_custom_exception

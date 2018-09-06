@@ -1,12 +1,12 @@
-#ifndef __H__slimesh__normals
-#define __H__slimesh__normals
+#ifndef __H__lume__normals
+#define __H__lume__normals
 
 #include <memory>
 #include "grob.h"
 #include "mesh.h"
 #include "types.h"
 
-namespace slimesh {
+namespace lume {
 
 
 ///	computes the normal of a single triangle
@@ -27,6 +27,6 @@ void
 ComputeFaceVertexNormals3 (Mesh& meshInOut,
                            const std::string& normalId = "normals");
 
-}// end of namespace slimesh
+}// end of namespace lume
 
-#endif	//__H__slimesh__normals
+#endif	//__H__lume__normals

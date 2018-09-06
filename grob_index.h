@@ -2,12 +2,12 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_grob_index
-#define __H__slimesh_grob_index
+#ifndef __H__lume_grob_index
+#define __H__lume_grob_index
 
 #include "grob.h"
 
-namespace slimesh {
+namespace lume {
 
 /// Pairs an index with a grob type
 /** \todo	grobType and index should be private and only availablle through method calls.
@@ -28,6 +28,6 @@ struct GrobIndex {
 	index_t	index;
 };
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_grob_index
+#endif	//__H__lume_grob_index

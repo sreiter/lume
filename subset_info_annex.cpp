@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace slimesh {
+namespace lume {
 
 SubsetInfoAnnex::ImGuiExecutor SubsetInfoAnnex::s_imguiExecutor = nullptr;
 
@@ -60,4 +60,4 @@ set_subset (const size_t i, SubsetProperties&& p)
 	m_subsetProps [i] = std::move (p);
 }
 	
-}//	end of namespace slimesh
+}//	end of namespace lume

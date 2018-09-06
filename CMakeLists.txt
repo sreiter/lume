@@ -19,8 +19,8 @@ include_directories (deps)
 
 file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
 
-add_library (slimeshlib ${sources})
+add_library (lume ${sources})
 
-add_executable (slimesh_tests tests_main.cpp)
-target_link_libraries(slimesh_tests slimeshlib)
+add_executable (lume_tests tests_main.cpp)
+target_link_libraries(lume_tests lume)
 

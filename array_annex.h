@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_data_buffer
-#define __H__slimesh_data_buffer
+#ifndef __H__lume_data_buffer
+#define __H__lume_data_buffer
 
 #include <iterator>
 #include <memory>
@@ -13,7 +13,7 @@
 #include "annex.h"
 #include "custom_exception.h"
 
-namespace slimesh {
+namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (BadTupleSizeError, AnnexError);
 
@@ -81,6 +81,6 @@ using SPIndexArrayAnnex		= std::shared_ptr <IndexArrayAnnex>;
 using CSPRealArrayAnnex		= std::shared_ptr <const RealArrayAnnex>;
 using CSPIndexArrayAnnex	= std::shared_ptr <const IndexArrayAnnex>;
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_data_buffer
+#endif	//__H__lume_data_buffer

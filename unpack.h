@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_unpack
-#define __H__slimesh_unpack
+#ifndef __H__lume_unpack
+#define __H__lume_unpack
 
 #include "types.h"
 
@@ -14,14 +14,14 @@
  * the macro `UNPACK_DS(buf)` which automatically extends to the above arguments.
  *
  * 
- * The macro uses the functions slimesh::impl::buf_data_ptr and slimesh::impl::buf_size
+ * The macro uses the functions lume::impl::buf_data_ptr and lume::impl::buf_size
  * which can be adapted to different containers/buffers. A specialization for std::vector
  * exists.*/
-#define UNPACK_DS(buf) slimesh::impl::buf_data_ptr(buf), slimesh::impl::buf_size(buf)
+#define UNPACK_DS(buf) lume::impl::buf_data_ptr(buf), lume::impl::buf_size(buf)
 
-#define UNPACK_DST(buf) slimesh::impl::buf_data_ptr(buf), slimesh::impl::buf_size(buf), slimesh::impl::buf_tuple_size(buf)
+#define UNPACK_DST(buf) lume::impl::buf_data_ptr(buf), lume::impl::buf_size(buf), lume::impl::buf_tuple_size(buf)
 
-namespace slimesh {
+namespace lume {
 namespace impl {
 
 template <class buf_t>
@@ -74,6 +74,6 @@ buf_tuple_size (const buf_t& b) {
 }
 
 }// end of namespace impl
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_unpack
+#endif	//__H__lume_unpack

@@ -2,8 +2,8 @@
 //
 // Copyright (C) 2018 Sebastian Reiter <s.b.reiter@gmail.com>
 
-#ifndef __H__slimesh_grob_array
-#define __H__slimesh_grob_array
+#ifndef __H__lume_grob_array
+#define __H__lume_grob_array
 
 #include "grob.h"
 #include "grob_iterator.h"
@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 
-namespace slimesh {
+namespace lume {
 
-DECLARE_CUSTOM_EXCEPTION (BadNumberOfIndices, SlimeshError);
+DECLARE_CUSTOM_EXCEPTION (BadNumberOfIndices, LumeError);
 
 class GrobArray {
 public:
@@ -95,6 +95,6 @@ private:
 using SPGrobArray	= std::shared_ptr <GrobArray>;
 using CSPGrobArray	= std::shared_ptr <const GrobArray>;
 
-}//	end of namespace slimesh
+}//	end of namespace lume
 
-#endif	//__H__slimesh_grob_array
+#endif	//__H__lume_grob_array

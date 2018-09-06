@@ -8,15 +8,15 @@
 #include <iostream>
 
 using namespace std;
-using namespace slimesh;
+using namespace lume;
 
 int main (int argc, char** argv)
 {
 	int retVal = 0;
 
 	try {
-		if (!slimesh::tests::RunTests ())
-			throw SlimeshError ("slimesh::RunTests did not succeed!");
+		if (!lume::tests::RunTests ())
+			throw LumeError ("lume::RunTests did not succeed!");
 	}
 	catch (std::exception& e) {
 		cout << "\nAn ERROR occurred during execution:\n";
