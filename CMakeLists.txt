@@ -25,8 +25,9 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-project (lume)
 cmake_minimum_required(VERSION 3.1)
+set (CMAKE_CXX_STANDARD 14)
+project (lume)
 
 set (sources
         subset_info_annex.cpp
