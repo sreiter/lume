@@ -24,7 +24,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #ifndef __H__lume__topology
 #define __H__lume__topology
 
@@ -66,7 +65,7 @@ private:
 *        call this method repeatedly on different `cornerInds` and `grobType` to
 *        find fill all element indices of a hybrid grid.
 * \{ */
-void FillElemIndexMap (GrobHashMap <index_t>& indexMapInOut,
+void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
                        index_t* grobBaseIndsOut,
                        const Mesh& mesh,
                        const GrobSet grobSet);
@@ -79,12 +78,14 @@ void FillElemIndexMap (GrobHashMap <index_t>& indexMapInOut,
 *        call this method repeatedly on different `grobSets` to
 *        find fill all element indices of a hybrid grid.
 * \{ */
-void FillElemIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
+void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet);
 /** \} */
 
 
+/// Computes the number of neighbors of type `nbrGrobs` for each grob in `grobs`
+/** The results are stored in the GrobHashMap `valencesOut`*/
 void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
                           Mesh& mesh,
                      	  GrobSet grobs,
@@ -131,19 +132,6 @@ void CreateEdgeInds (Mesh& mesh);
 void CreateFaceInds (Mesh& mesh);
 
 SPMesh CreateBoundaryMesh (SPMesh mesh, GrobSet grobSet, const bool* visibilities = nullptr);
-
-/**
- * \param grobBaseIndsOut Array of size `NUM_GROB_TYPES`.
- */
-template <class TIndexVector>
-void CreateAssociatedElemMap (TIndexVector& elemMapOut,
-                              TIndexVector& offsetsOut,
-                              index_t* grobBaseIndsOut,
-                              Mesh& mesh,
-                              GrobSet elemSet,
-                              GrobSet assElemSet);
-
-
 
 }//	end of namespace lume
 

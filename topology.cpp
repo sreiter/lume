@@ -70,7 +70,7 @@ operator () (const index_t ind) const
 
 
 
-void FillElemIndexMap (GrobHashMap <index_t>& indexMapInOut,
+void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
                        index_t* grobBaseIndsOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
@@ -93,7 +93,7 @@ void FillElemIndexMap (GrobHashMap <index_t>& indexMapInOut,
 }
 
 
-void FillElemIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
+void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
 {

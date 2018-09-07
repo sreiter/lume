@@ -198,7 +198,7 @@ static void TestGrobIterator ()
 
 
 namespace impl {
-	static void TestFillElemIndexMap (SPMesh mesh, GrobSet grobSet)
+	static void TestFillGrobToIndexMap (SPMesh mesh, GrobSet grobSet)
 	{
 		GrobHashMap <index_t> indexMap;
 		index_t baseInds[NUM_GROB_TYPES];
@@ -206,7 +206,7 @@ namespace impl {
 		if (!mesh->has (grobSet))
 			return;
 
-		FillElemIndexMap (indexMap, baseInds, *mesh, grobSet);
+		FillGrobToIndexMap (indexMap, baseInds, *mesh, grobSet);
 
 		for(auto gt : grobSet) {
 			const index_t baseInd = baseInds [gt];
@@ -224,7 +224,7 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestFillElemIndexMap ()
+static void TestFillGrobToIndexMap ()
 {
 	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
 								  "test_meshes/tet_refined.ugx",
@@ -234,10 +234,10 @@ static void TestFillElemIndexMap ()
 		try {
 			SPMesh mesh = CreateMeshFromFile (meshName);
 
-			impl::TestFillElemIndexMap (mesh, VERTICES);
-			impl::TestFillElemIndexMap (mesh, EDGES);
-			impl::TestFillElemIndexMap (mesh, FACES);
-			impl::TestFillElemIndexMap (mesh, CELLS);
+			impl::TestFillGrobToIndexMap (mesh, VERTICES);
+			impl::TestFillGrobToIndexMap (mesh, EDGES);
+			impl::TestFillGrobToIndexMap (mesh, FACES);
+			impl::TestFillGrobToIndexMap (mesh, CELLS);
 
 			cout << "    ok: '" << meshName << "'" << endl;
 		}
@@ -304,8 +304,8 @@ namespace impl {
 				COND_FAIL (numNbrs != valences [grob],
 				           "Mismatch between the number of neighbors ("
 				           << numNbrs << ") in a neighborhood of '"
-				           << GrobName (gt) << "' and the valence of that grob ("
-				           << valences [grob] << ")");
+				           << GrobName (gt) << "' and the valence of that '"
+				           << GrobName (gt) << "' (" << valences [grob] << ")");
 			}
 		}
 
@@ -327,7 +327,7 @@ static void TestNeighborhoods ()
 			// impl::TestNeighborhoods (mesh, VERTICES, FACES);
 			// impl::TestNeighborhoods (mesh, VERTICES, CELLS);
 			// impl::TestNeighborhoods (mesh, EDGES, FACES);
-			// impl::TestNeighborhoods (mesh, EDGES, CELLS);
+			impl::TestNeighborhoods (mesh, EDGES, CELLS);
 			impl::TestNeighborhoods (mesh, FACES, CELLS);
 
 			cout << "    ok: '" << meshName << "'" << endl;
@@ -458,7 +458,7 @@ bool RunTests ()
 	RUN_TEST(numTests, numFailed, TestCreateMeshFromFile);
 	RUN_TEST(numTests, numFailed, TestGrobArrays);
 	RUN_TEST(numTests, numFailed, TestGrobIterator);
-	RUN_TEST(numTests, numFailed, TestFillElemIndexMap);
+	RUN_TEST(numTests, numFailed, TestFillGrobToIndexMap);
 	RUN_TEST(numTests, numFailed, TestGrobValences);
 	RUN_TEST(numTests, numFailed, TestNeighborhoods);
 	RUN_TEST(numTests, numFailed, TestCreateBoundaryMesh);

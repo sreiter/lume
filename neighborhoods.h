@@ -59,6 +59,49 @@ private:
     GrobSet			m_neighborGrobTypes;
 };
 
+
+namespace impl {
+	/// Computes the offset for each grob in `grobs` into an neighborhood array
+	/** The results are stored in the specified index array, based on the indices
+	 * given in the `grobToIndexMap`. The `grobToIndexMap` can e.g. be created using
+	 * the method `FillGrobToIndexMap` on the `grobs` grob set.
+	 *
+	 * \returns	an array of the size `mesh.num (grobs)`. For each grob, it stores
+	 *			an offset into an array in which indices of neighboring grobs from
+	 *			the set `nbrGrobs` can be stored.
+	 *				- hint: `offsetsOut[i+1] - offsetsOut[i]` corresponds to the
+	 *				  number of neighbors of the i'th grob.
+	 *				- hint: `offsetsOut[mesh.num(grobs)]` or `offsetsOut.back()`
+	 *				  corresponds to the sum of the neighborhood sizes from all
+	 *				  grobs of type `grobs`.
+	 *
+	 * \warning	it is assumed that the highest index provided by `grobToIndexMap`
+	 *			is smaller than `mesh.num(grobs)`.
+	 *			
+	 * \sa FillGrobToIndexMap */
+	template <class TIndexVector>
+	void ComputeNeighborOffsetMap (TIndexVector& offsetsOut,
+	                               Mesh& mesh,
+	                     	       GrobSet grobs,
+	                     	       GrobSet nbrGrobs,
+	                     	       const GrobHashMap <index_t>& grobToIndexMap);
+
+	/**
+	 * \param grobBaseIndsOut Array of size `NUM_GROB_TYPES`.
+	 */
+	template <class TIndexVector>
+	void FillNeighborMap (TIndexVector& elemMapOut,
+                            TIndexVector& offsetsOut,
+                            index_t* grobBaseIndsOut,
+                            Mesh& mesh,
+                            GrobSet elemSet,
+                            GrobSet assElemSet);
+}
+
 }//	end of namespace lume
+
+////////////////////////////////
+// include implementation
+#include "neighborhoods_impl.hpp"
 
 #endif	//__H__lume_neighborhoods

@@ -52,8 +52,8 @@ refresh ()
 {
 	if (m_mesh) {
 		m_nbrs.set_tuple_size (2);
-		CreateAssociatedElemMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
-		                         m_centerGrobTypes, m_neighborGrobTypes);
+		impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
+		                       m_centerGrobTypes, m_neighborGrobTypes);
 	}
 	else {
 		m_nbrs.clear();
