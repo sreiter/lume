@@ -36,7 +36,7 @@ template <class TIndexVector>
 void GrobHashToIndexArray (TIndexVector& indArrayInOut,
                            const GrobHash& hash)
 {
-	using iter_t = GrobHash::iterator;
+	using iter_t = GrobHash::const_iterator;
 	const iter_t iend = hash.end();
 	for (iter_t igrob = hash.begin(); igrob != iend; ++igrob) {
 		const Grob& grob = *igrob;
@@ -50,10 +50,10 @@ template <class TIndexVector>
 void GrobHashToTypeArray (TIndexVector& typeArrayInOut,
                           const GrobHash& hash)
 {
-	using iter_t = GrobHash::iterator;
+	using iter_t = GrobHash::const_iterator;
 	const iter_t iend = hash.end();
 	for (iter_t igrob = hash.begin(); igrob != iend; ++igrob) {
-		typeArrayInOut.push_back (igrob->type());
+		typeArrayInOut.push_back (igrob->grob_type());
 	}
 }
 
@@ -62,11 +62,11 @@ void GrobHashToIndexArray (TIndexVector& indArrayInOut,
                            const GrobHash& hash,
                            grob_t grobType)
 {
-	using iter_t = GrobHash::iterator;
+	using iter_t = GrobHash::const_iterator;
 	const iter_t iend = hash.end();
 	for (iter_t igrob = hash.begin(); igrob != iend; ++igrob) {
 		const Grob& grob = *igrob;
-		if (grob.type () == grobType) {
+		if (grob.grob_type () == grobType) {
 			for(index_t i = 0; i < grob.num_corners(); ++i) {
 				indArrayInOut.push_back (grob.corner (i));
 			}
