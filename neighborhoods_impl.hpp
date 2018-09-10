@@ -49,7 +49,7 @@ void FillNeighborOffsetMap (TIndexVector& offsetsOut,
 	// Count how many associated elements each element has
 	if (nbrGrobSetDim > grobSetDim) {
 		for (auto nbrGrobType : nbrGrobSet) {
-			for(auto nbrGrob : *mesh.inds (nbrGrobType)) {
+			for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
 				for(index_t iside = 0; iside < nbrGrob.num_sides(grobSetDim); ++iside) {
 					++offsetsOut[grobToIndexMap.at(nbrGrob.side (grobSetDim, iside))];
 				}
@@ -93,7 +93,7 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 
 	for (auto nbrGrobType : nbrGrobs) {
 		index_t nbrGrobIndex = 0;
-		for(auto nbrGrob : *mesh.inds (nbrGrobType)) {
+		for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
 			for(index_t iside = 0; iside < nbrGrob.num_sides(elemDim); ++iside) {
 				const index_t eind = grobToIndexMap.at (nbrGrob.side (elemDim, iside));
 				const index_t offset = 2 * offsetsOut [eind];

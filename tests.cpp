@@ -105,7 +105,7 @@ namespace impl {
 		if (!mesh.has (grobType))
 			return;
 
-		GrobArray& ga = *mesh.inds (grobType);
+		GrobArray& ga = mesh.grobs (grobType);
 		IndexArrayAnnex& ia = ga.underlying_array ();
 
 		COND_FAIL (ia.tuple_size() != ga.grob_desc().num_corners(),
@@ -139,7 +139,7 @@ namespace impl {
 		if (!mesh.has (grobType))
 			return;
 
-		GrobArray& grobArray = *mesh.inds (grobType);
+		GrobArray& grobArray = mesh.grobs (grobType);
 		IndexArrayAnnex& indArray = grobArray.underlying_array ();
 
 		index_t indCounter = 0;
@@ -177,14 +177,14 @@ namespace impl {
 
 	//	todo: This implementation is slow for large meshes
 		for(auto gt : grobTypes) {
-			for(auto grob : *mesh.inds(gt)) {
+			for(auto grob : mesh.grobs(gt)) {
 				for(index_t iside = 0; iside < grob.num_sides (sideDim); ++iside) {
 					Grob sideGrob = grob.side (sideDim, iside);
 
 				// check whether sideGrob is contained in the set of sides
 					bool gotOne = false;
 					for(auto sideGT : sideTypes) {
-						for(auto testGrob : *mesh.inds(sideGT)) {
+						for(auto testGrob : mesh.grobs(sideGT)) {
 							if (testGrob == sideGrob){
 								gotOne = true;
 								break;
@@ -227,7 +227,7 @@ namespace impl {
 			const index_t baseInd = baseInds [gt];
 			index_t index = 0;
 
-			for(auto grob : *mesh->inds (gt)) {
+			for(auto grob : mesh->grobs (gt)) {
 				const index_t providedIndex = indexMap[grob] - baseInd;
 				COND_FAIL(providedIndex != index,
 				          "Index lookup mismatch for grob type '" << GrobDesc(gt).name()
@@ -267,7 +267,7 @@ namespace impl {
 
 		try {
 			for(auto gt : grobSet) {
-				for(auto grob : *mesh->inds (gt)) {
+				for(auto grob : mesh->grobs (gt)) {
 					for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
 						indexMap.at (grob.side (sideDim, iside));
 					}
@@ -303,7 +303,7 @@ namespace impl {
 
 		vector <index_t> numFacesWithValenceN;
 		for(auto gt : grobSet) {
-			for(auto grob : *mesh->inds (gt)) {
+			for(auto grob : mesh->grobs (gt)) {
 				const index_t valence = valences.at (grob);
 				if (valence >= numFacesWithValenceN.size())
 					numFacesWithValenceN.resize (valence + 1, 0);
@@ -365,7 +365,7 @@ namespace impl {
 		lume::impl::FillNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes, grobToIndexMap);
 
 		for(auto gt : grobTypes) {
-			for(auto grob : *mesh->inds (gt)) {
+			for(auto grob : mesh->grobs (gt)) {
 				const index_t i = grobToIndexMap.at (grob);
 				const index_t v = offsets.at(i+1) - offsets.at(i);
 
@@ -387,6 +387,7 @@ static void TestFillNeighborOffsetMap (SPMesh mesh)
 	impl::TestFillNeighborOffsetMap (mesh, FACES, CELLS);
 }
 
+
 namespace impl {
 	static void TestNeighborhoods (SPMesh mesh, GrobSet grobs, GrobSet nbrGrobs)
 	{
@@ -399,7 +400,7 @@ namespace impl {
 
 		for(auto gt : grobs) {
 			index_t counter = 0;
-			for(auto grob : *mesh->inds (gt)) {
+			for(auto grob : mesh->grobs (gt)) {
 				const GrobIndex gi (gt, counter++);
 				const index_t numNbrs = nbrhds.neighbors (gi).size();
 
@@ -413,6 +414,7 @@ namespace impl {
 	}
 }// end of namespace impl
 
+
 static void TestNeighborhoods (SPMesh mesh)
 {
 	impl::TestNeighborhoods (mesh, VERTICES, EDGES);
@@ -422,45 +424,6 @@ static void TestNeighborhoods (SPMesh mesh)
 	impl::TestNeighborhoods (mesh, EDGES, CELLS);
 	impl::TestNeighborhoods (mesh, FACES, CELLS);
 }
-
-
-// namespace impl {
-// 	void TestAssociatedElemMap (Mesh& mesh, GrobSet grobs, GrobSet nbrGrobs)
-// 	{
-// 		if (!mesh.has (grobs) || !mesh.has (nbrGrobs))
-// 			return;
-
-// 		vector <index_t> elems;
-// 		vector <index_t> offsets;
-// 	}
-// }// end of namespace impl
-
-
-// void TestAssociatedElemMap ()
-// {
-// 	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
-// 								  "test_meshes/tet_refined.ugx",
-// 								  "test_meshes/elems_refined.ugx"};
-
-// 	for(auto meshName : testMeshNames) {
-// 		try {
-// 			SPMesh mesh = CreateMeshFromFile (meshName);
-
-// 			impl::TestAssociatedElemMap (*mesh, VERTICES, EDGES);
-// 			impl::TestAssociatedElemMap (*mesh, VERTICES, FACES);
-// 			impl::TestAssociatedElemMap (*mesh, VERTICES, CELLS);
-// 			impl::TestAssociatedElemMap (*mesh, EDGES, FACES);
-// 			impl::TestAssociatedElemMap (*mesh, EDGES, CELLS);
-// 			impl::TestAssociatedElemMap (*mesh, FACES, CELLS);
-
-// 			cout << "    ok: '" << meshName << "'" << endl;
-// 		}
-// 		catch (LumeError& e) {
-// 			cout << "    fail: '" << meshName << "'" << endl;
-// 			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
-// 		}
-// 	}
-// }
 
 
 namespace impl {
@@ -486,6 +449,7 @@ namespace impl {
 		}
 	}
 }// end of namespace impl
+
 
 static void TestCreateBoundaryMesh ()
 {
@@ -588,13 +552,9 @@ bool RunTests ()
 
 
 	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
-
-
 	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, generalTestFiles);
 	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, generalTestFiles);
-
 	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestFiles);
-
 	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestFiles);
 	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestFiles);
 	RUN_TEST(testStats, TestGrobValences);

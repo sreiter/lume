@@ -84,30 +84,30 @@ public:
 
 
 	// INDICES
-	SPGrobArray inds (const grob_t gt)
+	GrobArray& grobs (const grob_t gt)
 	{
-		if (!inds_allocated (gt)) {
+		if (!grobs_allocated (gt)) {
 			auto t = std::make_shared <GrobArray> (gt);
 			m_grobStorage.set_annex (gt, t);
-			return t;
+			return *t;
 		}
 		else
-			return m_grobStorage.annex(gt);
+			return *m_grobStorage.annex(gt);
 	}
 
-	CSPGrobArray inds (const grob_t gt) const
+	const GrobArray& grobs (const grob_t gt) const
 	{
-		return m_grobStorage.annex(gt);
+		return *m_grobStorage.annex(gt);
 	}
 
-	bool inds_allocated (const grob_t gt) const
+	bool grobs_allocated (const grob_t gt) const
 	{
 		return m_grobStorage.has_annex(gt);
 	}
 
 	bool has (const grob_t gt) const
 	{
-		return inds_allocated (gt) && inds (gt)->size();
+		return grobs_allocated (gt) && grobs (gt).size();
 	}
 
 	bool has (const GrobSet gs) const
@@ -119,7 +119,7 @@ public:
 		return false;
 	}
 
-	void remove_inds (const grob_t gt)
+	void remove_grobs (const grob_t gt)
 	{
 		m_grobStorage.remove_annex (gt);
 	}
@@ -129,25 +129,10 @@ public:
 		return m_grobStorage.collect_keys();
 	}
 
-	index_t num_inds (grob_t grob)
-	{
-		if (inds_allocated (grob))
-			return inds (grob)->num_indices();
-		return 0;
-	}
-
-	index_t num_inds (const GrobSet& gs)
-	{
-		index_t num = 0;
-		for(index_t i = 0; i < gs.size(); ++i)
-			num += num_inds (gs.grob_type (i));
-		return num;
-	}
-
 	index_t num (grob_t grob)
 	{
-		if (inds_allocated (grob))
-			return inds (grob)->size ();
+		if (grobs_allocated (grob))
+			return grobs (grob).size ();
 		return 0;
 	}
 

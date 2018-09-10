@@ -54,7 +54,7 @@ std::shared_ptr <Mesh> CreateMeshFromSTL (std::string filename)
 	stl_reader::ReadStlFile (filename.c_str(),
 	                         *mesh->coords(),
 							 normals,
-							 mesh->inds(TRI)->underlying_array(),
+							 mesh->grobs(TRI).underlying_array(),
 							 solids);
 
 	mesh->coords()->set_tuple_size(3);
@@ -179,7 +179,7 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 		if (numNodesPerTet != GrobDesc (TET).num_corners ())
 			throw FileParseError (string ("Bad number of nodes in tetrahedron in ") + filename);
 		
-		auto& tets = mesh->inds (TET)->underlying_array ();
+		auto& tets = mesh->grobs (TET).underlying_array ();
 		tets.resize (numTets * numNodesPerTet);
 
 		for(int i = 0; i < numTets; ++i)
@@ -350,34 +350,34 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 		        || strcmp(name, "constraining_edges") == 0
 		        || strcmp(name, "constrained_edges") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->inds (EDGE)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (EDGE).underlying_array (), curNode);
 		}
 
 		else if(strcmp(name, "triangles") == 0
 		        || strcmp(name, "constraining_triangles") == 0
 		        || strcmp(name, "constrained_triangles") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->inds (TRI)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (TRI).underlying_array (), curNode);
 		}
 
 		else if(strcmp(name, "quadrilaterals") == 0
 		        || strcmp(name, "constraining_quadrilaterals") == 0
 		        || strcmp(name, "constrained_quadrilaterals") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->inds (QUAD)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (QUAD).underlying_array (), curNode);
 		}
 
 		else if(strcmp(name, "tetrahedrons") == 0)
-			ReadIndicesToArrayAnnex (mesh->inds (TET)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (TET).underlying_array (), curNode);
 
 		else if(strcmp(name, "hexahedrons") == 0)
-			ReadIndicesToArrayAnnex (mesh->inds (HEX)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (HEX).underlying_array (), curNode);
 
 		else if(strcmp(name, "pyramids") == 0)
-			ReadIndicesToArrayAnnex (mesh->inds (PYRA)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (PYRA).underlying_array (), curNode);
 
 		else if(strcmp(name, "prisms") == 0)
-			ReadIndicesToArrayAnnex (mesh->inds (PRISM)->underlying_array (), curNode);
+			ReadIndicesToArrayAnnex (mesh->grobs (PRISM).underlying_array (), curNode);
 
 		// else if(strcmp(name, "octahedrons") == 0)
 		// 	bSuccess = create_octahedrons(volumes, grid, curNode, vertices);

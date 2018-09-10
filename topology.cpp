@@ -39,7 +39,7 @@ namespace lume {
 namespace impl {
 	void GenerateVertexIndicesFromCoords (Mesh& mesh)
 	{
-		GrobArray& vrts = *mesh.inds (VERTEX);
+		GrobArray& vrts = mesh.grobs (VERTEX);
 		const index_t oldNumVrts = vrts.size();
 		const index_t newNumVrts = mesh.coords()->num_tuples();
 		if (newNumVrts > oldNumVrts){
@@ -97,7 +97,7 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
 		if (!mesh.has (grobType))
 			continue;
 
-		for(auto grob : *mesh.inds (grobType)) {
+		for(auto grob : mesh.grobs (grobType)) {
 			indexMapInOut.insert (make_pair (grob, counter++));
 		}
 	}
@@ -119,7 +119,7 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
 		
 		index_t counter = 0;
 
-		for(auto grob : *mesh.inds (grobType)) {
+		for(auto grob : mesh.grobs (grobType)) {
 			indexMapInOut.insert (make_pair (grob, GrobIndex (grobType, counter++)));
 		}
 	}
@@ -139,13 +139,13 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 	if (grobDim < nbrGrobDim) {
 		// initialize all grob valences with 0
 		for(auto gt : grobs) {
-			for(auto grob : *mesh.inds (gt)) {
+			for(auto grob : mesh.grobs (gt)) {
 				valencesOut [grob] = 0;
 			}
 		}
 
 		for(auto nbrGT : nbrGrobs) {
-			for(auto nbrGrob : *mesh.inds (nbrGT)) {
+			for(auto nbrGrob : mesh.grobs (nbrGT)) {
 				for(index_t iside = 0; iside < nbrGrob.num_sides (grobDim); ++iside) {
 					++valencesOut [nbrGrob.side (grobDim, iside)];
 				}
@@ -190,15 +190,15 @@ void CreateEdgeInds (Mesh& mesh)
 	for(auto gt : grobs) {
 		if(GrobDesc(gt).dim() > 1) {
 			FindUniqueSides (hash,
-							 mesh.inds(gt)->raw_ptr(),
-							 mesh.inds(gt)->num_indices(),
+							 mesh.grobs(gt).raw_ptr(),
+							 mesh.grobs(gt).num_indices(),
 							 gt,
 							 1);
 		}
 	}
 	
-	mesh.inds(EDGE)->clear();
-	GrobHashToIndexArray (mesh.inds(EDGE)->underlying_array(), hash);
+	mesh.grobs(EDGE).clear();
+	GrobHashToIndexArray (mesh.grobs(EDGE).underlying_array(), hash);
 }
 
 
@@ -211,15 +211,15 @@ void CreateFaceInds (Mesh& mesh)
 	for(auto gt : grobs) {
 		if(GrobDesc(gt).dim() > 2) {
 			FindUniqueSides (hash,
-							 mesh.inds(gt)->raw_ptr(),
-							 mesh.inds(gt)->num_indices(),
+							 mesh.grobs(gt).raw_ptr(),
+							 mesh.grobs(gt).num_indices(),
 							 gt,
 							 2);
 		}
 	}
 	
-	mesh.inds(TRI)->clear();
-	GrobHashToIndexArray (mesh.inds(TRI)->underlying_array(), hash);
+	mesh.grobs(TRI).clear();
+	GrobHashToIndexArray (mesh.grobs(TRI).underlying_array(), hash);
 }
 
 
@@ -230,8 +230,8 @@ static void CopyGrobsByValence (SPMesh target,
                                 const int valence)
 {
 	for(auto grobType : grobSet) {
-		auto& elems = *source->inds (grobType);
-		auto& newElems = *target->inds (grobType);
+		auto& elems = source->grobs (grobType);
+		auto& newElems = target->grobs (grobType);
 
 		index_t index = 0;
 		for(auto& grob : elems) {
