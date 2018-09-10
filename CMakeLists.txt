@@ -30,47 +30,48 @@ set (CMAKE_CXX_STANDARD 14)
 project (lume)
 
 set (sources
-        subset_info_annex.cpp
-        file_io.cpp
-        grob.cpp
-        mesh.cpp
-        neighborhoods.cpp
-        neighbors.cpp
-        normals.cpp
-        tests.cpp
-        topology.cpp
+        src/subset_info_annex.cpp
+        src/file_io.cpp
+        src/grob.cpp
+        src/mesh.cpp
+        src/neighborhoods.cpp
+        src/neighbors.cpp
+        src/normals.cpp
+        src/tests.cpp
+        src/topology.cpp
     )
 
 set (headers
-     	annex.h
-     	annex_storage.h
-     	array_annex.h
-     	custom_exception.h
-     	file_io.h
-     	grob.h
-     	grob_array.h
-     	grob_hash.h
-     	grob_index.h
-     	grob_iterator.h
-     	mesh.h
-     	neighborhoods.h
-     	neighborhoods_impl.hpp
-     	neighbors.h
-     	normals.h
-     	subset_info_annex.h
-     	tests.h
-     	topology.h
-     	topology_impl.h
-     	types.h
-     	unpack.h
-     	vec_math_raw.h)
+     	include/lume/annex.h
+     	include/lume/annex_storage.h
+     	include/lume/array_annex.h
+     	include/lume/custom_exception.h
+     	include/lume/file_io.h
+     	include/lume/grob.h
+     	include/lume/grob_array.h
+     	include/lume/grob_hash.h
+     	include/lume/grob_index.h
+     	include/lume/grob_iterator.h
+     	include/lume/mesh.h
+     	include/lume/neighborhoods.h
+     	include/lume/neighborhoods_impl.hpp
+     	include/lume/neighbors.h
+     	include/lume/normals.h
+     	include/lume/subset_info_annex.h
+     	include/lume/tests.h
+     	include/lume/topology.h
+     	include/lume/topology_impl.h
+     	include/lume/types.h
+     	include/lume/unpack.h
+     	include/lume/vec_math_raw.h)
 
 include_directories (deps/rapidxml-1.13)
 include_directories (deps)
+include_directories (include/lume)
 
 file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
 
 add_library (lume ${sources} ${headers})
 
-add_executable (lume_tests tests_main.cpp)
+add_executable (lume_tests src/tests_main.cpp)
 target_link_libraries(lume_tests lume)
