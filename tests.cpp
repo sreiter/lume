@@ -124,9 +124,8 @@ namespace impl {
 }// end of namespace
 
 
-static void TestGrobArrays (const string& meshName)
+static void TestGrobArrays (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
 	impl::TestGrobArrayLength (*mesh, GrobSet(VERTICES));
 	impl::TestGrobArrayLength (*mesh, GrobSet(EDGES));
 	impl::TestGrobArrayLength (*mesh, GrobSet(FACES));
@@ -161,9 +160,8 @@ namespace impl {
 	}
 }// end of namespace
 
-static void TestGrobIterator (const string& meshName)
+static void TestGrobIterator (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
 	impl::TestGrobIterator (*mesh, GrobSet(VERTICES));
 	impl::TestGrobIterator (*mesh, GrobSet(EDGES));
 	impl::TestGrobIterator (*mesh, GrobSet(FACES));
@@ -203,9 +201,8 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestConsistentTopology (const string& meshName)
+static void TestConsistentTopology (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
 	impl::TestSidesCorrespondToElements (*mesh, EDGES, VERTICES);
 	impl::TestSidesCorrespondToElements (*mesh, FACES, VERTICES);
 	impl::TestSidesCorrespondToElements (*mesh, FACES, EDGES);
@@ -242,10 +239,8 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestFillGrobToIndexMap (const string& meshName)
+static void TestFillGrobToIndexMap (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
-
 	impl::TestFillGrobToIndexMap (mesh, VERTICES);
 	impl::TestFillGrobToIndexMap (mesh, EDGES);
 	impl::TestFillGrobToIndexMap (mesh, FACES);
@@ -285,11 +280,8 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestGrobToIndexMapSideLookup (const string& meshName)
+static void TestGrobToIndexMapSideLookup (SPMesh mesh)
 {
-
-	SPMesh mesh = CreateMeshFromFile (meshName);
-
 	for(int dim = 0; dim < MAX_GROB_DIM; ++dim)
 		impl::TestGrobToIndexMapSideLookup (mesh, GrobSetTypeByDim (dim));
 }
@@ -385,10 +377,8 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestFillNeighborOffsetMap (const string& meshName)
+static void TestFillNeighborOffsetMap (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
-
 	impl::TestFillNeighborOffsetMap (mesh, VERTICES, EDGES);
 	impl::TestFillNeighborOffsetMap (mesh, VERTICES, FACES);
 	impl::TestFillNeighborOffsetMap (mesh, VERTICES, CELLS);
@@ -423,15 +413,13 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestNeighborhoods (const string& meshName)
+static void TestNeighborhoods (SPMesh mesh)
 {
-	SPMesh mesh = CreateMeshFromFile (meshName);
-
-	// impl::TestNeighborhoods (mesh, VERTICES, EDGES);
-	// impl::TestNeighborhoods (mesh, VERTICES, FACES);
-	// impl::TestNeighborhoods (mesh, VERTICES, CELLS);
-	// impl::TestNeighborhoods (mesh, EDGES, FACES);
-	// impl::TestNeighborhoods (mesh, EDGES, CELLS);
+	impl::TestNeighborhoods (mesh, VERTICES, EDGES);
+	impl::TestNeighborhoods (mesh, VERTICES, FACES);
+	impl::TestNeighborhoods (mesh, VERTICES, CELLS);
+	impl::TestNeighborhoods (mesh, EDGES, FACES);
+	impl::TestNeighborhoods (mesh, EDGES, CELLS);
 	impl::TestNeighborhoods (mesh, FACES, CELLS);
 }
 
@@ -552,10 +540,27 @@ namespace impl {
 			}
 		}
 	}
+
+	static void RunTestOnMeshes (void (*testFct)(SPMesh mesh),
+	                             const vector<string>& fileNames)
+	{
+		for(auto fileName : fileNames) {
+			try {
+				auto mesh = CreateMeshFromFile (fileName);
+				testFct (mesh);
+				cout << "    ok: '" << fileName << "'" << endl;
+			}
+			catch (std::exception& e) {
+				cout << "    fail: '" << fileName << "'" << endl;
+				FAIL ("Failed for '" << fileName << "' with message: " << e.what());
+			}
+		}
+	}
 }
 
 #define RUN_TEST(testStats, testFunctionName) impl::RunTest (testStats, &testFunctionName, #testFunctionName);
 #define RUN_TEST_ON_FILES(testStats, testFunctionName, files) impl::RunTest (testStats, &impl::RunTestOnFiles, #testFunctionName, &testFunctionName, files);
+#define RUN_TEST_ON_MESHES(testStats, testFunctionName, files) impl::RunTest (testStats, &impl::RunTestOnMeshes, #testFunctionName, &testFunctionName, files);
 
 
 
@@ -581,20 +586,20 @@ bool RunTests ()
 								  	  "test_meshes/tet_refined.ugx",
 								  	  "test_meshes/elems_refined.ugx"};
 
+
 	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
 
 
+	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, generalTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, generalTestFiles);
 
-	RUN_TEST_ON_FILES(testStats, TestGrobArrays, generalTestFiles);
-	RUN_TEST_ON_FILES(testStats, TestGrobIterator, generalTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestFiles);
 
-	RUN_TEST_ON_FILES(testStats, TestConsistentTopology, topologyTestFiles);
-
-	RUN_TEST_ON_FILES(testStats, TestFillGrobToIndexMap, topologyTestFiles);
-	RUN_TEST_ON_FILES(testStats, TestGrobToIndexMapSideLookup, topologyTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestFiles);
 	RUN_TEST(testStats, TestGrobValences);
-	RUN_TEST_ON_FILES(testStats, TestFillNeighborOffsetMap, topologyTestFiles);
-	RUN_TEST_ON_FILES(testStats, TestNeighborhoods, topologyTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestFillNeighborOffsetMap, topologyTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestFiles);
 	RUN_TEST(testStats, TestCreateBoundaryMesh);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
