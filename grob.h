@@ -62,7 +62,7 @@ enum grob_set_t {
 	CELLS
 };
 
-static const index_t MAX_GROB_DIM = 2;
+static const index_t MAX_GROB_DIM = 3;
 static const index_t NUM_GROB_TYPES = NO_GROB;
 static const index_t MAX_GROB_SET_SIZE = 4;
 
@@ -259,7 +259,7 @@ static const index_t GROB_DESCS[] = {
 	3,		// DIM
 	VERTICES,	// grob_set_t of 0D sides
 	EDGES,		// grob_set_t of 1D sides
-	TRIS,		// grob_set_t of 2D sides
+	FACES,		// grob_set_t of 2D sides
 	3,		// Offset to num 0D sides entry counting from this entry
 	18,		// Offset to num 1D sides entry counting from this entry
 	50,		// Offset to num 2D sides entry counting from this entry
@@ -308,7 +308,7 @@ static const index_t GROB_DESCS[] = {
 	3,		// DIM
 	VERTICES,	// grob_set_t of 0D sides
 	EDGES,		// grob_set_t of 1D sides
-	TRIS,		// grob_set_t of 2D sides
+	FACES,		// grob_set_t of 2D sides
 	3,		// Offset to num 0D sides entry counting from this entry
 	21,		// Offset to num 1D sides entry counting from this entry
 	57,		// Offset to num 2D sides entry counting from this entry
@@ -343,7 +343,7 @@ static const index_t GROB_DESCS[] = {
 	EDGE, 2, 5,	// 1D side 6 (type, corners)
 	EDGE, 3, 4,	// 1D side 6 (type, corners)
 	EDGE, 4, 5,	// 1D side 7 (type, corners)
-	EDGE, 5, 0,	// 1D side 7 (type, corners)
+	EDGE, 5, 3,	// 1D side 8 (type, corners)
 	5,		// num 2d sides
 	5,		// offset to first 2D side counting from this entry
 	8,		// offset to second 2D side counting from this entry
@@ -472,6 +472,13 @@ static const index_t GROB_SET_DESC_OFFESTS[] = {
 };
 
 
+static const grob_set_t GROB_SET_TYPE_BY_DIM[] = {
+	VERTICES,
+	EDGES,
+	FACES,
+	CELLS
+};
+
 /// Logs all grob-descs in a human readable way.
 void PrintGrobDescs ();
 
@@ -485,6 +492,11 @@ const std::string& GrobName (grob_t grob);
 
 ///	returns the name of a grob set
 const std::string& GrobSetName (grob_set_t grobSet);
+
+///	returns the largest constant from grob_set_t for a given dimension
+/** If no grob set for the given dimension exists, `NO_GROB_SET` is returned.
+ * \returns VERTICES (dim==0), EDGES (dim==1), FACES (dim==2), CELLS (dim==3), NO_GROB_SET (else)*/
+grob_set_t GrobSetTypeByDim (index_t dim);
 
 ///	Describes a class of **grid objects** in terms of local corner indices and sides.
 /** A `GrobDesc` is a descriptor object for a given type of *grid object*.

@@ -80,11 +80,10 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
 	index_t counter = 0;
 	
 	for (auto grobType : grobSet) {
-		if (!mesh.has (grobType))
-			continue;
-		
 		grobBaseIndsOut [grobType] = counter;
 
+		if (!mesh.has (grobType))
+			continue;
 
 		for(auto grob : *mesh.inds (grobType)) {
 			indexMapInOut.insert (make_pair (grob, counter++));
@@ -97,8 +96,12 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
 {
-	
 	for (auto grobType : grobSet) {
+		if (grobType == VERTEX) {
+		// vertices are not contained int the 'inds' arrays
+		
+		}
+
 		if (!mesh.has (grobType))
 			continue;
 		
@@ -122,6 +125,13 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 	const index_t nbrGrobDim = nbrGrobs.dim();
 
 	if (grobDim < nbrGrobDim) {
+		// initialize all grob valences with 0
+		for(auto gt : grobs) {
+			for(auto grob : *mesh.inds (gt)) {
+				valencesOut [grob] = 0;
+			}
+		}
+
 		for(auto nbrGT : nbrGrobs) {
 			for(auto nbrGrob : *mesh.inds (nbrGT)) {
 				for(index_t iside = 0; iside < nbrGrob.num_sides (grobDim); ++iside) {

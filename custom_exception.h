@@ -29,14 +29,19 @@
 #define __H__lume_custom_exception
 
 #include <stdexcept>
+#include <string>
 
 ///	Declares an exception class. baseClass should derive from std::exception or similar.
 #define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
 	class className : public baseClass {\
 	public:\
 		className () : baseClass ("") {}\
-		className (const char* what) : baseClass (what) {}\
-		className (const std::string& what) : baseClass (what) {}\
+		className (const char* what) : baseClass (what) {setup_msg(what);}\
+		className (const std::string& what) : baseClass (what) {setup_msg(what.c_str());}\
+		const char* what () const noexcept override {return m_what.c_str();}\
+	private:\
+		void setup_msg (const char* what) {m_what.append (#className).append(": ").append(what);}\
+		std::string	m_what;\
 	}; 
 	
 namespace lume {

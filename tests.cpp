@@ -47,6 +47,25 @@ DECLARE_CUSTOM_EXCEPTION (TestError, LumeError);
 #define FAIL(msg)	{std::stringstream ss; ss << msg; throw(TestError(ss.str()));}
 #define COND_FAIL(cond, msg)	if(cond){FAIL(msg);}
 
+
+class TestStats {
+public:
+	TestStats () : m_numTests (0), m_numFailed (0) {}
+
+	void success()	{++m_numTests;}
+	void fail()		{++m_numTests; ++m_numFailed;}
+
+	index_t num_tests () const		{return m_numTests;}
+	index_t num_failed () const		{return m_numFailed;}
+	index_t num_succeeded () const	{return num_tests() - num_failed();}
+
+private:
+	index_t m_numTests;
+	index_t m_numFailed;
+};
+
+
+
 namespace impl {
 
 	/// tests whether the grob_type() method of a GrobDesc of a given grob_t returns the correct grob_type.
@@ -74,25 +93,9 @@ static void TestGrobDescs ()
 //todo: lots more to be tested
 }
 
-
-static void TestCreateMeshFromFile ()
+static void TestCreateMeshFromFile (const string& meshName)
 {
-	vector<string> testMeshNames {"test_meshes/quad.stl",
-								  "test_meshes/tris_and_quads.ugx",
-								  "test_meshes/elems_refined_rim.ugx",
-								  "test_meshes/elems_refined.ugx",
-								  "test_meshes/bunny.stl"};
-
-	for(auto meshName : testMeshNames) {
-		try {
-			SPMesh mesh = CreateMeshFromFile (meshName);
-			cout << "    ok: '" << meshName << "'" << endl;
-		}
-		catch (LumeError& e) {
-			cout << "    fail: '" << meshName << "'" << endl;
-			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
-		}
-	}
+	CreateMeshFromFile (meshName);
 }
 
 
@@ -121,28 +124,13 @@ namespace impl {
 }// end of namespace
 
 
-static void TestGrobArrays ()
+static void TestGrobArrays (const string& meshName)
 {
-	vector<string> testMeshNames {"test_meshes/quad.stl",
-								  "test_meshes/tris_and_quads.ugx",
-								  "test_meshes/elems_refined_rim.ugx",
-								  "test_meshes/elems_refined.ugx"};
-
-	for(auto meshName : testMeshNames) {
-		try {
-			SPMesh mesh = CreateMeshFromFile (meshName);
-			impl::TestGrobArrayLength (*mesh, GrobSet(VERTICES));
-			impl::TestGrobArrayLength (*mesh, GrobSet(EDGES));
-			impl::TestGrobArrayLength (*mesh, GrobSet(FACES));
-			impl::TestGrobArrayLength (*mesh, GrobSet(CELLS));
-
-			cout << "    ok: '" << meshName << "'" << endl;
-		}
-		catch (LumeError& e) {
-			cout << "    fail: '" << meshName << "'" << endl;
-			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
-		}
-	}
+	SPMesh mesh = CreateMeshFromFile (meshName);
+	impl::TestGrobArrayLength (*mesh, GrobSet(VERTICES));
+	impl::TestGrobArrayLength (*mesh, GrobSet(EDGES));
+	impl::TestGrobArrayLength (*mesh, GrobSet(FACES));
+	impl::TestGrobArrayLength (*mesh, GrobSet(CELLS));
 }
 
 
@@ -173,27 +161,57 @@ namespace impl {
 	}
 }// end of namespace
 
-static void TestGrobIterator ()
+static void TestGrobIterator (const string& meshName)
 {
-	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
-								  "test_meshes/elems_refined_rim.ugx",
-								  "test_meshes/elems_refined.ugx"};
+	SPMesh mesh = CreateMeshFromFile (meshName);
+	impl::TestGrobIterator (*mesh, GrobSet(VERTICES));
+	impl::TestGrobIterator (*mesh, GrobSet(EDGES));
+	impl::TestGrobIterator (*mesh, GrobSet(FACES));
+	impl::TestGrobIterator (*mesh, GrobSet(CELLS));
+}
 
-	for(auto meshName : testMeshNames) {
-		try {
-			SPMesh mesh = CreateMeshFromFile (meshName);
-			impl::TestGrobIterator (*mesh, GrobSet(VERTICES));
-			impl::TestGrobIterator (*mesh, GrobSet(EDGES));
-			impl::TestGrobIterator (*mesh, GrobSet(FACES));
-			impl::TestGrobIterator (*mesh, GrobSet(CELLS));
 
-			cout << "    ok: '" << meshName << "'" << endl;
-		}
-		catch (LumeError& e) {
-			cout << "    fail: '" << meshName << "'" << endl;
-			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
+namespace impl {
+	static void TestSidesCorrespondToElements (Mesh& mesh, GrobSet grobTypes, GrobSet sideTypes)
+	{
+		const index_t sideDim = sideTypes.dim();
+		COND_FAIL (grobTypes.dim() <= sideDim, "BAD TEST SETUP");
+
+	//	todo: This implementation is slow for large meshes
+		for(auto gt : grobTypes) {
+			for(auto grob : *mesh.inds(gt)) {
+				for(index_t iside = 0; iside < grob.num_sides (sideDim); ++iside) {
+					Grob sideGrob = grob.side (sideDim, iside);
+
+				// check whether sideGrob is contained in the set of sides
+					bool gotOne = false;
+					for(auto sideGT : sideTypes) {
+						for(auto testGrob : *mesh.inds(sideGT)) {
+							if (testGrob == sideGrob){
+								gotOne = true;
+								break;
+							}
+						}
+					}
+
+					COND_FAIL (!gotOne, "Couldn't find side " << iside << " (" << sideGrob.desc().name()
+					           << ") of grob " << grob.desc().name() << " in the array of grobs of type '"
+					           << sideTypes.name() << "'");
+				}
+			}
 		}
 	}
+}// end of namespace impl
+
+static void TestConsistentTopology (const string& meshName)
+{
+	SPMesh mesh = CreateMeshFromFile (meshName);
+	impl::TestSidesCorrespondToElements (*mesh, EDGES, VERTICES);
+	impl::TestSidesCorrespondToElements (*mesh, FACES, VERTICES);
+	impl::TestSidesCorrespondToElements (*mesh, FACES, EDGES);
+	impl::TestSidesCorrespondToElements (*mesh, CELLS, VERTICES);
+	impl::TestSidesCorrespondToElements (*mesh, CELLS, EDGES);
+	impl::TestSidesCorrespondToElements (*mesh, CELLS, FACES);
 }
 
 
@@ -224,43 +242,77 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestFillGrobToIndexMap ()
+static void TestFillGrobToIndexMap (const string& meshName)
 {
-	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
-								  "test_meshes/tet_refined.ugx",
-								  "test_meshes/elems_refined.ugx"};
+	SPMesh mesh = CreateMeshFromFile (meshName);
 
-	for(auto meshName : testMeshNames) {
-		try {
-			SPMesh mesh = CreateMeshFromFile (meshName);
-
-			impl::TestFillGrobToIndexMap (mesh, VERTICES);
-			impl::TestFillGrobToIndexMap (mesh, EDGES);
-			impl::TestFillGrobToIndexMap (mesh, FACES);
-			impl::TestFillGrobToIndexMap (mesh, CELLS);
-
-			cout << "    ok: '" << meshName << "'" << endl;
-		}
-		catch (LumeError& e) {
-			cout << "    fail: '" << meshName << "'" << endl;
-			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
-		}
-	}
+	impl::TestFillGrobToIndexMap (mesh, VERTICES);
+	impl::TestFillGrobToIndexMap (mesh, EDGES);
+	impl::TestFillGrobToIndexMap (mesh, FACES);
+	impl::TestFillGrobToIndexMap (mesh, CELLS);
 }
 
 
-static void TestGrobValences ()
+namespace impl {
+	/** creates a grobToIndexMap for `sideGrobSet`, then iterates over the
+	 * elements of next higher dimension and makes sure, that all of their sides
+	 * are contained in grobToIndexMap.*/
+	static void TestGrobToIndexMapSideLookup (SPMesh mesh, GrobSet sideGrobSet)
+	{
+		if (!mesh->has (sideGrobSet))
+			return;
+
+		GrobHashMap <index_t> indexMap;
+		index_t baseInds[NUM_GROB_TYPES];
+
+		FillGrobToIndexMap (indexMap, baseInds, *mesh, sideGrobSet);
+
+		const index_t sideDim = sideGrobSet.dim();
+		GrobSet grobSet (GrobSetTypeByDim (sideDim + 1));
+
+		try {
+			for(auto gt : grobSet) {
+				for(auto grob : *mesh->inds (gt)) {
+					for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
+						indexMap.at (grob.side (sideDim, iside));
+					}
+				}
+			}
+		}
+		catch (std::out_of_range& e) {
+			FAIL ("side of grob could not be found in grobToIndexMap of all side grobs");
+		}
+	}
+}// end of namespace impl
+
+static void TestGrobToIndexMapSideLookup (const string& meshName)
 {
-	const string meshName ("test_meshes/tet_refined.ugx");
-	try {
-		SPMesh mesh = CreateMeshFromFile (meshName);
+
+	SPMesh mesh = CreateMeshFromFile (meshName);
+
+	for(int dim = 0; dim < MAX_GROB_DIM; ++dim)
+		impl::TestGrobToIndexMapSideLookup (mesh, GrobSetTypeByDim (dim));
+}
+
+
+namespace impl {
+	static void TestGrobValences (SPMesh mesh,
+	                              const index_t numGrobsWithValence1,
+	                              const index_t numGrobsWithValence2)
+	{
 		GrobHashMap <index_t> valences;
-		ComputeGrobValences (valences, *mesh, FACES, CELLS);
+		GrobSet nbrGrobSet = mesh->grob_set_type_of_highest_dim ();
+		if (nbrGrobSet.dim() == 0)
+			return;
+
+		GrobSet grobSet = nbrGrobSet.side_set (nbrGrobSet.dim() - 1);
+
+		ComputeGrobValences (valences, *mesh, grobSet, nbrGrobSet);
 
 		vector <index_t> numFacesWithValenceN;
-		for(auto gt : GrobSet (FACES)) {
+		for(auto gt : grobSet) {
 			for(auto grob : *mesh->inds (gt)) {
-				const index_t valence = valences [grob];
+				const index_t valence = valences.at (grob);
 				if (valence >= numFacesWithValenceN.size())
 					numFacesWithValenceN.resize (valence + 1, 0);
 				++numFacesWithValenceN[valence];
@@ -270,20 +322,80 @@ static void TestGrobValences ()
 		COND_FAIL (numFacesWithValenceN[0] > 0,
 		           "There should be no faces with valence 0 in this grid");
 
-		COND_FAIL (numFacesWithValenceN[1] != 16,
-		           "There should be exactly 16 faces with valence 1 in this grid");
+		COND_FAIL (numFacesWithValenceN[1] != numGrobsWithValence1,
+		           "There should be exactly " << numGrobsWithValence1
+		           << " faces with valence 1 in this grid");
 
-		COND_FAIL (numFacesWithValenceN[2] != 8,
-		           "There should be exactly 8 faces with valence 2 in this grid");
-
-		cout << "    ok: '" << meshName << "'" << endl;
+		COND_FAIL (numFacesWithValenceN[2] != numGrobsWithValence2,
+		           "There should be exactly " << numGrobsWithValence2
+		           << " faces with valence 2 in this grid");
 	}
-	catch (LumeError& e) {
-		cout << "    fail: '" << meshName << "'" << endl;
-		FAIL ("Failed for '" << meshName << "' with message: " << e.what());
+}// end of namespace impl
+
+static void TestGrobValences ()
+{
+	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
+								  "test_meshes/tet_refined.ugx"};
+
+    vector<index_t> numGrobsWithValence1 {10, 16};
+    vector<index_t> numGrobsWithValence2 {9, 8};
+
+    int counter = 0;
+	for(auto meshName : testMeshNames) {
+		try {
+			SPMesh mesh = CreateMeshFromFile (meshName);
+			impl::TestGrobValences (mesh, numGrobsWithValence1[counter],
+			                        numGrobsWithValence2[counter]);
+			++counter;
+			cout << "    ok: '" << meshName << "'" << endl;
+		}
+		catch (std::exception& e) {
+			cout << "    fail: '" << meshName << "'" << endl;
+			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
+		}
 	}
 }
 
+
+namespace impl {
+	static void TestFillNeighborOffsetMap (SPMesh mesh,
+	                                       GrobSet grobTypes,
+	                                       GrobSet nbrGrobTypes)
+	{
+		GrobHashMap <index_t> valences;
+		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobTypes);
+
+		GrobHashMap <index_t> grobToIndexMap;
+		index_t baseInds[NUM_GROB_TYPES];
+		FillGrobToIndexMap (grobToIndexMap, baseInds, *mesh, grobTypes);
+
+		vector <index_t> offsets;
+		lume::impl::FillNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes, grobToIndexMap);
+
+		for(auto gt : grobTypes) {
+			for(auto grob : *mesh->inds (gt)) {
+				const index_t i = grobToIndexMap.at (grob);
+				const index_t v = offsets.at(i+1) - offsets.at(i);
+
+				COND_FAIL(v != valences.at (grob),
+				          "Valence deduced from offset-map (" << v << ") does not correspond to "
+				          " computed valence map (" << valences.at (grob) << ")");
+			}
+		}
+	}
+}// end of namespace impl
+
+static void TestFillNeighborOffsetMap (const string& meshName)
+{
+	SPMesh mesh = CreateMeshFromFile (meshName);
+
+	impl::TestFillNeighborOffsetMap (mesh, VERTICES, EDGES);
+	impl::TestFillNeighborOffsetMap (mesh, VERTICES, FACES);
+	impl::TestFillNeighborOffsetMap (mesh, VERTICES, CELLS);
+	impl::TestFillNeighborOffsetMap (mesh, EDGES, FACES);
+	impl::TestFillNeighborOffsetMap (mesh, EDGES, CELLS);
+	impl::TestFillNeighborOffsetMap (mesh, FACES, CELLS);
+}
 
 namespace impl {
 	static void TestNeighborhoods (SPMesh mesh, GrobSet grobs, GrobSet nbrGrobs)
@@ -313,30 +425,16 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestNeighborhoods ()
+static void TestNeighborhoods (const string& meshName)
 {
-	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
-								  "test_meshes/tet_refined.ugx",
-								  "test_meshes/elems_refined.ugx"};
+	SPMesh mesh = CreateMeshFromFile (meshName);
 
-	for(auto& meshName : testMeshNames) {
-		try {
-			SPMesh mesh = CreateMeshFromFile (meshName);
-		
-			// impl::TestNeighborhoods (mesh, VERTICES, EDGES);
-			// impl::TestNeighborhoods (mesh, VERTICES, FACES);
-			// impl::TestNeighborhoods (mesh, VERTICES, CELLS);
-			// impl::TestNeighborhoods (mesh, EDGES, FACES);
-			impl::TestNeighborhoods (mesh, EDGES, CELLS);
-			impl::TestNeighborhoods (mesh, FACES, CELLS);
-
-			cout << "    ok: '" << meshName << "'" << endl;
-		}
-		catch (LumeError& e) {
-			cout << "    fail: '" << meshName << "'" << endl;
-			FAIL ("Failed for '" << meshName << "' with message: " << e.what());
-		}
-	}
+	// impl::TestNeighborhoods (mesh, VERTICES, EDGES);
+	// impl::TestNeighborhoods (mesh, VERTICES, FACES);
+	// impl::TestNeighborhoods (mesh, VERTICES, CELLS);
+	// impl::TestNeighborhoods (mesh, EDGES, FACES);
+	// impl::TestNeighborhoods (mesh, EDGES, CELLS);
+	impl::TestNeighborhoods (mesh, FACES, CELLS);
 }
 
 
@@ -416,34 +514,50 @@ static void TestCreateBoundaryMesh ()
 
 
 namespace impl {
-	static void RunTest (int& testCounter, int& failedTestCounter, void (*testFunction)(), const char* testFunctionName)
+	template <class ... TArgs1, class ... TArgs2>
+	static void RunTest (TestStats& testStats,
+	                     void (*testFunction)(TArgs1...),
+	                     const char* testFunctionName,
+	                     TArgs2&&... args)
 	{
-		++testCounter;
 		cout.flush ();
 
 		cout << "->  " << testFunctionName << endl;
 		try {
-			testFunction ();
+			testFunction (forward<TArgs2>(args)...);
+
 			cout << "SUCCESS" << endl;
+			testStats.success();
 		}
-		catch (TestError& err) {
-			++failedTestCounter;
-			cout << "FAILED ('" << testFunctionName << "'). Message below:" << endl;
-			cout << err.what () << endl << endl;
-		}
-		catch (std::runtime_error& err) {
-			++failedTestCounter;
-			cout << "FAILED ('" << testFunctionName << "'). UNEXPECTED INTERNAL ERROR. Message below:" << endl;
-			cout << err.what () << endl << endl;
+		catch (std::exception& err) {
+			testStats.fail();
+			cout << "FAIL ('" << testFunctionName << "'). Message below:" << endl;
+			cout << "     " << err.what () << endl << endl;
 		}
 		catch (...) {
-			++failedTestCounter;
-			cout << "FAILED ('" << testFunctionName << "'). UNKNOWN INTERNAL ERROR!" << endl << endl;
+			testStats.fail();
+			cout << "FAIL ('" << testFunctionName << "'). UNKNOWN INTERNAL ERROR!" << endl << endl;
+		}
+	}
+
+	static void RunTestOnFiles (void (*testFct)(const string& fileName),
+	                            const vector<string>& fileNames)
+	{
+		for(auto fileName : fileNames) {
+			try {
+				testFct (fileName);
+				cout << "    ok: '" << fileName << "'" << endl;
+			}
+			catch (std::exception& e) {
+				cout << "    fail: '" << fileName << "'" << endl;
+				FAIL ("Failed for '" << fileName << "' with message: " << e.what());
+			}
 		}
 	}
 }
 
-#define RUN_TEST(testCounter, failedTestCounter, testFunctionName) impl::RunTest (testCounter, failedTestCounter, &testFunctionName, #testFunctionName);
+#define RUN_TEST(testStats, testFunctionName) impl::RunTest (testStats, &testFunctionName, #testFunctionName);
+#define RUN_TEST_ON_FILES(testStats, testFunctionName, files) impl::RunTest (testStats, &impl::RunTestOnFiles, #testFunctionName, &testFunctionName, files);
 
 
 
@@ -454,17 +568,39 @@ bool RunTests ()
 
 	cout << "RUNNING TESTS" << endl;
 
-	RUN_TEST(numTests, numFailed, TestGrobDescs);
-	RUN_TEST(numTests, numFailed, TestCreateMeshFromFile);
-	RUN_TEST(numTests, numFailed, TestGrobArrays);
-	RUN_TEST(numTests, numFailed, TestGrobIterator);
-	RUN_TEST(numTests, numFailed, TestFillGrobToIndexMap);
-	RUN_TEST(numTests, numFailed, TestGrobValences);
-	RUN_TEST(numTests, numFailed, TestNeighborhoods);
-	RUN_TEST(numTests, numFailed, TestCreateBoundaryMesh);
+	TestStats testStats;
 
-	cout << endl << "TESTS DONE: " << numTests << " tests were run, "
-		 << numFailed << " failed." << endl << endl;
+	RUN_TEST(testStats, TestGrobDescs);
+
+	vector<string> generalTestFiles {"test_meshes/quad.stl",
+								  	 "test_meshes/tris_and_quads.ugx",
+								  	 "test_meshes/elems_refined_rim.ugx",
+								  	 "test_meshes/tet_refined.ugx",
+								  	 "test_meshes/elems_refined.ugx"};
+
+	vector<string> topologyTestFiles {"test_meshes/tris_and_quads.ugx",
+								  	  "test_meshes/elems_refined_rim.ugx",
+								  	  "test_meshes/tet_refined.ugx",
+								  	  "test_meshes/elems_refined.ugx"};
+
+	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
+
+
+
+	RUN_TEST_ON_FILES(testStats, TestGrobArrays, generalTestFiles);
+	RUN_TEST_ON_FILES(testStats, TestGrobIterator, generalTestFiles);
+
+	RUN_TEST_ON_FILES(testStats, TestConsistentTopology, topologyTestFiles);
+
+	RUN_TEST_ON_FILES(testStats, TestFillGrobToIndexMap, topologyTestFiles);
+	RUN_TEST_ON_FILES(testStats, TestGrobToIndexMapSideLookup, topologyTestFiles);
+	RUN_TEST(testStats, TestGrobValences);
+	RUN_TEST_ON_FILES(testStats, TestFillNeighborOffsetMap, topologyTestFiles);
+	RUN_TEST_ON_FILES(testStats, TestNeighborhoods, topologyTestFiles);
+	RUN_TEST(testStats, TestCreateBoundaryMesh);
+
+	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
+		 << testStats.num_failed() << " failed." << endl << endl;
 
 	return numFailed == 0;
 }

@@ -45,6 +45,7 @@ namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (AnnexTypeError, AnnexError);
 
+///	A mesh holds index arrays to define a net and provides annexes to store associtated data
 class Mesh {
 public:
 
@@ -76,7 +77,10 @@ public:
 	CSPRealArrayAnnex coords () const				{return m_coords;}
 	index_t num_coords () const						{return m_coords->size();}
 
-	void set_coords (const SPRealArrayAnnex& coords)		{m_coords = coords;}
+	void set_coords (const SPRealArrayAnnex& coords)
+	{
+		m_coords = coords;
+	}
 
 
 	// INDICES
@@ -155,6 +159,15 @@ public:
 		return counter;
 	}
 
+	grob_set_t grob_set_type_of_highest_dim () const
+	{
+		for(int dim = (int)MAX_GROB_DIM; dim >= 0; --dim) {
+			grob_set_t gst = GrobSetTypeByDim ((index_t)dim);
+			if (has (gst))
+				return gst;
+		}
+		return NO_GROB_SET;
+	}
 
 	// ANNEX
 	bool has_annex (const AnnexKey& key) const						{return m_annexStorage.has_annex (key);}

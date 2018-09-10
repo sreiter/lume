@@ -422,24 +422,44 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 }
 
 
+namespace impl {
+	void GenerateVertexIndicesFromCoords (Mesh& mesh)
+	{
+		GrobArray& vrts = *mesh.inds (VERTEX);
+		const index_t oldNumVrts = vrts.size();
+		const index_t newNumVrts = mesh.coords()->num_tuples();
+		if (newNumVrts > oldNumVrts){
+			vrts.reserve (newNumVrts);
+			for(index_t i = oldNumVrts; i < newNumVrts; ++i)
+				vrts.push_back ({i});
+		}
+		else
+			vrts.resize (newNumVrts);
+	}
+}// end of namespace impl
+
+
 std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
 {
 	string suffix = filename.substr(filename.size() - 4, 4);
 	transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 
+	SPMesh mesh;
 	if (suffix == ".stl")
-		return CreateMeshFromSTL (filename);
+		mesh = CreateMeshFromSTL (filename);
 
 	else if (suffix == ".ele" )
-		return CreateMeshFromELE (filename);
+		mesh = CreateMeshFromELE (filename);
 
 	else if (suffix == ".ugx" )
-		return CreateMeshFromUGX (filename);
+		mesh = CreateMeshFromUGX (filename);
 
 	else {
 		throw FileSuffixError (filename);
 	}
-	return SPMesh ();
+
+	impl::GenerateVertexIndicesFromCoords (*mesh);
+	return mesh;
 }
 
 }// end of namespace lume

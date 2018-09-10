@@ -125,4 +125,13 @@ const std::string& GrobSetName (grob_set_t grobSet)
 	return names[grobSet];
 }
 
+
+grob_set_t GrobSetTypeByDim (index_t dim)
+{
+	if (dim > MAX_GROB_DIM)
+		return NO_GROB_SET;
+
+	return impl::GROB_SET_TYPE_BY_DIM [dim];
+}
+
 }// end of namespace lume

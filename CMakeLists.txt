@@ -41,13 +41,36 @@ set (sources
         topology.cpp
     )
 
+set (headers
+     	annex.h
+     	annex_storage.h
+     	array_annex.h
+     	custom_exception.h
+     	file_io.h
+     	grob.h
+     	grob_array.h
+     	grob_hash.h
+     	grob_index.h
+     	grob_iterator.h
+     	mesh.h
+     	neighborhoods.h
+     	neighborhoods_impl.hpp
+     	neighbors.h
+     	normals.h
+     	subset_info_annex.h
+     	tests.h
+     	topology.h
+     	topology_impl.h
+     	types.h
+     	unpack.h
+     	vec_math_raw.h)
+
 include_directories (deps/rapidxml-1.13)
 include_directories (deps)
 
 file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
 
-add_library (lume ${sources})
+add_library (lume ${sources} ${headers})
 
 add_executable (lume_tests tests_main.cpp)
 target_link_libraries(lume_tests lume)
-

@@ -36,22 +36,22 @@ namespace impl {
 template <class TIndexVector>
 void FillNeighborOffsetMap (TIndexVector& offsetsOut,
 	                        Mesh& mesh,
-	                     	GrobSet grobs,
-	                     	GrobSet nbrGrobs,
+	                     	GrobSet grobSet,
+	                     	GrobSet nbrGrobSet,
 	                     	const GrobHashMap <index_t>& grobToIndexMap)
 {
 	offsetsOut.clear ();
-	offsetsOut.resize (mesh.num (grobs) + 1, 0);
+	offsetsOut.resize (mesh.num (grobSet) + 1, 0);
 
-	const index_t grobsDim = grobs.dim();
-	const index_t nbrGrobsDim = nbrGrobs.dim();
+	const index_t grobSetDim = grobSet.dim();
+	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
 	// Count how many associated elements each element has
-	if (nbrGrobsDim > grobsDim) {
-		for (auto nbrGrob : nbrGrobs) {
-			for(auto grob : *mesh.inds (nbrGrob)) {
-				for(index_t iside = 0; iside < grob.num_sides(grobsDim); ++iside) {
-					++offsetsOut[grobToIndexMap.at(grob.side (grobsDim, iside))];
+	if (nbrGrobSetDim > grobSetDim) {
+		for (auto nbrGrobType : nbrGrobSet) {
+			for(auto nbrGrob : *mesh.inds (nbrGrobType)) {
+				for(index_t iside = 0; iside < nbrGrob.num_sides(grobSetDim); ++iside) {
+					++offsetsOut[grobToIndexMap.at(nbrGrob.side (grobSetDim, iside))];
 				}
 			}
 		}
@@ -82,8 +82,7 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 		throw LumeError ("FillNeighborMap: Currently only nbrGrobs.dim() > grobs.dim() supported");
 	
 	GrobHashMap <index_t> grobToIndexMap;
-	index_t baseInds[NUM_GROB_TYPES];
-	FillGrobToIndexMap (grobToIndexMap, baseInds, mesh, grobs);
+	FillGrobToIndexMap (grobToIndexMap, grobBaseIndsOut, mesh, grobs);
 
 	FillNeighborOffsetMap (offsetsOut, mesh, grobs, nbrGrobs, grobToIndexMap);
 
@@ -96,7 +95,7 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 		index_t nbrGrobIndex = 0;
 		for(auto nbrGrob : *mesh.inds (nbrGrobType)) {
 			for(index_t iside = 0; iside < nbrGrob.num_sides(elemDim); ++iside) {
-				const index_t eind = grobToIndexMap[nbrGrob.side (elemDim, iside)];
+				const index_t eind = grobToIndexMap.at (nbrGrob.side (elemDim, iside));
 				const index_t offset = 2 * offsetsOut [eind];
 				const index_t numAss = offsetsOut [eind + 1] - offsetsOut [eind];
 				for(index_t j = offset; j < offset + 2 * numAss; j+=2) {
