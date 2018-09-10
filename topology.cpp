@@ -36,6 +36,22 @@ using namespace std;
 
 namespace lume {
 
+namespace impl {
+	void GenerateVertexIndicesFromCoords (Mesh& mesh)
+	{
+		GrobArray& vrts = *mesh.inds (VERTEX);
+		const index_t oldNumVrts = vrts.size();
+		const index_t newNumVrts = mesh.coords()->num_tuples();
+		if (newNumVrts > oldNumVrts){
+			vrts.reserve (newNumVrts);
+			for(index_t i = oldNumVrts; i < newNumVrts; ++i)
+				vrts.push_back ({i});
+		}
+		else
+			vrts.resize (newNumVrts);
+	}
+}// end of namespace impl
+
 TotalToGrobIndexMap::
 TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs) :
     m_grobSet (gs)
@@ -45,11 +61,7 @@ TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs) :
 
     m_baseInds[0] = 0;
     for(index_t i = 0; i < gs.size(); ++i) {
-      	const index_t numTuples = gs.grob_type (i) == VERTEX ?
-          								mesh.coords()->num_tuples() :
-          								mesh.num (gs.grob_type (i));
-          
-     	m_baseInds [i+1] = m_baseInds [i] + numTuples;
+     	m_baseInds [i+1] = m_baseInds [i] + mesh.num (gs.grob_type (i));
     }
 }
 
@@ -99,7 +111,7 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
 	for (auto grobType : grobSet) {
 		if (grobType == VERTEX) {
 		// vertices are not contained int the 'inds' arrays
-		
+
 		}
 
 		if (!mesh.has (grobType))

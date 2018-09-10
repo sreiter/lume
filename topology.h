@@ -37,6 +37,11 @@ namespace lume {
 
 class Mesh;
 
+namespace impl {
+	void GenerateVertexIndicesFromCoords (Mesh& mesh);
+}// end of namespace impl
+
+
 /// Maps consecutively indexed grid objects of different types to their respective grob indices
 /** While slimesh indices grid objects for each type starting from zero, other
  * indexing schemata are possible. E.g. first indexing all triangles and afterwards

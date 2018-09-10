@@ -420,8 +420,6 @@ namespace impl {
 				           << GrobName (gt) << "' (" << valences [grob] << ")");
 			}
 		}
-
-
 	}
 }// end of namespace impl
 

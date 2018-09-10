@@ -383,6 +383,9 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 		// 	bSuccess = create_octahedrons(volumes, grid, curNode, vertices);
 
 		else if(strcmp(name, "subset_handler") == 0) {
+		//	make sure that vertex indices are present
+			impl::GenerateVertexIndicesFromCoords (*mesh);
+
 			string siName = "subsetHandler";
 			if (xml_attribute<>* attrib = curNode->first_attribute("name"))
 				siName = attrib->value();
@@ -420,23 +423,6 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 
 	return mesh;
 }
-
-
-namespace impl {
-	void GenerateVertexIndicesFromCoords (Mesh& mesh)
-	{
-		GrobArray& vrts = *mesh.inds (VERTEX);
-		const index_t oldNumVrts = vrts.size();
-		const index_t newNumVrts = mesh.coords()->num_tuples();
-		if (newNumVrts > oldNumVrts){
-			vrts.reserve (newNumVrts);
-			for(index_t i = oldNumVrts; i < newNumVrts; ++i)
-				vrts.push_back ({i});
-		}
-		else
-			vrts.resize (newNumVrts);
-	}
-}// end of namespace impl
 
 
 std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
