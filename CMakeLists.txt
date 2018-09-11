@@ -29,6 +29,9 @@ cmake_minimum_required(VERSION 3.1)
 set (CMAKE_CXX_STANDARD 14)
 project (lume)
 
+option (BUILD_LUME_TESTS "Build 'lume_test' executable and configure test environment" OFF)
+message (STATUS "BUILD_LUME_TESTS: " ${BUILD_LUME_TESTS} "    (enable/disable with cmake option -DBUILD_LUME_TESTS=ON/OFF)")
+
 set (sources
         src/subset_info_annex.cpp
         src/file_io.cpp
@@ -69,9 +72,10 @@ include_directories (deps/rapidxml-1.13)
 include_directories (deps)
 include_directories (include/lume)
 
-file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
-
 add_library (lume ${sources} ${headers})
 
-add_executable (lume_tests src/tests_main.cpp)
-target_link_libraries(lume_tests lume)
+if (BUILD_LUME_TESTS)
+	file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
+	add_executable (lume_tests src/tests_main.cpp)
+	target_link_libraries(lume_tests lume)
+endif (BUILD_LUME_TESTS)
