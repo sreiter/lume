@@ -1,3 +1,4 @@
+# lume &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.com/sreiter/lume.svg?branch=master)](https://travis-ci.com/sreiter/lume)
 ## Introduction
 **lume** (**L**eightweight **U**nstructured **ME**shes) is a *BSD* licensed C++ library for the representation of unstructured hybrid meshes (or unstructured hybrid grids).
 
