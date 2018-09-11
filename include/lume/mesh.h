@@ -70,7 +70,7 @@ public:
 	{
 		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
 			const grob_t grobType = static_cast<grob_t>(i);
-			m_grobArrays [grobType] = std::make_shared <GrobArray> (grobType);
+			m_grobArrays [grobType] = std::make_unique <GrobArray> (grobType);
 		}
 
 		set_annex (AnnexKey ("coords", VERTEX), m_coords);
@@ -81,7 +81,7 @@ public:
 	{
 		for(auto grobSet : supportedGrobSets) {
 			for(auto grobType : grobSet)
-				m_grobArrays [grobType] = std::make_shared <GrobArray> (static_cast<grob_t>(grobType));
+				m_grobArrays [grobType] = std::make_unique <GrobArray> (static_cast<grob_t>(grobType));
 		}
 		set_annex (AnnexKey ("coords", VERTEX), m_coords);
 	}
@@ -274,8 +274,8 @@ private:
 	//	MEMBER VARIABLES
 	SPRealArrayAnnex			m_coords;
 	/** \todo	think about different storage with faster access (e.g. plain array)*/
-	SPGrobArray				m_grobArrays [NUM_GROB_TYPES];
-	mesh_annex_storage_t	m_annexStorage;
+	std::unique_ptr<GrobArray>	m_grobArrays [NUM_GROB_TYPES];
+	mesh_annex_storage_t		m_annexStorage;
 };
 
 inline std::ostream& operator<< (std::ostream& out, const Mesh::AnnexKey& v) {
