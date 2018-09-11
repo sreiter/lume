@@ -1,0 +1,8 @@
+language: cpp
+
+script:
+    - mkdir -p build
+    - cd build
+    - cmake -DBUILD_LUME_TESTS=ON ..
+    - make
+    - ./lume_tests
