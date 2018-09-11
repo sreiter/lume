@@ -505,18 +505,28 @@ namespace impl {
 		}
 	}
 
+	
+	struct TestMesh {
+		TestMesh (const std::string& _fileName) :
+			fileName (_fileName),
+			mesh (CreateMeshFromFile (fileName))
+		{}
+
+		std::string fileName;
+		SPMesh		mesh;
+	};
+
 	static void RunTestOnMeshes (void (*testFct)(SPMesh mesh),
-	                             const vector<string>& fileNames)
+	                             const vector<TestMesh>& testMeshes)
 	{
-		for(auto fileName : fileNames) {
+		for(auto testMesh : testMeshes) {
 			try {
-				auto mesh = CreateMeshFromFile (fileName);
-				testFct (mesh);
-				cout << "    ok: '" << fileName << "'" << endl;
+				testFct (testMesh.mesh);
+				cout << "    ok: '" << testMesh.fileName << "'" << endl;
 			}
 			catch (std::exception& e) {
-				cout << "    fail: '" << fileName << "'" << endl;
-				FAIL ("Failed for '" << fileName << "' with message: " << e.what());
+				cout << "    fail: '" << testMesh.fileName << "'" << endl;
+				FAIL ("Failed for '" << testMesh.fileName << "' with message: " << e.what());
 			}
 		}
 	}
@@ -524,12 +534,14 @@ namespace impl {
 
 #define RUN_TEST(testStats, testFunctionName) impl::RunTest (testStats, &testFunctionName, #testFunctionName);
 #define RUN_TEST_ON_FILES(testStats, testFunctionName, files) impl::RunTest (testStats, &impl::RunTestOnFiles, #testFunctionName, &testFunctionName, files);
-#define RUN_TEST_ON_MESHES(testStats, testFunctionName, files) impl::RunTest (testStats, &impl::RunTestOnMeshes, #testFunctionName, &testFunctionName, files);
+#define RUN_TEST_ON_MESHES(testStats, testFunctionName, meshes) impl::RunTest (testStats, &impl::RunTestOnMeshes, #testFunctionName, &testFunctionName, meshes);
 
 
 
 bool RunTests ()
 {
+	using impl::TestMesh;
+	
 	int numTests = 0;
 	int numFailed = 0;
 
@@ -540,26 +552,27 @@ bool RunTests ()
 	RUN_TEST(testStats, TestGrobDescs);
 
 	vector<string> generalTestFiles {"test_meshes/quad.stl",
+									 "test_meshes/box_with_spheres.ele",
 								  	 "test_meshes/tris_and_quads.ugx",
 								  	 "test_meshes/elems_refined_rim.ugx",
 								  	 "test_meshes/tet_refined.ugx",
 								  	 "test_meshes/elems_refined.ugx"};
 
-	vector<string> topologyTestFiles {"test_meshes/tris_and_quads.ugx",
-								  	  "test_meshes/elems_refined_rim.ugx",
-								  	  "test_meshes/tet_refined.ugx",
-								  	  "test_meshes/elems_refined.ugx"};
-
+	vector<TestMesh> topologyTestMeshes {TestMesh ("test_meshes/tris_and_quads.ugx"),
+								  		 TestMesh ("test_meshes/elems_refined_rim.ugx"),
+								  		 TestMesh ("test_meshes/tet_refined.ugx"),
+								  		 TestMesh ("test_meshes/elems_refined.ugx")};
 
 	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, generalTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, generalTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestFiles);
+
+	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestMeshes);
 	RUN_TEST(testStats, TestGrobValences);
-	RUN_TEST_ON_MESHES(testStats, TestFillNeighborOffsetMap, topologyTestFiles);
-	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestFiles);
+	RUN_TEST_ON_MESHES(testStats, TestFillNeighborOffsetMap, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
 	RUN_TEST(testStats, TestCreateBoundaryMesh);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
