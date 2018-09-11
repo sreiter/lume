@@ -70,7 +70,7 @@ public:
 	{
 		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
 			const grob_t grobType = static_cast<grob_t>(i);
-			m_grobArrays [grobType] = std::make_unique <GrobArray> (grobType);
+			m_grobArrays [grobType] = std::unique_ptr <GrobArray> (new GrobArray (grobType));
 		}
 
 		set_annex (AnnexKey ("coords", VERTEX), m_coords);
@@ -81,7 +81,7 @@ public:
 	{
 		for(auto grobSet : supportedGrobSets) {
 			for(auto grobType : grobSet)
-				m_grobArrays [grobType] = std::make_unique <GrobArray> (static_cast<grob_t>(grobType));
+				m_grobArrays [grobType] = std::unique_ptr <GrobArray> (new GrobArray (grobType));
 		}
 		set_annex (AnnexKey ("coords", VERTEX), m_coords);
 	}
