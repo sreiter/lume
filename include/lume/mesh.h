@@ -84,44 +84,44 @@ public:
 
 
 	// INDICES
-	GrobArray& grobs (const grob_t gt)
+	GrobArray& grobs (const grob_t grobType)
 	{
-		if (!grobs_allocated (gt)) {
-			auto t = std::make_shared <GrobArray> (gt);
-			m_grobStorage.set_annex (gt, t);
+		if (!grobs_allocated (grobType)) {
+			auto t = std::make_shared <GrobArray> (grobType);
+			m_grobStorage.set_annex (grobType, t);
 			return *t;
 		}
 		else
-			return *m_grobStorage.annex(gt);
+			return *m_grobStorage.annex(grobType);
 	}
 
-	const GrobArray& grobs (const grob_t gt) const
+	const GrobArray& grobs (const grob_t grobType) const
 	{
-		return *m_grobStorage.annex(gt);
+		return *m_grobStorage.annex(grobType);
 	}
 
-	bool grobs_allocated (const grob_t gt) const
+	bool grobs_allocated (const grob_t grobType) const
 	{
-		return m_grobStorage.has_annex(gt);
+		return m_grobStorage.has_annex(grobType);
 	}
 
-	bool has (const grob_t gt) const
+	bool has (const grob_t grobType) const
 	{
-		return grobs_allocated (gt) && grobs (gt).size();
+		return grobs_allocated (grobType) && grobs (grobType).size();
 	}
 
-	bool has (const GrobSet gs) const
+	bool has (const GrobSet grobSet) const
 	{
-		for (auto gt : gs) {
-			if (has (gt))
+		for (auto grobType : grobSet) {
+			if (has (grobType))
 				return true;
 		}
 		return false;
 	}
 
-	void remove_grobs (const grob_t gt)
+	void remove_grobs (const grob_t grobType)
 	{
-		m_grobStorage.remove_annex (gt);
+		m_grobStorage.remove_annex (grobType);
 	}
 
 	std::vector <grob_t> grob_types() const
@@ -129,18 +129,33 @@ public:
 		return m_grobStorage.collect_keys();
 	}
 
-	index_t num (grob_t grob)
+	index_t num (grob_t grobType)
 	{
-		if (grobs_allocated (grob))
-			return grobs (grob).size ();
+		if (grobs_allocated (grobType))
+			return grobs (grobType).size ();
 		return 0;
 	}
 
-	index_t num (const GrobSet& gs)
+	index_t num (const GrobSet& grobSet)
 	{
 		index_t counter = 0;
-		for(index_t i = 0; i < gs.size(); ++i)
-			counter += num (gs.grob_type (i));
+		for(auto grobType : grobSet)
+			counter += num (grobType);
+		return counter;
+	}
+
+	index_t num_indices (grob_t grobType)
+	{
+		if (grobs_allocated (grobType))
+			return grobs (grobType).num_indices ();
+		return 0;
+	}
+
+	index_t num_indices (const GrobSet& grobSet)
+	{
+		index_t counter = 0;
+		for(auto grobType : grobSet)
+			counter += num_indices (grobType);
 		return counter;
 	}
 
