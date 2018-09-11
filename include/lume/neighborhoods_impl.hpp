@@ -34,11 +34,11 @@ namespace lume {
 namespace impl {
 
 template <class TIndexVector>
-void FillNeighborOffsetMap (TIndexVector& offsetsOut,
-	                        Mesh& mesh,
-	                     	GrobSet grobSet,
-	                     	GrobSet nbrGrobSet,
-	                     	const GrobHashMap <index_t>& grobToIndexMap)
+void FillHigherDimNeighborOffsetMap (TIndexVector& offsetsOut,
+			                         Mesh& mesh,
+			                     	 GrobSet grobSet,
+			                     	 GrobSet nbrGrobSet,
+			                     	 const GrobHashMap <index_t>& grobToIndexMap)
 {
 	offsetsOut.clear ();
 	offsetsOut.resize (mesh.num (grobSet) + 1, 0);
@@ -46,18 +46,15 @@ void FillNeighborOffsetMap (TIndexVector& offsetsOut,
 	const index_t grobSetDim = grobSet.dim();
 	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
-	// Count how many associated elements each element has
-	if (nbrGrobSetDim > grobSetDim) {
-		for (auto nbrGrobType : nbrGrobSet) {
-			for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
-				for(index_t iside = 0; iside < nbrGrob.num_sides(grobSetDim); ++iside) {
-					++offsetsOut[grobToIndexMap.at(nbrGrob.side (grobSetDim, iside))];
-				}
+	if (nbrGrobSetDim <= grobSetDim)
+		throw LumeError ("neighbor dimension has to be higher than central grob set dimension");
+
+	for (auto nbrGrobType : nbrGrobSet) {
+		for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
+			for(index_t iside = 0; iside < nbrGrob.num_sides(grobSetDim); ++iside) {
+				++offsetsOut[grobToIndexMap.at(nbrGrob.side (grobSetDim, iside))];
 			}
 		}
-	}
-	else {
-		throw LumeError ("FillNeighborOffsetMap: Currently, nbr dimension > elem dimension has to hold true");
 	}
 
 	// Compute an offset into a neighbor map for each element (convert count -> offset)
@@ -71,31 +68,32 @@ void FillNeighborOffsetMap (TIndexVector& offsetsOut,
 
 
 template <class TIndexVector>
-void FillNeighborMap (TIndexVector& nbrMapOut,
-                        TIndexVector& offsetsOut,
-                        index_t* grobBaseIndsOut,
-                        Mesh& mesh,
-                        GrobSet grobs,
-                        GrobSet nbrGrobs)
+void FillHigherDimNeighborMap (TIndexVector& nbrMapOut,
+                        	   TIndexVector& offsetsOut,
+                        	   index_t* grobBaseIndsOut,
+                        	   Mesh& mesh,
+                        	   GrobSet grobSet,
+                        	   GrobSet nbrGrobSet)
 {
-	if (nbrGrobs.dim() <= grobs.dim())
-		throw LumeError ("FillNeighborMap: Currently only nbrGrobs.dim() > grobs.dim() supported");
-	
-	GrobHashMap <index_t> grobToIndexMap;
-	FillGrobToIndexMap (grobToIndexMap, grobBaseIndsOut, mesh, grobs);
+	const index_t grobSetDim = grobSet.dim();
+	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
-	FillNeighborOffsetMap (offsetsOut, mesh, grobs, nbrGrobs, grobToIndexMap);
+	if (nbrGrobSetDim <= grobSetDim)
+		throw LumeError ("neighbor dimension has to be higher than central grob set dimension");
+
+	GrobHashMap <index_t> grobToIndexMap;
+	FillGrobToIndexMap (grobToIndexMap, grobBaseIndsOut, mesh, grobSet);
+
+	FillHigherDimNeighborOffsetMap (offsetsOut, mesh, grobSet, nbrGrobSet, grobToIndexMap);
 
 	nbrMapOut.clear ();
 	nbrMapOut.resize (offsetsOut.back() * 2, NO_GROB);
 	
-	const index_t elemDim = grobs.dim();
-
-	for (auto nbrGrobType : nbrGrobs) {
+	for (auto nbrGrobType : nbrGrobSet) {
 		index_t nbrGrobIndex = 0;
 		for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
-			for(index_t iside = 0; iside < nbrGrob.num_sides(elemDim); ++iside) {
-				const index_t eind = grobToIndexMap.at (nbrGrob.side (elemDim, iside));
+			for(index_t iside = 0; iside < nbrGrob.num_sides(grobSetDim); ++iside) {
+				const index_t eind = grobToIndexMap.at (nbrGrob.side (grobSetDim, iside));
 				const index_t offset = 2 * offsetsOut [eind];
 				const index_t numAss = offsetsOut [eind + 1] - offsetsOut [eind];
 				for(index_t j = offset; j < offset + 2 * numAss; j+=2) {
@@ -108,6 +106,96 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 			}
 			++nbrGrobIndex;
 		}
+	}
+}
+
+
+template <class TIndexVector>
+void FillLowerDimNeighborOffsetMap (TIndexVector& offsetsOut,
+			                        Mesh& mesh,
+			                     	GrobSet grobSet,
+			                     	GrobSet nbrGrobSet)
+{
+	offsetsOut.clear ();
+	offsetsOut.resize (mesh.num (grobSet) + 1, 0);
+
+	const index_t grobSetDim = grobSet.dim();
+	const index_t nbrGrobSetDim = nbrGrobSet.dim();
+
+	if (nbrGrobSetDim >= grobSetDim)
+		throw LumeError ("neighbor dimension has to be lower than central grob set dimension");
+
+	offsetsOut [0] = 0;
+	index_t counter = 1;
+	for(auto grobType : grobSet) {
+		for(auto grob : mesh.grobs (grobType)) {
+			offsetsOut [counter] = offsetsOut [counter - 1] + grob.num_sides (nbrGrobSetDim);
+			++counter;
+		}
+	}
+}
+
+template <class TIndexVector>
+void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
+                        	   TIndexVector& offsetsOut,
+                        	   index_t* grobBaseIndsOut,
+                        	   Mesh& mesh,
+                        	   GrobSet grobSet,
+                        	   GrobSet nbrGrobSet)
+{
+	const index_t grobSetDim = grobSet.dim();
+	const index_t nbrGrobSetDim = nbrGrobSet.dim();
+
+	if (nbrGrobSetDim >= grobSetDim)
+		throw LumeError ("neighbor dimension has to be lower than central grob set dimension");
+
+	FillLowerDimNeighborOffsetMap (offsetsOut, mesh, grobSet, nbrGrobSet);
+
+	nbrMapOut.clear ();
+	nbrMapOut.resize (offsetsOut.back() * 2, NO_GROB);
+
+	index_t nbrGrobBaseInds [NUM_GROB_TYPES];
+	GrobHashMap <index_t> nbrGrobToIndexMap;
+	FillGrobToIndexMap (nbrGrobToIndexMap, nbrGrobBaseInds, mesh, nbrGrobSet);
+
+	index_t counter = 0;
+	VecSet (grobBaseIndsOut, 0, NUM_GROB_TYPES);
+	for(auto grobType : grobSet) {
+		grobBaseIndsOut [grobType] = counter;
+		for(auto grob : mesh.grobs (grobType)) {
+			const index_t offset = 2 * offsetsOut [counter];
+			const index_t numNbrs = grob.num_sides (nbrGrobSetDim);
+			
+			for(index_t inbr = 0; inbr < numNbrs; ++inbr) {
+				const Grob nbrGrob = grob.side (nbrGrobSetDim, inbr);
+				nbrMapOut [offset + 2*inbr] = nbrGrob.grob_type();
+				nbrMapOut [offset + 2*inbr + 1] = nbrGrobToIndexMap.at (nbrGrob) - nbrGrobBaseInds [nbrGrob.grob_type()];
+			}
+			++counter;
+		}
+	}
+}
+
+
+template <class TIndexVector>
+void FillNeighborMap (TIndexVector& nbrMapOut,
+                      TIndexVector& offsetsOut,
+                      index_t* grobBaseIndsOut,
+                      Mesh& mesh,
+                      GrobSet grobSet,
+                      GrobSet nbrGrobSet)
+{
+	const index_t grobSetDim = grobSet.dim();
+	const index_t nbrGrobSetDim = nbrGrobSet.dim();
+
+	if (nbrGrobSetDim > grobSetDim) {
+		FillHigherDimNeighborMap (nbrMapOut, offsetsOut, grobBaseIndsOut, mesh, grobSet, nbrGrobSet);
+	}
+	else if (nbrGrobSetDim < grobSetDim) {
+		FillLowerDimNeighborMap (nbrMapOut, offsetsOut, grobBaseIndsOut, mesh, grobSet, nbrGrobSet);
+	}
+	else {
+		throw LumeError ("FillNeighborMap: Currently, nbr dimension == elem dimension is not supported");
 	}
 }
 

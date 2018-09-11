@@ -88,10 +88,11 @@ neighbors (const GrobIndex gi) const
 	if (baseIndex >= m_offsets.size())
 		return Neighbors (0, nullptr);
 
-	const index_t numNbrs = m_offsets [baseIndex + gi.index + 1]
-							- m_offsets [baseIndex + gi.index];
+	const index_t offsetIndex = baseIndex + gi.index;
+	const index_t numNbrs = m_offsets [offsetIndex + 1]
+							- m_offsets [offsetIndex];
 
-	const index_t* firstNbr = m_nbrs.raw_ptr() + baseIndex * 2;
+	const index_t* firstNbr = m_nbrs.raw_ptr() + m_offsets [offsetIndex] * 2;
 
 	return Neighbors (numNbrs, firstNbr);
 }

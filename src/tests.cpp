@@ -170,6 +170,30 @@ static void TestGrobIterator (SPMesh mesh)
 
 
 namespace impl {
+	static void TestGrobIndexAccess (SPMesh mesh, GrobSet grobTypes)
+	{
+		for(auto grobType : grobTypes) {
+			index_t counter = 0;
+			for(auto grob : mesh->grobs (grobType)) {
+				COND_FAIL (grob != mesh->grob (GrobIndex (grobType, counter)),
+				           "mesh->grob(" << counter << ") doesn't correspond to "
+				           << counter << "'th grob as provided by the GrobIterator");
+				++counter;
+			}
+		}
+	}
+
+}// end of namespace impl
+static void TestGrobIndexAccess (SPMesh mesh)
+{
+	impl::TestGrobIndexAccess (mesh, VERTICES);
+	impl::TestGrobIndexAccess (mesh, EDGES);
+	impl::TestGrobIndexAccess (mesh, FACES);
+	impl::TestGrobIndexAccess (mesh, CELLS);
+}
+
+
+namespace impl {
 	static void TestSidesCorrespondToElements (Mesh& mesh, GrobSet grobTypes, GrobSet sideTypes)
 	{
 		const index_t sideDim = sideTypes.dim();
@@ -301,24 +325,24 @@ namespace impl {
 
 		ComputeGrobValences (valences, *mesh, grobSet, nbrGrobSet);
 
-		vector <index_t> numFacesWithValenceN;
+		vector <index_t> numSidesWithValenceN;
 		for(auto gt : grobSet) {
 			for(auto grob : mesh->grobs (gt)) {
 				const index_t valence = valences.at (grob);
-				if (valence >= numFacesWithValenceN.size())
-					numFacesWithValenceN.resize (valence + 1, 0);
-				++numFacesWithValenceN[valence];
+				if (valence >= numSidesWithValenceN.size())
+					numSidesWithValenceN.resize (valence + 1, 0);
+				++numSidesWithValenceN[valence];
 			}
 		}
 
-		COND_FAIL (numFacesWithValenceN[0] > 0,
+		COND_FAIL (numSidesWithValenceN[0] > 0,
 		           "There should be no faces with valence 0 in this grid");
 
-		COND_FAIL (numFacesWithValenceN[1] != numGrobsWithValence1,
+		COND_FAIL (numSidesWithValenceN[1] != numGrobsWithValence1,
 		           "There should be exactly " << numGrobsWithValence1
 		           << " faces with valence 1 in this grid");
 
-		COND_FAIL (numFacesWithValenceN[2] != numGrobsWithValence2,
+		COND_FAIL (numSidesWithValenceN[2] != numGrobsWithValence2,
 		           "There should be exactly " << numGrobsWithValence2
 		           << " faces with valence 2 in this grid");
 	}
@@ -350,7 +374,7 @@ static void TestGrobValences ()
 
 
 namespace impl {
-	static void TestFillNeighborOffsetMap (SPMesh mesh,
+	static void TestFillHigherDimNeighborOffsetMap (SPMesh mesh,
 	                                       GrobSet grobTypes,
 	                                       GrobSet nbrGrobTypes)
 	{
@@ -362,7 +386,7 @@ namespace impl {
 		FillGrobToIndexMap (grobToIndexMap, baseInds, *mesh, grobTypes);
 
 		vector <index_t> offsets;
-		lume::impl::FillNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes, grobToIndexMap);
+		lume::impl::FillHigherDimNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes, grobToIndexMap);
 
 		for(auto gt : grobTypes) {
 			for(auto grob : mesh->grobs (gt)) {
@@ -377,38 +401,111 @@ namespace impl {
 	}
 }// end of namespace impl
 
-static void TestFillNeighborOffsetMap (SPMesh mesh)
+static void TestFillHigherDimNeighborOffsetMap (SPMesh mesh)
 {
-	impl::TestFillNeighborOffsetMap (mesh, VERTICES, EDGES);
-	impl::TestFillNeighborOffsetMap (mesh, VERTICES, FACES);
-	impl::TestFillNeighborOffsetMap (mesh, VERTICES, CELLS);
-	impl::TestFillNeighborOffsetMap (mesh, EDGES, FACES);
-	impl::TestFillNeighborOffsetMap (mesh, EDGES, CELLS);
-	impl::TestFillNeighborOffsetMap (mesh, FACES, CELLS);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, VERTICES, EDGES);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, VERTICES, FACES);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, VERTICES, CELLS);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, EDGES, FACES);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, EDGES, CELLS);
+	impl::TestFillHigherDimNeighborOffsetMap (mesh, FACES, CELLS);
 }
 
 
 namespace impl {
-	static void TestNeighborhoods (SPMesh mesh, GrobSet grobs, GrobSet nbrGrobs)
+	static void TestFillLowerDimNeighborOffsetMap (SPMesh mesh,
+	                                       GrobSet grobTypes,
+	                                       GrobSet nbrGrobTypes)
+	{
+		GrobHashMap <index_t> valences;
+		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobTypes);
+
+		vector <index_t> offsets;
+		lume::impl::FillLowerDimNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes);
+
+		index_t i = 0;
+		for(auto gt : grobTypes) {
+			for(auto grob : mesh->grobs (gt)) {
+				const index_t v = offsets.at(i+1) - offsets.at(i);
+
+				COND_FAIL(v != valences.at (grob),
+				          grobTypes.name() << " to " << nbrGrobTypes.name()
+				          << " valence deduced from offset-map (" << v
+				          << ") does not correspond to computed valence map ("
+				          << valences.at (grob) << ")");
+				++i;
+			}
+		}
+	}
+}// end of namespace impl
+
+static void TestFillLowerDimNeighborOffsetMap (SPMesh mesh)
+{
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, EDGES, VERTICES);
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, FACES, VERTICES);
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, CELLS, VERTICES);
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, FACES, EDGES);
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, CELLS, EDGES);
+	impl::TestFillLowerDimNeighborOffsetMap (mesh, CELLS, FACES);
+}
+
+
+namespace impl {
+	static void TestNeighborsAreSides (SPMesh mesh, const Grob& grob, const Neighbors& nbrs)
+	{
+		for(size_t i = 0; i < nbrs.size(); ++i) {
+			Grob nbrGrob = mesh->grob (nbrs[i]);
+			COND_FAIL (grob.find_side (nbrGrob) == Grob::NO_SIDE,
+			           "Couldn't find " << i << "'th " << " neighbor of type "
+			           << nbrGrob.desc().name()
+			           << " in the set of sides of a " << grob.desc().name()
+			           << ". nbrGrobIndex: " << nbrs[i].index);
+		}
+	}
+
+	static void TestGrobIsSideOfNeighbors (SPMesh mesh, const Grob& grob, const Neighbors& nbrs)
+	{
+		for(size_t i = 0; i < nbrs.size(); ++i) {
+			Grob nbrGrob = mesh->grob (nbrs[i]);
+			COND_FAIL (nbrGrob.find_side (grob) == Grob::NO_SIDE,
+			           "Provided grob (" << grob.desc().name()
+			           << ") is not a side of the " << i << "'th " << " neighbor of type "
+			           << nbrGrob.desc().name());
+		}
+	}
+
+	static void TestNeighborhoods (SPMesh mesh, GrobSet grobTypes, GrobSet nbrGrobs)
 	{
 	//	valences are used to check whether the individual neighborhoods have
 	//	correct size. Note that 'ComputeGrobValences' is tested in a different test.
 		GrobHashMap <index_t> valences;
-		ComputeGrobValences (valences, *mesh, grobs, nbrGrobs);
+		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobs);
 
-		Neighborhoods nbrhds (mesh, grobs, nbrGrobs);
+		Neighborhoods nbrhds (mesh, grobTypes, nbrGrobs);
 
-		for(auto gt : grobs) {
+		const index_t grobDim = grobTypes.dim();
+		const index_t nbrGrobDim = nbrGrobs.dim();
+
+		for(auto gt : grobTypes) {
 			index_t counter = 0;
 			for(auto grob : mesh->grobs (gt)) {
 				const GrobIndex gi (gt, counter++);
-				const index_t numNbrs = nbrhds.neighbors (gi).size();
+				const Neighbors nbrs = nbrhds.neighbors (gi);
+				const index_t numNbrs = nbrs.size();
 
 				COND_FAIL (numNbrs != valences [grob],
 				           "Mismatch between the number of neighbors ("
 				           << numNbrs << ") in a neighborhood of '"
 				           << GrobName (gt) << "' and the valence of that '"
 				           << GrobName (gt) << "' (" << valences [grob] << ")");
+
+				if (nbrGrobDim < grobDim) {
+					TestNeighborsAreSides (mesh, grob, nbrs);
+				}
+				else if (nbrGrobDim > grobDim) {
+					TestGrobIsSideOfNeighbors (mesh, grob, nbrs);
+				}
+
 			}
 		}
 	}
@@ -420,9 +517,15 @@ static void TestNeighborhoods (SPMesh mesh)
 	impl::TestNeighborhoods (mesh, VERTICES, EDGES);
 	impl::TestNeighborhoods (mesh, VERTICES, FACES);
 	impl::TestNeighborhoods (mesh, VERTICES, CELLS);
+	impl::TestNeighborhoods (mesh, EDGES, VERTICES);
 	impl::TestNeighborhoods (mesh, EDGES, FACES);
 	impl::TestNeighborhoods (mesh, EDGES, CELLS);
+	impl::TestNeighborhoods (mesh, FACES, VERTICES);
+	impl::TestNeighborhoods (mesh, FACES, EDGES);
 	impl::TestNeighborhoods (mesh, FACES, CELLS);
+	impl::TestNeighborhoods (mesh, CELLS, VERTICES);
+	impl::TestNeighborhoods (mesh, CELLS, EDGES);
+	impl::TestNeighborhoods (mesh, CELLS, FACES);
 }
 
 
@@ -567,11 +670,13 @@ bool RunTests ()
 
 	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobIndexAccess, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestMeshes);
 	RUN_TEST(testStats, TestGrobValences);
-	RUN_TEST_ON_MESHES(testStats, TestFillNeighborOffsetMap, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillLowerDimNeighborOffsetMap, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
 	RUN_TEST(testStats, TestCreateBoundaryMesh);
 

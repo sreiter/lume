@@ -29,6 +29,7 @@
 #define __H__lume_topology_impl
 
 #include "topology.h"
+#include "vec_math_raw.h"
 
 namespace lume {
 
@@ -74,15 +75,6 @@ void GrobHashToIndexArray (TIndexVector& indArrayInOut,
 	}
 }
 
-template <class TIndexVector>
-void ComputeGrobValences (TIndexVector& valencesOut,
-                          Mesh& mesh,
-                     	  GrobSet grobs,
-                     	  GrobSet nbrGrobs,
-                     	  const GrobHashMap <index_t>& grobToIndexMap)
-{
-
-}
 
 template <class TIndexVector>
 void UniqueSidesToIndexArray (TIndexVector& indArrayInOut,

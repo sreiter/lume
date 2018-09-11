@@ -39,6 +39,7 @@
 #include "grob.h"
 #include "grob_array.h"
 #include "grob_hash.h"
+#include "grob_index.h"
 #include "types.h"
 
 namespace lume {
@@ -98,6 +99,11 @@ public:
 	const GrobArray& grobs (const grob_t grobType) const
 	{
 		return *m_grobStorage.annex(grobType);
+	}
+
+	Grob grob (const GrobIndex& grobIndex) const
+	{
+		return grobs (grobIndex.grobType) [grobIndex.index];
 	}
 
 	bool grobs_allocated (const grob_t grobType) const
@@ -258,6 +264,7 @@ private:
 
 	//	MEMBER VARIABLES
 	SPRealArrayAnnex			m_coords;
+	/** \todo	think about different storage with faster access (e.g. plain array)*/
 	index_annex_storage_t	m_grobStorage;
 	mesh_annex_storage_t	m_annexStorage;
 };

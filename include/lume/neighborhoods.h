@@ -48,6 +48,9 @@ public:
 
     Neighbors neighbors (const GrobIndex gi) const;
 
+    GrobSet center_grob_types () const		{return m_centerGrobTypes;}
+    GrobSet nbr_grob_types () const			{return m_neighborGrobTypes;}
+
 private:
 	index_t base_index (const GrobIndex gi) const;
 
@@ -80,11 +83,33 @@ namespace impl {
 	 *			
 	 * \sa FillGrobToIndexMap */
 	template <class TIndexVector>
-	void ComputeNeighborOffsetMap (TIndexVector& offsetsOut,
-	                               Mesh& mesh,
-	                     	       GrobSet grobs,
-	                     	       GrobSet nbrGrobs,
-	                     	       const GrobHashMap <index_t>& grobToIndexMap);
+	void FillHigherDimNeighborOffsetMap (TIndexVector& offsetsOut,
+				                         Mesh& mesh,
+				                     	 GrobSet grobSet,
+				                     	 GrobSet nbrGrobSet,
+				                     	 const GrobHashMap <index_t>& grobToIndexMap);
+
+	template <class TIndexVector>
+	void FillLowerDimNeighborOffsetMap (TIndexVector& offsetsOut,
+				                        Mesh& mesh,
+				                     	GrobSet grobSet,
+				                     	GrobSet nbrGrobSet);
+
+	template <class TIndexVector>
+	void FillHigherDimNeighborMap (TIndexVector& nbrMapOut,
+	                        	   TIndexVector& offsetsOut,
+	                        	   index_t* grobBaseIndsOut,
+	                        	   Mesh& mesh,
+	                        	   GrobSet grobSet,
+	                        	   GrobSet nbrGrobSet);
+
+	template <class TIndexVector>
+	void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
+	                        	   TIndexVector& offsetsOut,
+	                        	   index_t* grobBaseIndsOut,
+	                        	   Mesh& mesh,
+	                        	   GrobSet grobSet,
+	                        	   GrobSet nbrGrobSet);
 
 	/**
 	 * \param grobBaseIndsOut Array of size `NUM_GROB_TYPES`.

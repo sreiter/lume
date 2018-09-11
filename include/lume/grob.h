@@ -29,6 +29,7 @@
 #define __H__lume__grob
 
 #include <cstdint>
+#include <limits>
 #include <string>
 #include "types.h"
 
@@ -629,6 +630,8 @@ private:
  */
 class Grob {
 public:
+	static const index_t NO_SIDE = std::numeric_limits<index_t>::max();
+
 	Grob (grob_t grobType, const index_t* corners = nullptr) :
 		m_globCornerInds (corners),
 		m_cornerOffsets (impl::Array_16_4::ascending_order ()),
@@ -660,6 +663,11 @@ public:
 		}
 
 		return true;
+	}
+
+	bool operator != (const Grob& g) const
+	{
+		return !((*this) == g);
 	}
 
 	inline index_t dim () const							{return m_desc.dim ();}
@@ -710,7 +718,7 @@ public:
 		return m_desc.side_desc (sideDim, sideIndex);
 	}
 
-	Grob side (const index_t sideDim, const index_t sideIndex)
+	Grob side (const index_t sideDim, const index_t sideIndex) const
 	{
 		impl::Array_16_4 cornerOffsets;
 		const index_t numCorners = m_desc.side_desc(sideDim, sideIndex).num_corners();
@@ -723,6 +731,19 @@ public:
 		// LOG("\n");
 
 		return Grob (m_desc.side_type (sideDim, sideIndex), m_globCornerInds, cornerOffsets);
+	}
+
+	/// returns the index of the side which corresponds to the given grob
+	/** if no such side was found, 'Grob::NO_SIDE' is returned.*/
+	index_t find_side (const Grob& sideGrob) const
+	{
+		const index_t sideDim = sideGrob.dim();
+		const index_t numSides = num_sides (sideDim);
+		for(index_t iside = 0; iside < numSides; ++iside) {
+			if (sideGrob == side (sideDim, iside))
+				return iside;
+		}
+		return numSides;
 	}
 
 private:

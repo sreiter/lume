@@ -152,9 +152,15 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 			}
 		}
 	}
-	else {
-		throw LumeError ("ComputeGrobValences is currently only implemented for grobs.dim() < nbrGrobs.dim(). Sorry.");
+	else if (grobDim > nbrGrobDim) {
+		for(auto gt : grobs) {
+			for(auto grob : mesh.grobs (gt)) {
+				valencesOut [grob] = grob.num_sides (nbrGrobDim);
+			}
+		}
 	}
+	else
+		throw LumeError ("ComputeGrobValences is currently not implemented for grobs.dim() == nbrGrobs.dim(). Sorry.");
 }
 
 
