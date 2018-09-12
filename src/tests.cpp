@@ -298,7 +298,7 @@ namespace impl {
 				}
 			}
 		}
-		catch (std::out_of_range& e) {
+		catch (std::out_of_range&) {
 			FAIL ("side of grob could not be found in grobToIndexMap of all side grobs");
 		}
 	}
