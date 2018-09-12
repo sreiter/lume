@@ -451,22 +451,21 @@ static void TestFillLowerDimNeighborOffsetMap (SPMesh mesh)
 
 
 namespace impl {
-	static void TestNeighborsAreSides (SPMesh mesh, const Grob& grob, const Neighbors& nbrs)
+	static void TestNeighborsAreSides (SPMesh mesh, const Grob& grob, const NeighborGrobs& nbrs)
 	{
 		for(size_t i = 0; i < nbrs.size(); ++i) {
-			Grob nbrGrob = mesh->grob (nbrs[i]);
+			Grob nbrGrob = nbrs[i];
 			COND_FAIL (grob.find_side (nbrGrob) == Grob::NO_SIDE,
 			           "Couldn't find " << i << "'th " << " neighbor of type "
 			           << nbrGrob.desc().name()
-			           << " in the set of sides of a " << grob.desc().name()
-			           << ". nbrGrobIndex: " << nbrs[i].index);
+			           << " in the set of sides of a " << grob.desc().name());
 		}
 	}
 
-	static void TestGrobIsSideOfNeighbors (SPMesh mesh, const Grob& grob, const Neighbors& nbrs)
+	static void TestGrobIsSideOfNeighbors (SPMesh mesh, const Grob& grob, const NeighborGrobs& nbrs)
 	{
 		for(size_t i = 0; i < nbrs.size(); ++i) {
-			Grob nbrGrob = mesh->grob (nbrs[i]);
+			Grob nbrGrob = nbrs[i];
 			COND_FAIL (nbrGrob.find_side (grob) == Grob::NO_SIDE,
 			           "Provided grob (" << grob.desc().name()
 			           << ") is not a side of the " << i << "'th " << " neighbor of type "
@@ -490,7 +489,7 @@ namespace impl {
 			index_t counter = 0;
 			for(auto grob : mesh->grobs (gt)) {
 				const GrobIndex gi (gt, counter++);
-				const Neighbors nbrs = nbrhds.neighbors (gi);
+				const NeighborGrobs nbrs = nbrhds.neighbor_grobs (gi);
 				const index_t numNbrs = nbrs.size();
 
 				COND_FAIL (numNbrs != valences [grob],

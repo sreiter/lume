@@ -109,11 +109,6 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
                        const GrobSet grobSet)
 {
 	for (auto grobType : grobSet) {
-		if (grobType == VERTEX) {
-		// vertices are not contained int the 'inds' arrays
-
-		}
-
 		if (!mesh.has (grobType))
 			continue;
 		
@@ -176,9 +171,7 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 	for (index_t igrob = 0; igrob < numCornerInds; igrob += numGrobCorners)
 	{
 		grob.set_global_corner_array(cornerInds + igrob);
-		// LOGT(grob, grob.corner(0) << ", " << grob.corner(1) << ", " << grob.corner(2) << ", " << grob.corner(3) << "\n");
 		for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
-			// LOGT(grob, grob.side (iside).corner(0) << ", " << grob.side (iside).corner(1) << "\n");
 			const auto r = sideHashInOut.insert(grob.side (sideDim, iside));
 			numInsertions += static_cast<index_t> (r.second);
 		}
@@ -242,13 +235,14 @@ static void CopyGrobsByValence (SPMesh target,
 		index_t index = 0;
 		for(auto& grob : elems) {
 			const GrobIndex gi (grobType, index);
-			if (srcGrobNeighborhoods.neighbors (gi).size() == valence) {
+			if (srcGrobNeighborhoods.num_neighbors (gi) == valence) {
 				newElems.push_back (grob);
 			}
 			++index;
 		}
 	}
 }
+
 
 SPMesh CreateBoundaryMesh (SPMesh mesh, GrobSet grobSet, const bool* visibilities)
 {

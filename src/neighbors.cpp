@@ -26,37 +26,32 @@
 
 
 #include "neighbors.h"
+#include "neighborhoods.h"
 
 namespace lume {
 
-Neighbors::
-Neighbors () :
-	m_size (0),
-	m_nbrs (0)
-{
-
-}
-
-Neighbors::
-Neighbors (const index_t _size, const index_t* _nbrs) :
-	m_size (_size),
-	m_nbrs (_nbrs)
-{
-}
-
-
-index_t Neighbors::
+////////////////////////////////////////////////////////////////////////////////
+// NeighborIndices implementation
+index_t NeighborIndices::
 size () const
 {
-	return m_size;
+	return m_neighborhoods->num_neighbors (m_grobIndex);
 }
 
-GrobIndex Neighbors::
+GrobIndex NeighborIndices::
 neighbor (const index_t i) const
 {
-	const index_t* p = m_nbrs + i * 2;
+	const index_t* p = m_neighborhoods->first_neighbor(m_grobIndex) + i * 2;
 	return GrobIndex (static_cast<grob_t>(p[0]), p[1]);
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// NeighborGrobs implementation
+Grob NeighborGrobs::
+to_grob (const GrobIndex& gi) const
+{
+	return neighborhoods()->m_mesh->grob (gi);
+}
 
 }//	end of namespace lume

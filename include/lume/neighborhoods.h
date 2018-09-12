@@ -35,24 +35,53 @@
 namespace lume {
 
 
-/// Gives access to the neighbors of all enteties of the mesh
+/// Gives access to the neighbors of all entities of the mesh
 class Neighborhoods {
+	friend class NeighborIndices;
+	friend class NeighborGrobs;
+
 public:
+
     Neighborhoods ();
+
+    /// Creates a neighborhood between grobs of different type and dimension
+    /** \note it has to hold true: centerGrobTypes != neighborGrobTypes*/
     Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+
+	/// Creates a neighborhood between grobs of the same type using the specified grobConnections as links
+	/** To create a neighborhoods between faces, where two faces are neighbors if
+	 * they are connected by a vertex, one could execute the following code:
+	 * \code
+	 * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, VERTICES, FACES));
+	 * \endcode
+	 *
+	 * To receive a neighborhood between faces connected by their edges, this code would work:
+	 * \code
+	 * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, EDGES, FACES));
+	 * \endcode
+
+	 * \param neighborGrobTypes	the following properties have to hold true:
+	 *									- `grobConnections.center_grob_types() != grobTypes`
+	 *									- `grobConnections.nbr_grob_types() == grobTypes`*/
+    Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
 
     void refresh ();
     void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
 
     SPMesh mesh ();
 
-    Neighbors neighbors (const GrobIndex gi) const;
+    NeighborIndices neighbor_indices (const GrobIndex gi) const;
+    NeighborGrobs neighbor_grobs (const GrobIndex gi) const;
+    
+    index_t num_neighbors (const GrobIndex gi) const;
 
     GrobSet center_grob_types () const		{return m_centerGrobTypes;}
     GrobSet nbr_grob_types () const			{return m_neighborGrobTypes;}
-
+    
 private:
 	index_t base_index (const GrobIndex gi) const;
+	index_t offset_index (const GrobIndex& gi) const;
+	const index_t* first_neighbor (const GrobIndex& gi) const;
 
     IndexArrayAnnex m_offsets;
     IndexArrayAnnex m_nbrs;

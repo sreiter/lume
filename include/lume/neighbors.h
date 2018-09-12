@@ -31,24 +31,59 @@
 #include "grob_index.h"
 
 namespace lume {
-	
-class Neighbors {
+
+class Neighborhoods;
+
+////////////////////////////////////////////////////////////////////////////////
+class NeighborIndices {
 public:
-	Neighbors ();
-	/// Constructs an instance with a neighborhood of a given size
-	/** \param _size	The number of neighbors
-	 *	\param _nbrs	An array of the length `_size*2`, containing
-	 *					`_size` index pairs (`grobType`, `index`).*/
-	Neighbors (const index_t _size, const index_t* _nbrs);
+	NeighborIndices (const GrobIndex& grobIndex,
+			   		 const Neighborhoods* neighborhoods) :
+		m_grobIndex (grobIndex),
+		m_neighborhoods (neighborhoods)
+	{}
 	
+	const GrobIndex& central_grob_index () const	{return m_grobIndex;}
+
 	index_t size () const;
-	GrobIndex operator [] (const index_t i) const		{return neighbor(i);}
+	GrobIndex operator [] (const index_t i) const	{return neighbor (i);}
 	GrobIndex neighbor (const index_t i) const;
 
+	const Neighborhoods* neighborhoods() const		{return m_neighborhoods;}
+
 private:
-	const index_t	m_size;
-	const index_t* 	m_nbrs;
+	const GrobIndex			m_grobIndex;
+	const Neighborhoods*	m_neighborhoods;
 };
+
+
+////////////////////////////////////////////////////////////////////////////////
+class NeighborGrobs {
+public:
+	NeighborGrobs (const GrobIndex& grobIndex,
+			   	   const Neighborhoods* neighborhoods) :
+		m_nbrInds (grobIndex, neighborhoods)
+	{}
+
+	NeighborGrobs (const NeighborIndices& nbrInds) :
+		m_nbrInds (nbrInds)
+	{}
+	
+	const GrobIndex& central_grob_index () const		{return m_nbrInds.central_grob_index();}
+	Grob central_grob () const							{return to_grob(m_nbrInds.central_grob_index());}
+
+	index_t size () const								{return m_nbrInds.size();}
+	Grob operator [] (const index_t i) const			{return neighbor (i);}
+	Grob neighbor (const index_t i) const				{return to_grob (m_nbrInds.neighbor(i));}
+
+	const Neighborhoods* neighborhoods() const			{return m_nbrInds.neighborhoods();}
+
+private:
+	Grob to_grob (const GrobIndex& gi) const;
+
+	NeighborIndices m_nbrInds;
+};
+
 
 }//	end of namespace lume
 
