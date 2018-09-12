@@ -38,8 +38,8 @@ class Neighborhoods;
 ////////////////////////////////////////////////////////////////////////////////
 class NeighborIndices {
 public:
-	using iterator_t = ArrayIterator <NeighborIndices, GrobIndex, index_t, GrobIndex*, GrobIndex>;
-	using const_iterator_t = ConstArrayIterator <NeighborIndices, GrobIndex, index_t, const GrobIndex*, GrobIndex>;
+	using iterator_t = ConstArrayIterator <NeighborIndices, GrobIndex, index_t, GrobIndex*, GrobIndex>;
+	using const_iterator_t = iterator_t;
 
 	NeighborIndices (const GrobIndex& grobIndex,
 			   		 const Neighborhoods* neighborhoods) :
@@ -53,11 +53,8 @@ public:
 	GrobIndex operator [] (const index_t i) const	{return neighbor (i);}
 	GrobIndex neighbor (const index_t i) const;
 
-	iterator_t begin()								{return iterator_t (*this, 0);}
-	iterator_t end()								{return iterator_t (*this, size());}
-
-	const_iterator_t begin() const					{return const_iterator_t (*this, 0);}
-	const_iterator_t end() const					{return const_iterator_t (*this, size());}
+	const_iterator_t begin() const					{return iterator_t (*this, 0);}
+	const_iterator_t end() const					{return iterator_t (*this, size());}
 
 	const Neighborhoods* neighborhoods() const		{return m_neighborhoods;}
 
@@ -70,8 +67,8 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 class NeighborGrobs {
 public:
-	using iterator_t = ArrayIterator <NeighborGrobs, Grob, index_t, Grob*, Grob>;
-	using const_iterator_t = ConstArrayIterator <NeighborGrobs, Grob, index_t, const Grob*, Grob>;
+	using iterator_t = ConstArrayIterator <NeighborGrobs, Grob, index_t, Grob*, Grob>;
+	using const_iterator_t = iterator_t;
 
 	NeighborGrobs (const GrobIndex& grobIndex,
 			   	   const Neighborhoods* neighborhoods) :
@@ -89,11 +86,8 @@ public:
 	Grob operator [] (const index_t i) const			{return neighbor (i);}
 	Grob neighbor (const index_t i) const				{return to_grob (m_nbrInds.neighbor(i));}
 
-	iterator_t begin()									{return iterator_t (*this, 0);}
-	iterator_t end()									{return iterator_t (*this, size());}
-
-	const_iterator_t begin() const						{return const_iterator_t (*this, 0);}
-	const_iterator_t end() const						{return const_iterator_t (*this, size());}
+	const_iterator_t begin() const						{return iterator_t (*this, 0);}
+	const_iterator_t end() const						{return iterator_t (*this, size());}
 
 	const Neighborhoods* neighborhoods() const			{return m_nbrInds.neighborhoods();}
 
