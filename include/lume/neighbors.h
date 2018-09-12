@@ -28,6 +28,7 @@
 #ifndef __H__lume_neighbors
 #define __H__lume_neighbors
 
+#include "array_iterator.h"
 #include "grob_index.h"
 
 namespace lume {
@@ -37,6 +38,9 @@ class Neighborhoods;
 ////////////////////////////////////////////////////////////////////////////////
 class NeighborIndices {
 public:
+	using iterator_t = ArrayIterator <NeighborIndices, GrobIndex, index_t, GrobIndex*, GrobIndex>;
+	using const_iterator_t = ConstArrayIterator <NeighborIndices, GrobIndex, index_t, const GrobIndex*, GrobIndex>;
+
 	NeighborIndices (const GrobIndex& grobIndex,
 			   		 const Neighborhoods* neighborhoods) :
 		m_grobIndex (grobIndex),
@@ -49,6 +53,12 @@ public:
 	GrobIndex operator [] (const index_t i) const	{return neighbor (i);}
 	GrobIndex neighbor (const index_t i) const;
 
+	iterator_t begin()								{return iterator_t (*this, 0);}
+	iterator_t end()								{return iterator_t (*this, size());}
+
+	const_iterator_t begin() const					{return const_iterator_t (*this, 0);}
+	const_iterator_t end() const					{return const_iterator_t (*this, size());}
+
 	const Neighborhoods* neighborhoods() const		{return m_neighborhoods;}
 
 private:
@@ -60,6 +70,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 class NeighborGrobs {
 public:
+	using iterator_t = ArrayIterator <NeighborGrobs, Grob, index_t, Grob*, Grob>;
+	using const_iterator_t = ConstArrayIterator <NeighborGrobs, Grob, index_t, const Grob*, Grob>;
+
 	NeighborGrobs (const GrobIndex& grobIndex,
 			   	   const Neighborhoods* neighborhoods) :
 		m_nbrInds (grobIndex, neighborhoods)
@@ -75,6 +88,12 @@ public:
 	index_t size () const								{return m_nbrInds.size();}
 	Grob operator [] (const index_t i) const			{return neighbor (i);}
 	Grob neighbor (const index_t i) const				{return to_grob (m_nbrInds.neighbor(i));}
+
+	iterator_t begin()									{return iterator_t (*this, 0);}
+	iterator_t end()									{return iterator_t (*this, size());}
+
+	const_iterator_t begin() const						{return const_iterator_t (*this, 0);}
+	const_iterator_t end() const						{return const_iterator_t (*this, size());}
 
 	const Neighborhoods* neighborhoods() const			{return m_nbrInds.neighborhoods();}
 

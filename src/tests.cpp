@@ -453,23 +453,25 @@ static void TestFillLowerDimNeighborOffsetMap (SPMesh mesh)
 namespace impl {
 	static void TestNeighborsAreSides (SPMesh mesh, const Grob& grob, const NeighborGrobs& nbrs)
 	{
-		for(size_t i = 0; i < nbrs.size(); ++i) {
-			Grob nbrGrob = nbrs[i];
+		index_t counter = 0;
+		for(auto nbrGrob : nbrs) {
 			COND_FAIL (grob.find_side (nbrGrob) == Grob::NO_SIDE,
-			           "Couldn't find " << i << "'th " << " neighbor of type "
+			           "Couldn't find " << counter << "'th " << " neighbor of type "
 			           << nbrGrob.desc().name()
 			           << " in the set of sides of a " << grob.desc().name());
+			++counter;
 		}
 	}
 
 	static void TestGrobIsSideOfNeighbors (SPMesh mesh, const Grob& grob, const NeighborGrobs& nbrs)
 	{
-		for(size_t i = 0; i < nbrs.size(); ++i) {
-			Grob nbrGrob = nbrs[i];
+		index_t counter = 0;
+		for(auto nbrGrob : nbrs) {
 			COND_FAIL (nbrGrob.find_side (grob) == Grob::NO_SIDE,
 			           "Provided grob (" << grob.desc().name()
-			           << ") is not a side of the " << i << "'th " << " neighbor of type "
+			           << ") is not a side of the " << counter << "'th " << " neighbor of type "
 			           << nbrGrob.desc().name());
+			++counter;
 		}
 	}
 

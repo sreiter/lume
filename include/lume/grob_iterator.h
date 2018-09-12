@@ -51,6 +51,11 @@ public:
 		return m_grob;
 	}
 
+	reference operator -> () const
+	{
+		return m_grob;
+	}
+
 	bool operator == (const GrobIterator& i) const
 	{
 		return	m_grob.global_corner_array () == i.m_grob.global_corner_array ()
