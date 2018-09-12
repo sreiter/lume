@@ -455,7 +455,7 @@ namespace impl {
 	{
 		index_t counter = 0;
 		for(auto nbrGrob : nbrs) {
-			COND_FAIL (grob.find_side (nbrGrob) == Grob::NO_SIDE,
+			COND_FAIL (grob.find_side (nbrGrob) == NO_INDEX,
 			           "Couldn't find " << counter << "'th " << " neighbor of type "
 			           << nbrGrob.desc().name()
 			           << " in the set of sides of a " << grob.desc().name());
@@ -467,7 +467,7 @@ namespace impl {
 	{
 		index_t counter = 0;
 		for(auto nbrGrob : nbrs) {
-			COND_FAIL (nbrGrob.find_side (grob) == Grob::NO_SIDE,
+			COND_FAIL (nbrGrob.find_side (grob) == NO_INDEX,
 			           "Provided grob (" << grob.desc().name()
 			           << ") is not a side of the " << counter << "'th " << " neighbor of type "
 			           << nbrGrob.desc().name());
@@ -527,6 +527,61 @@ static void TestNeighborhoods (SPMesh mesh)
 	impl::TestNeighborhoods (mesh, CELLS, VERTICES);
 	impl::TestNeighborhoods (mesh, CELLS, EDGES);
 	impl::TestNeighborhoods (mesh, CELLS, FACES);
+}
+
+
+namespace impl {
+	static void TestNeighborValence (NeighborIndices nbrs,
+	                                  const index_t expectedValence,
+	                                  const std::string& linkGrobSetName)
+	{
+		const index_t numNbrs = nbrs.size();
+		COND_FAIL (numNbrs != expectedValence,
+		           "Wrong number of " << nbrs.neighborhoods()->neighbor_grob_set().name()
+		           << " neighbors of a "
+		           << GrobName (nbrs.center_grob_index().grobType)
+		           << " linked by " << linkGrobSetName
+		           << ". Expected " << expectedValence << " but got " << numNbrs);
+	}
+
+	static void TestFaceNeighbors (GrobSet linkGrobSet)
+	{
+
+	//	in this mesh all faces have the same valence.
+	//	11 for connections via vertices, 2 for connections via edges
+		auto mesh = CreateMeshFromFile ("test_meshes/circle_12.ugx");
+
+		index_t expectedValence;
+		if 		(linkGrobSet.dim() == 0)	expectedValence = 11;
+		else if (linkGrobSet.dim() == 1)	expectedValence = 2;
+		else								FAIL ("This test only supports linkGrobSets of dimension 0 or 1");
+
+		Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, linkGrobSet, FACES));
+
+		for(auto grobType : GrobSet(FACES)) {
+			const index_t numGrobs = mesh->num (grobType);
+			for(index_t i = 0; i < numGrobs; ++i) {
+				const GrobIndex gi (grobType, i);
+
+			//	make sure that the valence of the current grob is fine
+				const NeighborIndices nbrInds = faceNbrs.neighbor_indices (gi);
+				impl::TestNeighborValence (nbrInds, expectedValence, linkGrobSet.name());
+
+			//	also make sure that all neighbors of that grob have the same valence again
+			//	(this is a special property of the considered mesh)
+				for(auto nbrGrobIndex : nbrInds) {
+					const NeighborIndices faceNbrsOfNbr = faceNbrs.neighbor_indices (nbrGrobIndex);
+					impl::TestNeighborValence (faceNbrsOfNbr, expectedValence, linkGrobSet.name());
+				}
+			}
+		}
+	}
+}// end of namespace impl
+
+static void TestFaceNeighbors ()
+{
+	impl::TestFaceNeighbors (VERTICES);
+	impl::TestFaceNeighbors (EDGES);
 }
 
 
@@ -660,7 +715,8 @@ bool RunTests ()
 								  	 "test_meshes/tris_and_quads.ugx",
 								  	 "test_meshes/elems_refined_rim.ugx",
 								  	 "test_meshes/tet_refined.ugx",
-								  	 "test_meshes/elems_refined.ugx"};
+								  	 "test_meshes/elems_refined.ugx",
+								  	 "test_meshes/circle_12.ugx"};
 
 	vector<TestMesh> topologyTestMeshes {TestMesh ("test_meshes/tris_and_quads.ugx"),
 								  		 TestMesh ("test_meshes/elems_refined_rim.ugx"),
@@ -679,6 +735,7 @@ bool RunTests ()
 	RUN_TEST_ON_MESHES(testStats, TestFillLowerDimNeighborOffsetMap, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
+	RUN_TEST(testStats, TestFaceNeighbors);
 	RUN_TEST(testStats, TestCreateBoundaryMesh);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "

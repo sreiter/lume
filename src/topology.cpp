@@ -87,7 +87,7 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
 {
-	VecSet (grobBaseIndsOut, 0, NUM_GROB_TYPES);
+	VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
 
 	index_t counter = 0;
 	

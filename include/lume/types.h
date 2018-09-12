@@ -28,12 +28,15 @@
 #ifndef __H__types
 #define __H__types
 
+#include <limits>
+
 namespace lume {
 
 using uint = unsigned int;
 using index_t = unsigned int;
-
 using real_t = float;
+
+static constexpr index_t NO_INDEX = std::numeric_limits<index_t>::max();
 
 }// end of namespace lume
 

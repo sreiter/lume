@@ -47,7 +47,7 @@ public:
 		m_neighborhoods (neighborhoods)
 	{}
 	
-	const GrobIndex& central_grob_index () const	{return m_grobIndex;}
+	const GrobIndex& center_grob_index () const		{return m_grobIndex;}
 
 	index_t size () const;
 	GrobIndex operator [] (const index_t i) const	{return neighbor (i);}
@@ -79,8 +79,8 @@ public:
 		m_nbrInds (nbrInds)
 	{}
 	
-	const GrobIndex& central_grob_index () const		{return m_nbrInds.central_grob_index();}
-	Grob central_grob () const							{return to_grob(m_nbrInds.central_grob_index());}
+	const GrobIndex& center_grob_index () const			{return m_nbrInds.center_grob_index();}
+	Grob center_grob () const							{return to_grob(m_nbrInds.center_grob_index());}
 
 	index_t size () const								{return m_nbrInds.size();}
 	Grob operator [] (const index_t i) const			{return neighbor (i);}

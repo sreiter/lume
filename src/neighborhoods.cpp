@@ -38,38 +38,35 @@ Neighborhoods ()
 {
 	for(index_t i = 0; i < MAX_GROB_SET_SIZE; ++i)
 		m_grobBaseInds[i] = 0;
+
+	m_centerGrobTypes = NO_GROB_SET;
+	m_neighborGrobTypes = NO_GROB_SET;
 }
+
 
 Neighborhoods::
 Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 {
-	refresh (mesh, centerGrobTypes, neighborGrobTypes);
-}
-
-
-void Neighborhoods::
-refresh ()
-{
-	if (m_mesh) {
-		m_nbrs.set_tuple_size (2);
-		impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
-		                       m_centerGrobTypes, m_neighborGrobTypes);
-	}
-	else {
-		m_nbrs.clear();
-		m_offsets.clear();
-		m_centerGrobTypes = NO_GROB_SET;
-		m_neighborGrobTypes = NO_GROB_SET;
-	}
-}
-
-void Neighborhoods::
-refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
-{
 	m_mesh = mesh;
 	m_centerGrobTypes = centerGrobTypes;
 	m_neighborGrobTypes = neighborGrobTypes;
-	refresh();
+
+	m_nbrs.set_tuple_size (2);
+	impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
+	                       m_centerGrobTypes, m_neighborGrobTypes);
+}
+
+
+Neighborhoods::
+Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
+{
+	m_mesh = mesh;
+	m_centerGrobTypes = grobTypes;
+	m_neighborGrobTypes = grobTypes;
+
+	m_nbrs.set_tuple_size (2);
+	impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
+	                       grobTypes, grobConnections);
 }
 
 

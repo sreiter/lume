@@ -159,7 +159,7 @@ void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
 	FillGrobToIndexMap (nbrGrobToIndexMap, nbrGrobBaseInds, mesh, nbrGrobSet);
 
 	index_t counter = 0;
-	VecSet (grobBaseIndsOut, 0, NUM_GROB_TYPES);
+	VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
 	for(auto grobType : grobSet) {
 		grobBaseIndsOut [grobType] = counter;
 		for(auto grob : mesh.grobs (grobType)) {
@@ -195,8 +195,83 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 		FillLowerDimNeighborMap (nbrMapOut, offsetsOut, grobBaseIndsOut, mesh, grobSet, nbrGrobSet);
 	}
 	else {
-		throw LumeError ("FillNeighborMap: Currently, nbr dimension == elem dimension is not supported");
+		throw LumeError ("FillNeighborMap: Please use a different overload of 'FillNeighborMap' "
+						 "for neighborhoods where the center- and neighbor-grob-sets are equal.");
 	}
+}
+
+
+template <class TIndexVector>
+void FillNeighborMap (TIndexVector& elemMapOut,
+                      TIndexVector& offsetsOut,
+                      index_t* grobBaseIndsOut,
+                      Mesh& mesh,
+                      GrobSet grobSet,
+                      const Neighborhoods& grobConnections)
+{
+	if (grobConnections.center_grob_set() == grobSet)
+		throw LumeError (std::string("Provided grobConnections have the wrong central_grob_type. "
+		                 "Expected something else than").append(grobSet.name())
+						 .append(", since this is also the type of the central and neighbored elements"));
+
+	if (grobConnections.neighbor_grob_set() != grobSet)
+		throw LumeError (std::string("Provided grobConnections have the wrong neighbor_grob_type. "
+		                 "Expected ").append(grobSet.name()).append (", provided: ")
+						 .append(grobConnections.neighbor_grob_set().name()));
+
+
+	const GrobSet linkSet = grobConnections.center_grob_set();
+	const index_t grobDim = grobSet.dim();
+	const index_t linkDim = linkSet.dim();
+
+	if (linkDim < grobDim) {
+		GrobHashMap <GrobIndex> sideGrobIndexMap;
+		FillGrobToIndexMap (sideGrobIndexMap, mesh, linkSet);
+
+		GrobHash grobHash;
+
+	//	count the number of neighbors of each grob and store them in the offset array
+	//	also fill the neighbor array
+		offsetsOut.clear ();
+		offsetsOut.resize (mesh.num (grobSet) + 1, 0);
+
+		elemMapOut.clear();
+
+		index_t counter = 0;
+		VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
+		for(auto grobType : grobSet) {
+			grobBaseIndsOut [grobType] = counter;
+			for(auto grob : mesh.grobs (grobType)) {
+				offsetsOut [counter] = elemMapOut.size() / 2;
+				grobHash.clear();
+
+				const index_t numSides = grob.num_sides(linkDim);
+				for(index_t iside = 0; iside < numSides; ++iside) {
+					const GrobIndex sideGrobIndex = sideGrobIndexMap.at (grob.side (linkDim, iside));
+
+					const NeighborIndices nbrs = grobConnections.neighbor_indices (sideGrobIndex);
+
+					for(auto nbrGrobInd : nbrs) {
+						const Grob nbrGrob (mesh.grob(nbrGrobInd));
+						if (nbrGrob == grob)
+							continue;
+
+						if (grobHash.insert (nbrGrob).second) {
+							elemMapOut.push_back (nbrGrobInd.grobType);
+							elemMapOut.push_back (nbrGrobInd.index);
+						}
+					}
+				}
+
+				++counter;
+			}
+		}
+		offsetsOut [counter] = elemMapOut.size() / 2;
+	}
+	else {
+		throw LumeError ("linkDim > grobDim currently not supported.");
+	}
+
 }
 
 }// end of namespace impl	

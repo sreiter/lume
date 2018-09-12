@@ -29,7 +29,6 @@
 #define __H__lume__grob
 
 #include <cstdint>
-#include <limits>
 #include <string>
 #include "types.h"
 
@@ -630,8 +629,6 @@ private:
  */
 class Grob {
 public:
-	static const index_t NO_SIDE = std::numeric_limits<index_t>::max();
-
 	Grob (grob_t grobType, const index_t* corners = nullptr) :
 		m_globCornerInds (corners),
 		m_cornerOffsets (impl::Array_16_4::ascending_order ()),
@@ -734,7 +731,7 @@ public:
 	}
 
 	/// returns the index of the side which corresponds to the given grob
-	/** if no such side was found, 'Grob::NO_SIDE' is returned.*/
+	/** if no such side was found, 'lume::NO_INDEX' is returned.*/
 	index_t find_side (const Grob& sideGrob) const
 	{
 		const index_t sideDim = sideGrob.dim();
@@ -743,7 +740,7 @@ public:
 			if (sideGrob == side (sideDim, iside))
 				return iside;
 		}
-		return numSides;
+		return NO_INDEX;
 	}
 
 private:
@@ -790,6 +787,8 @@ public:
 	{}
 
 	bool operator == (const GrobSet& gs) const			{return m_offset == gs.m_offset;}
+	bool operator != (const GrobSet& gs) const			{return m_offset != gs.m_offset;}
+
 	grob_set_t type () const							{return grob_set_t (impl::GROB_SET_DESCS [m_offset]);}
 	index_t dim () const								{return impl::GROB_SET_DESCS [m_offset + 1];}
 	const std::string& name () const					{return GrobSetName (type ());}

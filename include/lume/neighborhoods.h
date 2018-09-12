@@ -59,24 +59,21 @@ public:
 	 * \code
 	 * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, EDGES, FACES));
 	 * \endcode
-
+	 *
 	 * \param neighborGrobTypes	the following properties have to hold true:
 	 *									- `grobConnections.center_grob_types() != grobTypes`
-	 *									- `grobConnections.nbr_grob_types() == grobTypes`*/
+	 *									- `grobConnections.neighbor_grob_types() == grobTypes`*/
     Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
-
-    void refresh ();
-    void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
 
     SPMesh mesh ();
 
     NeighborIndices neighbor_indices (const GrobIndex gi) const;
     NeighborGrobs neighbor_grobs (const GrobIndex gi) const;
-    
+
     index_t num_neighbors (const GrobIndex gi) const;
 
-    GrobSet center_grob_types () const		{return m_centerGrobTypes;}
-    GrobSet nbr_grob_types () const			{return m_neighborGrobTypes;}
+    GrobSet center_grob_set () const	{return m_centerGrobTypes;}
+    GrobSet neighbor_grob_set () const	{return m_neighborGrobTypes;}
     
 private:
 	index_t base_index (const GrobIndex gi) const;
@@ -150,6 +147,17 @@ namespace impl {
                             Mesh& mesh,
                             GrobSet elemSet,
                             GrobSet assElemSet);
+
+	/**
+	 * \param grobBaseIndsOut Array of size `NUM_GROB_TYPES`.
+	 */
+	template <class TIndexVector>
+	void FillNeighborMap (TIndexVector& elemMapOut,
+                            TIndexVector& offsetsOut,
+                            index_t* grobBaseIndsOut,
+                            Mesh& mesh,
+                            GrobSet elemSet,
+                            const Neighborhoods& grobConnections);
 }
 
 }//	end of namespace lume
