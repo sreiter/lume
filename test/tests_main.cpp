@@ -26,7 +26,7 @@
 
 
 #include "lume/custom_exception.h"
-#include "lume/tests.h"
+#include "tests.h"
 
 #include <iostream>
 

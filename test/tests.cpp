@@ -29,9 +29,10 @@
 #include "lume/grob.h"
 #include "lume/file_io.h"
 #include "lume/parallel_for.h"
-#include "lume/tests.h"
 #include "lume/topology.h"
 #include "lume/neighborhoods.h"
+
+#include "tests.h"
 
 #include <iostream>
 #include <sstream>

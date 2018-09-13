@@ -39,7 +39,6 @@ set (sources
         src/neighborhoods.cpp
         src/neighbors.cpp
         src/normals.cpp
-        src/tests.cpp
         src/topology.cpp
     )
 
@@ -47,6 +46,7 @@ set (headers
      	include/lume/annex.h
      	include/lume/annex_storage.h
      	include/lume/array_annex.h
+     	include/lume/array_iterator.h
      	include/lume/custom_exception.h
      	include/lume/file_io.h
      	include/lume/grob.h
@@ -59,8 +59,8 @@ set (headers
      	include/lume/neighborhoods_impl.hpp
      	include/lume/neighbors.h
      	include/lume/normals.h
+     	include/lume/parallel_for.h
      	include/lume/subset_info_annex.h
-     	include/lume/tests.h
      	include/lume/topology.h
      	include/lume/topology_impl.h
      	include/lume/types.h
@@ -88,7 +88,12 @@ target_compile_features(lume PUBLIC cxx_range_for cxx_variadic_templates cxx_lam
 
 
 if (BUILD_LUME_TESTS)
-	file(COPY "test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
-	add_executable (lume_tests src/tests_main.cpp)
+	file(COPY "test/test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
+
+	set (testSources
+	     	test/tests.cpp
+	     	test/tests_main.cpp)
+
+	add_executable (lume_tests ${testSources})
 	target_link_libraries(lume_tests lume)
 endif (BUILD_LUME_TESTS)
