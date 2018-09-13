@@ -69,6 +69,10 @@ set (headers
 
 add_library (lume ${sources} ${headers})
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(lume Threads::Threads)
+
 target_include_directories(lume
     PUBLIC 
         $<INSTALL_INTERFACE:include>    
@@ -79,7 +83,8 @@ target_include_directories(lume
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidxml-1.13
 )
 
-target_compile_features(lume PUBLIC cxx_range_for cxx_variadic_templates)
+#currently not needed, but may be handy: cxx_return_type_deduction
+target_compile_features(lume PUBLIC cxx_range_for cxx_variadic_templates cxx_lambdas)
 
 
 if (BUILD_LUME_TESTS)

@@ -28,6 +28,7 @@
 #include "lume/custom_exception.h"
 #include "lume/grob.h"
 #include "lume/file_io.h"
+#include "lume/parallel_for.h"
 #include "lume/tests.h"
 #include "lume/topology.h"
 #include "lume/neighborhoods.h"
@@ -621,6 +622,52 @@ static void TestCreateBoundaryMesh ()
 }
 
 
+namespace impl {
+	template <int minSyncLoopSize>
+	void TestParallelFor (const size_t size)
+	{
+		vector <int> v;
+		v.resize(size, 0);
+
+		parallel_for <minSyncLoopSize> (0, v.size(), [&v] (size_t i) {v[i] = i;});
+
+		for(size_t i = 0; i < v.size(); ++i) {
+			COND_FAIL (i != v[i], "TestParallelFor <" << minSyncLoopSize
+			           << ">: " << i << "'th vector entry doesn't match expected value "
+			           << i << ". Instead it contains: " << v[i]);
+		}
+
+	//	now set them all to 0 and check again. Use container based implementation
+	//	with by-reference callback argument.
+		// auto l = [] (int& entry) {};
+		// int a;
+		// l(a);
+
+		parallel_for <minSyncLoopSize> (v, [] (int& entry) {entry = 0;});
+
+		for(size_t i = 0; i < v.size(); ++i) {
+			COND_FAIL (0 != v[i], "TestParallelFor <" << minSyncLoopSize
+			           << ">: " << i << "'th vector entry doesn't match expected value "
+			           << 0 << ". Instead it contains: " << v[i]);
+		}
+	}
+}// end of namespace impl
+
+static void TestParallelFor ()
+{
+	impl::TestParallelFor <0> (100);
+	impl::TestParallelFor <1> (100);
+	impl::TestParallelFor <2> (100);
+	impl::TestParallelFor <10> (100);
+	impl::TestParallelFor <15> (100);
+	impl::TestParallelFor <99> (100);
+	impl::TestParallelFor <100> (100);
+	impl::TestParallelFor <101> (100);
+	impl::TestParallelFor <200> (100);
+
+	parallel_for (0, 7, [] (int){});
+}
+
 
 namespace impl {
 	template <class ... TArgs1, class ... TArgs2>
@@ -737,6 +784,7 @@ bool RunTests ()
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
 	RUN_TEST(testStats, TestFaceNeighbors);
 	RUN_TEST(testStats, TestCreateBoundaryMesh);
+	RUN_TEST(testStats, TestParallelFor);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
 		 << testStats.num_failed() << " failed." << endl << endl;
