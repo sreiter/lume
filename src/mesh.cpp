@@ -25,7 +25,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "mesh.h"
+#include "lume/mesh.h"
 
 using namespace std;
 

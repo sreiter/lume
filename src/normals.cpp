@@ -25,9 +25,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "normals.h"
-#include "mesh.h"
-#include "vec_math_raw.h"
+#include "lume/normals.h"
+#include "lume/mesh.h"
+#include "lume/vec_math_raw.h"
 
 namespace lume {
 

@@ -25,8 +25,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "neighbors.h"
-#include "neighborhoods.h"
+#include "lume/neighbors.h"
+#include "lume/neighborhoods.h"
 
 namespace lume {
 

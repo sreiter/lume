@@ -25,8 +25,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "custom_exception.h"
-#include "tests.h"
+#include "lume/custom_exception.h"
+#include "lume/tests.h"
 
 #include <iostream>
 

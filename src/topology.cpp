@@ -25,12 +25,12 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "mesh.h"
-#include "topology.h"
-#include "vec_math_raw.h"
+#include "lume/mesh.h"
+#include "lume/topology.h"
+#include "lume/vec_math_raw.h"
 
 //todo: remove this include
-#include "neighborhoods.h"
+#include "lume/neighborhoods.h"
 
 using namespace std;
 

@@ -25,12 +25,12 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "custom_exception.h"
-#include "grob.h"
-#include "file_io.h"
-#include "tests.h"
-#include "topology.h"
-#include "neighborhoods.h"
+#include "lume/custom_exception.h"
+#include "lume/grob.h"
+#include "lume/file_io.h"
+#include "lume/tests.h"
+#include "lume/topology.h"
+#include "lume/neighborhoods.h"
 
 #include <iostream>
 #include <sstream>

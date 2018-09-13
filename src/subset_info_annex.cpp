@@ -25,7 +25,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "subset_info_annex.h"
+#include "lume/subset_info_annex.h"
 
 using namespace std;
 

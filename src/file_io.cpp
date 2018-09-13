@@ -29,10 +29,10 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "file_io.h"
-#include "subset_info_annex.h"
-#include "vec_math_raw.h"
-#include "topology.h"
+#include "lume/file_io.h"
+#include "lume/subset_info_annex.h"
+#include "lume/vec_math_raw.h"
+#include "lume/topology.h"
 
 #include "stl_reader/stl_reader.h"
 #include "rapidxml/rapidxml.hpp"

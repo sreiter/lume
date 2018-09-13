@@ -27,7 +27,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "grob.h"
+#include "lume/grob.h"
 
 using namespace std;
 

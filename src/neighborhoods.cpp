@@ -25,8 +25,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "neighborhoods.h"
-#include "topology.h"
+#include "lume/neighborhoods.h"
+#include "lume/topology.h"
 #include <limits>
 
 using namespace std;
