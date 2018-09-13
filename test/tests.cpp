@@ -624,17 +624,16 @@ static void TestCreateBoundaryMesh ()
 
 
 namespace impl {
-	template <int minSyncLoopSize>
-	void TestParallelFor (const size_t size)
+	void TestParallelFor (const size_t size, const int minBlockSize = 0)
 	{
 		vector <int> v;
 		v.resize(size, 0);
 
-		parallel_for <minSyncLoopSize> (0, v.size(), [&v] (size_t i) {v[i] = i;});
+		parallel_for (0, v.size(), [&v] (size_t i) {v[i] = i;}, minBlockSize);
 
 		for(size_t i = 0; i < v.size(); ++i) {
-			COND_FAIL (i != v[i], "TestParallelFor <" << minSyncLoopSize
-			           << ">: " << i << "'th vector entry doesn't match expected value "
+			COND_FAIL (i != v[i], "TestParallelFor (minBlockSize:" << minBlockSize
+			           << "): " << i << "'th vector entry doesn't match expected value "
 			           << i << ". Instead it contains: " << v[i]);
 		}
 
@@ -644,11 +643,11 @@ namespace impl {
 		// int a;
 		// l(a);
 
-		parallel_for <minSyncLoopSize> (v, [] (int& entry) {entry = 0;});
+		parallel_for (v, [] (int& entry) {entry = 0;}, minBlockSize);
 
 		for(size_t i = 0; i < v.size(); ++i) {
-			COND_FAIL (0 != v[i], "TestParallelFor <" << minSyncLoopSize
-			           << ">: " << i << "'th vector entry doesn't match expected value "
+			COND_FAIL (0 != v[i], "TestParallelFor (minBlockSize:" << minBlockSize
+			           << "): " << i << "'th vector entry doesn't match expected value "
 			           << 0 << ". Instead it contains: " << v[i]);
 		}
 	}
@@ -656,15 +655,15 @@ namespace impl {
 
 static void TestParallelFor ()
 {
-	impl::TestParallelFor <0> (100);
-	impl::TestParallelFor <1> (100);
-	impl::TestParallelFor <2> (100);
-	impl::TestParallelFor <10> (100);
-	impl::TestParallelFor <15> (100);
-	impl::TestParallelFor <99> (100);
-	impl::TestParallelFor <100> (100);
-	impl::TestParallelFor <101> (100);
-	impl::TestParallelFor <200> (100);
+	impl::TestParallelFor (100, 0);
+	impl::TestParallelFor (100, 1);
+	impl::TestParallelFor (100, 2);
+	impl::TestParallelFor (100, 10);
+	impl::TestParallelFor (100, 15);
+	impl::TestParallelFor (100, 99);
+	impl::TestParallelFor (100, 100);
+	impl::TestParallelFor (100, 101);
+	impl::TestParallelFor (100, 200);
 
 	parallel_for (0, 7, [] (int){});
 }

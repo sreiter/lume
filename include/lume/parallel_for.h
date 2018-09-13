@@ -101,25 +101,29 @@ struct call_with_ref_or_value {
  * \endcode
  *
  * In the code above, as many threads as the hardware supports are used and the
- * iteration is split among those threads.
+ * iteration squence is cut into corresponding blocks, so that each thread executes
+ * a sequential iteration on one block.
  *
  * If, however, the function that you pass to parallel_for does heavy work, or if
  * the runtime of that function varies depending on the current iterate, you may want
- * to specify the size of the blocks, which are processed by one thread. This can
- * be done specifying the template parameter `TMinBlockSize` when calling `parallel_for`:
+ * to schedule more threads than there are hardware threads. To this end you may
+ * specify the size of the blocks, which are processed by one thread. This can
+ * be done specifying the optional parameter `blockSize` when calling `parallel_for`.
+ * The maximum number of threads will be scheduled so that
+ * each thread operates on a block of at least size `blockSize`. An example:
  *
  * \code
  * void SomeHeavyFunction (shared_ptr<SomeClass>&);
  * // ...
  * vector<shared_ptr<SomeClass>> v;
- * parallel_for <1> (v, &SomeHeavyFunction)
+ * parallel_for (v, &SomeHeavyFunction, 1)
  * \endcode
  *
  * This would start one thread for each entry in `v`.
  *
  * \warning when using `parallel_for`, please be aware that serious issues may
  *			arise, if common data-types are accessed during a loop. The following
- *			code would could lead to serious problems and unexpected results:
+ *			code would lead to serious problems and unexpected results:
  *			\code
  *			// WARNING: BAD CODE WITH SERIOUS ISSUES
  *			vector v;
@@ -132,6 +136,11 @@ struct call_with_ref_or_value {
  * \param end 		Iterator to the end of a sequence or an integer value which denotes
  *					the value directly after the last value in the sequence.
  *
+ * \param container	An overload exists which takes a container instead of a pair
+ *					of begin/end iterators. Such a container has to feature methods
+ *					`iter_t begin()` and `iter_t end()`, where `iter_t` is an iterator
+ *					type compatible with `std::iterator_traits`.
+ *
  * \param func		If iterators have been passed to the method, then TFunc should
  *					have a signature compatible to `void (*)(T&)`, where `T`
  *					corresponds to the value type of the iterator.
@@ -139,14 +148,21 @@ struct call_with_ref_or_value {
  *					be `void (*)(T)`, where `T` is of the same integer type as the
  *					ones used to define the range.
  *
- * \param container	Some overloads exist which take a container instead of a pair
- *					of begin/end iterators. Such a container has to feature methods
- *					`iter_t begin()` and `iter_t end()`, where `iter_t` is an iterator
- *					type compatible with `std::iterator_traits`.
+ * \param blockSize	(optional, default = 0) defines the minimal size of an
+ *					iteration block which shall be processed by one thread.
+ *					The maximum number of threads will be scheduled so that each
+ *					thread operates on a block of the provided sequence which has
+ *					at least size `blockSize`. 
+ *					If not specified or 0, the block size will be determined
+ *					automatically, so that each hardware thread operates on
+ *					one part of the sequence.
  * \{
  */
-template <int TMinBlockSize, class TRandAccIter1, class TRandAccIter2, class TFunc>
-void parallel_for (TRandAccIter1 begin, TRandAccIter2 end, const TFunc& func)
+template <class TRandAccIter1, class TRandAccIter2, class TFunc>
+void parallel_for (TRandAccIter1 begin,
+                   TRandAccIter2 end,
+                   const TFunc& func,
+                   const int blockSize = 0)
 {
 	using iter_t = TRandAccIter1;
 
@@ -154,8 +170,8 @@ void parallel_for (TRandAccIter1 begin, TRandAccIter2 end, const TFunc& func)
 	if(len <= 0)
 		return;
 
-	const size_t numBlocks = TMinBlockSize ?
-							 std::max <size_t> (1, static_cast<size_t> (len / TMinBlockSize)) :
+	const size_t numBlocks = blockSize ?
+							 std::max <size_t> (1, static_cast<size_t> (len / blockSize)) :
 							 std::max<int> (1, std::thread::hardware_concurrency());
 
 	std::vector <std::future<void>> futures;
@@ -184,22 +200,11 @@ void parallel_for (TRandAccIter1 begin, TRandAccIter2 end, const TFunc& func)
 		f.wait();
 }
 
-template <class TRandAccIter1, class TRandAccIter2, class TFunc>
-void parallel_for (TRandAccIter1 begin, TRandAccIter2 end, const TFunc& func)
-{
-	parallel_for <0> (begin, end, func);
-}
-
-template <int minSyncLoopSize, class TRandAccContainer, class TFunc>
-void parallel_for (TRandAccContainer& container, const TFunc& func)
-{
-	parallel_for <minSyncLoopSize> (container.begin(), container.end(), func);
-}
 
 template <class TRandAccContainer, class TFunc>
-void parallel_for (TRandAccContainer& container, const TFunc& func)
+void parallel_for (TRandAccContainer& container, const TFunc& func, const int blockSize = 0)
 {
-	parallel_for (container.begin(), container.end(), func);
+	parallel_for (container.begin(), container.end(), func, blockSize);
 }
 /** \} */
 
