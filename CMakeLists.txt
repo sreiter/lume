@@ -39,6 +39,7 @@ set (sources
         src/neighborhoods.cpp
         src/neighbors.cpp
         src/normals.cpp
+        src/rim_mesh.cpp
         src/topology.cpp
     )
 
@@ -60,6 +61,7 @@ set (headers
      	include/lume/neighbors.h
      	include/lume/normals.h
      	include/lume/parallel_for.h
+     	include/lume/rim_mesh.h
      	include/lume/subset_info_annex.h
      	include/lume/topology.h
      	include/lume/topology_impl.h

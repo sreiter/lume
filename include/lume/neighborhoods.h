@@ -45,8 +45,11 @@ public:
     Neighborhoods ();
 
     /// Creates a neighborhood between grobs of different type and dimension
-    /** \note it has to hold true: centerGrobTypes != neighborGrobTypes*/
+    /** \note it has to hold true: centerGrobTypes != neighborGrobTypes
+     * \{ */
     Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+    // void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+    /** \} */
 
 	/// Creates a neighborhood between grobs of the same type using the specified grobConnections as links
 	/** To create a neighborhoods between faces, where two faces are neighbors if
@@ -62,8 +65,11 @@ public:
 	 *
 	 * \param neighborGrobTypes	the following properties have to hold true:
 	 *									- `grobConnections.center_grob_types() != grobTypes`
-	 *									- `grobConnections.neighbor_grob_types() == grobTypes`*/
+	 *									- `grobConnections.neighbor_grob_types() == grobTypes`
+	 * \{ */
     Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
+	// void refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
+	/** \} */
 
     SPMesh mesh ();
 

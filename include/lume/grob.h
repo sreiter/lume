@@ -796,6 +796,7 @@ public:
 	grob_t grob_type (const index_t i) const			{return grob_t (impl::GROB_SET_DESCS [m_offset + 3 + i]);}
 
 	grob_set_t side_set (const index_t sideDim) const	{return grob_set_t(impl::GROB_SET_DESCS [m_offset + 3 + size() + sideDim]);}
+	grob_set_t side_set () const						{return side_set (dim() - 1);}
 
 	iterator begin () const		{return iterator (0, this);}
 	iterator end () const		{return iterator (size(), this);}

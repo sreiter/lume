@@ -639,10 +639,6 @@ namespace impl {
 
 	//	now set them all to 0 and check again. Use container based implementation
 	//	with by-reference callback argument.
-		// auto l = [] (int& entry) {};
-		// int a;
-		// l(a);
-
 		parallel_for (v, [] (int& entry) {entry = 0;}, minBlockSize);
 
 		for(size_t i = 0; i < v.size(); ++i) {
