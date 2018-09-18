@@ -32,25 +32,32 @@
 
 namespace lume {
 
-void CollectRimSides (SPMesh rimMeshOut,
-                      SPMesh mesh,
+void CreateRimMesh (SPMesh rimMeshOut,
+                    SPMesh mesh,
+                    GrobSet grobSet,
+                    const std::function <bool (const GrobIndex& gi)>&
+                    	visFunc = [](const GrobIndex&){return true;},
+                    const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>&
+                      	gotRimGrobFunc = [](const GrobIndex&, const GrobIndex&){});
+
+
+void CreateRimMesh (SPMesh rimMeshOut,
+                    SPMesh mesh,
+                    GrobSet grobSet,
+                    const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc);
+
+SPMesh CreateRimMesh (SPMesh mesh,
                       GrobSet grobSet,
-                      const std::function <bool (const GrobIndex& gi)>& visFunc,
+                      const std::function <bool (const GrobIndex& gi)>&
+                      	  visFunc = [](const GrobIndex&){return true;},
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>&
+                          gotRimGrobFunc = [](const GrobIndex&, const GrobIndex&){});
+
+
+SPMesh CreateRimMesh (SPMesh mesh,
+                      GrobSet grobSet,
                       const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc);
 
-void CollectRimSides (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet,
-                      const std::function <bool (const GrobIndex& gi)>& visFunc);
-
-void CollectRimSides (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc);
-
-void CollectRimSides (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet);
 
 }//	end of namespace lume
 

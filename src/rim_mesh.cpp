@@ -64,27 +64,33 @@ void CreateRimMesh (SPMesh rimMeshOut,
 void CreateRimMesh (SPMesh rimMeshOut,
                       SPMesh mesh,
                       GrobSet grobSet,
-                      const std::function <bool (const GrobIndex& gi)>& visFunc)
-{
-	CreateRimMesh (rimMeshOut, mesh, grobSet, visFunc,
-	                 [](const GrobIndex&, const GrobIndex&){});
-}
-
-void CreateRimMesh (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet,
                       const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
 {
 	CreateRimMesh (rimMeshOut, mesh, grobSet, [](const GrobIndex&){return true;},
 	                 gotRimGrobFunc);
 }
 
-void CreateRimMesh (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet)
+
+SPMesh CreateRimMesh (SPMesh mesh,
+                      GrobSet grobSet,
+                      const std::function <bool (const GrobIndex& gi)>& visFunc,
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
 {
-	CreateRimMesh (rimMeshOut, mesh, grobSet, [](const GrobIndex&){return true;},
-	                 [](const GrobIndex&, const GrobIndex&){});
+	auto rimMesh = std::make_shared <Mesh> ();
+	CreateRimMesh (rimMesh, mesh, grobSet, visFunc, gotRimGrobFunc);
+	return rimMesh;
 }
+
+
+SPMesh CreateRimMesh (SPMesh mesh,
+                      GrobSet grobSet,
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
+{
+	auto rimMesh = std::make_shared <Mesh> ();
+	CreateRimMesh (rimMesh, mesh, grobSet, gotRimGrobFunc);
+	return rimMesh;
+}
+
+
 
 }//	end of namespace lume

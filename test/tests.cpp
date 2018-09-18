@@ -31,6 +31,7 @@
 #include "lume/parallel_for.h"
 #include "lume/topology.h"
 #include "lume/neighborhoods.h"
+#include "lume/rim_mesh.h"
 
 #include "tests.h"
 
@@ -588,20 +589,20 @@ static void TestFaceNeighbors ()
 
 
 namespace impl {
-	static void TestCreateBoundaryMesh (const string& meshName, const string& rimMeshName)
+	static void TestCreateRimMesh (const string& meshName, const string& rimMeshName)
 	{
 		try {
 			SPMesh mesh = CreateMeshFromFile (meshName);
-			SPMesh bndMesh = CreateBoundaryMesh (mesh, CELLS);
+			SPMesh rimMesh = CreateRimMesh (mesh, CELLS);
 
-			SPMesh rimMesh = CreateMeshFromFile (rimMeshName);
-			COND_FAIL (bndMesh->num (TRI) != rimMesh->num (TRI),
-			           "Mismatch between number of triangles in created boundary mesh ("
-			           << bndMesh->num (TRI) << ") and loaded rim mesh (" << rimMesh->num (TRI) << ")");
+			SPMesh loadedRimMesh = CreateMeshFromFile (rimMeshName);
+			COND_FAIL (rimMesh->num (TRI) != loadedRimMesh->num (TRI),
+			           "Mismatch between number of triangles in created rim mesh ("
+			           << rimMesh->num (TRI) << ") and loaded rim mesh (" << loadedRimMesh->num (TRI) << ")");
 
-			COND_FAIL (bndMesh->num (QUAD) != rimMesh->num (QUAD),
-			           "Mismatch between number of quadrilaterals in created boundary mesh ("
-			           << bndMesh->num (QUAD) << ") and loaded rim mesh (" << rimMesh->num (QUAD) << ")");
+			COND_FAIL (rimMesh->num (QUAD) != loadedRimMesh->num (QUAD),
+			           "Mismatch between number of quadrilaterals in created rim mesh ("
+			           << rimMesh->num (QUAD) << ") and loaded rim mesh (" << loadedRimMesh->num (QUAD) << ")");
 
 			cout << "    ok: '" << meshName << "' and '" << rimMeshName << "'" << endl;
 		}
@@ -612,13 +613,13 @@ namespace impl {
 }// end of namespace impl
 
 
-static void TestCreateBoundaryMesh ()
+static void TestCreateRimMesh ()
 {
-	impl::TestCreateBoundaryMesh ("test_meshes/tet_refined.ugx",
-	                        	  "test_meshes/tet_refined_rim.ugx");
+	impl::TestCreateRimMesh ("test_meshes/tet_refined.ugx",
+	                       	 "test_meshes/tet_refined_rim.ugx");
 
-	impl::TestCreateBoundaryMesh ("test_meshes/elems_refined.ugx",
-	                        	  "test_meshes/elems_refined_rim.ugx");
+	impl::TestCreateRimMesh ("test_meshes/elems_refined.ugx",
+	                       	 "test_meshes/elems_refined_rim.ugx");
 
 }
 
@@ -779,7 +780,7 @@ bool RunTests ()
 	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologyTestMeshes);
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
 	RUN_TEST(testStats, TestFaceNeighbors);
-	RUN_TEST(testStats, TestCreateBoundaryMesh);
+	RUN_TEST(testStats, TestCreateRimMesh);
 	RUN_TEST(testStats, TestParallelFor);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
