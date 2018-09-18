@@ -66,11 +66,6 @@ public:
 		return d;
 	}
 
-	void set_annex (const TKey& id, const value_t& annex)
-	{
-		m_annexMap[id] = annex;
-	}
-
 	const_value_t annex (const TKey& id) const
 	{
 		auto i = m_annexMap.find (id);
@@ -78,6 +73,29 @@ public:
 			throw NoSuchAnnexError (std::to_string (id));
 		            
 		return i->second;
+	}
+
+	template <class TConcreteType>
+	value_t optional_annex (const TKey& id)
+	{
+		auto i = m_annexMap.find (id);
+		if (i == m_annexMap.end())
+			return std::shared_ptr<TConcreteType>();
+		return i->second;
+	}
+
+	template <class TConcreteType>
+	const_value_t optional_annex (const TKey& id) const
+	{
+		auto i = m_annexMap.find (id);
+		if (i == m_annexMap.end())
+			return std::shared_ptr<const TConcreteType>();
+		return i->second;
+	}
+
+	void set_annex (const TKey& id, const value_t& annex)
+	{
+		m_annexMap[id] = annex;
 	}
 
 	void remove_annex (const TKey& id)
