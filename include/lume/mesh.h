@@ -224,7 +224,7 @@ public:
 
 	template <class T>
 	std::shared_ptr <const T>
-	optional_annex (const AnnexKey& key) const					{return std::dynamic_pointer_cast<const T> (m_annexStorage.optional_annex (key));}
+	optional_annex (const AnnexKey& key) const					{return std::dynamic_pointer_cast<const T> (m_annexStorage.optional_annex <T> (key));}
 
 	template <class T>
 	std::shared_ptr <const T>
