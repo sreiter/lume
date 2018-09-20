@@ -65,19 +65,19 @@ TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs) :
     }
 }
 
-std::pair <index_t, grob_t> TotalToGrobIndexMap::
+GrobIndex TotalToGrobIndexMap::
 operator () (const index_t ind) const
 {
     for(size_t i = 0; i < m_grobSet.size(); ++i) {
       	if (ind >= m_baseInds [i] && ind < m_baseInds [i+1])
-        	return make_pair (ind - m_baseInds[i], m_grobSet.grob_type(index_t(i)));
+        	return GrobIndex(m_grobSet.grob_type(index_t(i)), ind - m_baseInds[i]);
     }
 
     throw LumeError (string("TotalToGrobIndexMap: Couldn't map index ").
     					append (to_string(ind)).
     					append (" to GrobSet ").
     					append (m_grobSet.name()));
-    return make_pair <index_t, grob_t> (0, NO_GROB);
+    return GrobIndex (NO_GROB, 0);
 }
 
 

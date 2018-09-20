@@ -41,17 +41,25 @@ public:
 
 	AnnexTable (SPMesh mesh, const std::string& annexName, GrobSet grobSet, bool createMissing)
 	{
+		m_mesh = mesh;
 		for(auto gt : grobSet) {
-			if (createMissing || mesh->has_annex <TAnnex> (annexName))
-				m_annexes [gt] = mesh->annex <TAnnex> (annexName);
+			if (createMissing || mesh->has_annex <TAnnex> (annexName, gt))
+				m_annexes [gt] = mesh->annex <TAnnex> (annexName, gt);
 		}
 	}
 
 	SPTAnnex annex (const grob_t grobType)			{return m_annexes [grobType];}
 	CSPTAnnex annex (const grob_t grobType) const	{return m_annexes [grobType];}
 
+	SPTAnnex* annexes ()							{return m_annexes;}
+	const SPTAnnex* annexes () const				{return m_annexes;}
+
+	SPMesh mesh ()			{return m_mesh;}
+	CSPMesh mesh () const	{return m_mesh;}
+
 private:
-	SPTAnnex m_annexes [NUM_GROB_TYPES];
+	SPMesh		m_mesh;
+	SPTAnnex 	m_annexes [NUM_GROB_TYPES];
 };
 
 
@@ -71,6 +79,21 @@ public:
 
 	auto& operator [] (const GrobIndex& gi)				{return (*m_annexTable.annex (gi.grobType))[gi.index];}
 	const auto& operator [] (const GrobIndex& gi) const	{return (*m_annexTable.annex (gi.grobType))[gi.index];}
+
+	void resize_annexes_to_match_grobs (const index_t tupleSize = 0)
+	{
+		auto annexes = m_annexTable.annexes();
+		SPMesh mesh = m_annexTable.mesh();
+
+		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
+			if (annexes[i]) {
+				auto& a = annexes[i];
+				if (tupleSize > 0)
+					a->set_tuple_size (tupleSize);
+				a->resize (mesh->num (static_cast<grob_t>(i)) * a->tuple_size());
+			}
+		}
+	}
 
 private:
 	AnnexTable <TAnnex>	m_annexTable;

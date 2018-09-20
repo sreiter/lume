@@ -29,6 +29,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include "lume/annex_table.h"
 #include "lume/file_io.h"
 #include "lume/subset_info_annex.h"
 #include "lume/vec_math_raw.h"
@@ -224,7 +225,7 @@ static SubsetInfoAnnex::Color ParseColor (char* colStr)
 
 
 template <class T>
-static void ParseElementIndicesToArrayAnnex (Mesh& mesh,
+static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
                                             const string& annexName,
                                             xml_node<>* node,
                                             const T value,
@@ -234,41 +235,22 @@ static void ParseElementIndicesToArrayAnnex (Mesh& mesh,
 	
 	// indices in the node are referring to all elements of one dimension.
 	// we have to map them to indices of individual grob types.
-	TotalToGrobIndexMap indMap (mesh, gs);
+	TotalToGrobIndexMap indMap (*mesh, gs);
 
-	// For fast access, we store the raw pointers to data arrays of individual
-	// grob types in an array
-	T* rawData [NUM_GROB_TYPES];
-	VecSet (rawData, NUM_GROB_TYPES, nullptr);
-
-	// allocate data arrays and set up the rawData array
-	for(auto gt : gs) {
-		if (gt != VERTEX && !mesh.has (gt))
-			continue;
-
-		auto& arrayAnnex = *mesh.annex <ArrayAnnex<T>> (annexName, gt);
-
-		if (gt == VERTEX)
-			arrayAnnex.resize (mesh.coords ()->num_tuples());
-		else
-			arrayAnnex.resize (mesh.num (gt));
-
-		VecSet (UNPACK_DS(arrayAnnex), 0);
-		rawData [gt] = arrayAnnex.raw_ptr();
-	}
+	ArrayAnnexTable <ArrayAnnex<T>> annexTable (mesh, annexName, gs, true);
+	annexTable.resize_annexes_to_match_grobs (1);
 
 	// parse the node values and assign indices
 	char* p = strtok (node->value(), " ");
 	while (p) {
 		const auto ig = indMap (index_t (atoi(p)));
-		rawData [ig.second] [ig.first] = value;
+		annexTable [ig] = value;
 		p = strtok (nullptr, " ");
 	}
-
 }
 
 template <class T>
-static void ParseElementIndicesToArrayAnnex (Mesh& mesh,
+static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
                                             const string& annexName,
                                             xml_node<>* node,
                                             const T value)
@@ -402,7 +384,7 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 				if (xml_attribute<>* attrib = subsetNode->first_attribute("color"))
 					props.color = ParseColor (attrib->value());
 
-				ParseElementIndicesToArrayAnnex (*mesh, siName, subsetNode, subsetIndex);
+				ParseElementIndicesToArrayAnnex (mesh, siName, subsetNode, subsetIndex);
 
 				subsetInfo->add_subset (std::move (props));
 				++subsetIndex;

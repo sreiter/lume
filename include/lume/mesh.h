@@ -99,7 +99,19 @@ public:
 	}
 
 
-	// INDICES
+	// GRID OBJECTS
+	void clear_grobs ()
+	{
+		const auto grobTypes = grob_types();
+		for(auto grobType : grobTypes)
+			grobs (grobType).clear();
+	}
+
+	void insert (const Grob& grob)
+	{
+		grobs (grob.grob_type()).push_back (grob);
+	}
+
 	GrobArray& grobs (const grob_t grobType)
 	{
 		return *m_grobArrays [grobType];
@@ -191,7 +203,7 @@ public:
 	bool has_annex (const std::string& name, grob_t gt) const		{return has_annex (AnnexKey (name, gt));}
 
 	template <class T>
-	bool has_annex (const AnnexKey& key) const						{return m_annexStorage.has_annex (key) && annex <T> (key);}
+	bool has_annex (const AnnexKey& key) const						{return m_annexStorage.has_annex (key);}
 
 	template <class T>
 	bool has_annex (const std::string& name, grob_t gt) const		{return has_annex <T> (AnnexKey (name, gt));}

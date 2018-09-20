@@ -77,6 +77,7 @@ public:
 		real_t m_data[4];
 	};
 
+
 	struct SubsetProperties {
 		SubsetProperties () : name ("_default_"), color (1.f, 1.f, 1.f, 1.f), visible (true) {}
 		SubsetProperties (const std::string& _name, const Color& _color, const bool _visible) :
@@ -91,6 +92,7 @@ public:
 	};
 
 	
+	SubsetInfoAnnex();
 	SubsetInfoAnnex(const std::string& name);
 	virtual ~SubsetInfoAnnex();
 
@@ -102,9 +104,12 @@ public:
 	void add_subset (const SubsetProperties& p);
 	void add_subset (SubsetProperties&& p);
 
-	void set_subset (const size_t i, const SubsetProperties& p);
-	void set_subset (const size_t i, SubsetProperties&& p);
+	void set_subset (const index_t i, const SubsetProperties& p);
+	void set_subset (const index_t i, SubsetProperties&& p);
 
+
+	SubsetProperties& subset_properties (const index_t i)				{return m_subsetProps.at (i);}
+	const SubsetProperties& subset_properties (const index_t i) const	{return m_subsetProps.at (i);}
 
 	using ImGuiExecutor = void (*) (std::vector<SubsetProperties>&);
 	static void set_imgui_executor (ImGuiExecutor exec)	{s_imguiExecutor = exec;}

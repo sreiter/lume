@@ -51,7 +51,7 @@ namespace impl {
 class TotalToGrobIndexMap {
 public:
   TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs);
-  std::pair <index_t, grob_t> operator () (const index_t ind) const;
+  GrobIndex operator () (const index_t ind) const;
 
 private:
   index_t m_baseInds [MAX_GROB_SET_SIZE + 1];

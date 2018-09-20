@@ -34,6 +34,10 @@ namespace lume {
 SubsetInfoAnnex::ImGuiExecutor SubsetInfoAnnex::s_imguiExecutor = nullptr;
 
 SubsetInfoAnnex::
+SubsetInfoAnnex()
+{}
+
+SubsetInfoAnnex::
 SubsetInfoAnnex(const std::string& name) :
 	m_name (name)
 {}
@@ -68,7 +72,7 @@ add_subset (SubsetProperties&& p)
 
 
 void SubsetInfoAnnex::
-set_subset (const size_t i, const SubsetProperties& p)
+set_subset (const index_t i, const SubsetProperties& p)
 {
 	if (m_subsetProps.size() <= i)
 		m_subsetProps.resize (i+1);
@@ -76,7 +80,7 @@ set_subset (const size_t i, const SubsetProperties& p)
 }
 
 void SubsetInfoAnnex::
-set_subset (const size_t i, SubsetProperties&& p)
+set_subset (const index_t i, SubsetProperties&& p)
 {
 	if (m_subsetProps.size() <= i)
 		m_subsetProps.resize (i+1);
