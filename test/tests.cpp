@@ -32,6 +32,7 @@
 #include "lume/topology.h"
 #include "lume/neighborhoods.h"
 #include "lume/rim_mesh.h"
+#include "lume/subset_info_annex.h"
 
 #include "tests.h"
 
@@ -624,6 +625,46 @@ static void TestCreateRimMesh ()
 }
 
 
+
+static void TestSubsets ()
+{
+	const string subsetInfoName = "defSH";
+	auto mesh = CreateMeshFromFile ("test_meshes/circle_with_subsets.ugx");
+
+	COND_FAIL (!mesh->has_annex <SubsetInfoAnnex> (subsetInfoName, NO_GROB),
+	           "'defSH' SubsetInfoAnnex missing");
+	vector<index_t> numInds (6, 0);
+
+	for(auto grobType : GrobSet(FACES)) {
+		COND_FAIL (!mesh->has_annex <IndexArrayAnnex> (subsetInfoName, grobType),
+		           "Missing IndexArrayAnnex '" << subsetInfoName << "' at grobs "
+		           "of type " << GrobName (grobType));
+
+		auto& subsetInds = *mesh->annex <IndexArrayAnnex> (subsetInfoName, grobType);
+
+		auto& grobs = mesh->grobs (grobType);
+		COND_FAIL (grobs.size() != subsetInds.size(),
+		           "Number of grobs and number of subset indices do not match for "
+		           "grob type " << GrobName (grobType));
+
+		for(index_t i = 0; i < subsetInds.size(); ++i) {
+			COND_FAIL (subsetInds[i] >= numInds.size(), "Invalid subset index encountered: " << subsetInds[i]);
+			++numInds [subsetInds[i]];
+		}
+	}
+
+	vector <index_t> numIndsExpected {0, 3, 3, 3, 3, 12};
+	COND_FAIL (numInds.size() != numIndsExpected.size(), "Bad test setup");
+
+	for(size_t i = 0; i < numInds.size(); ++i) {
+		COND_FAIL (numInds [i] != numIndsExpected[i],
+		           "The number of subset indices (" << numInds[i] << ") of subset "
+		           << i << " doesn't match the expected number " << numIndsExpected[i]);
+	}
+
+}
+
+
 namespace impl {
 	void TestParallelFor (const size_t size, const int minBlockSize = 0)
 	{
@@ -781,6 +822,7 @@ bool RunTests ()
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
 	RUN_TEST(testStats, TestFaceNeighbors);
 	RUN_TEST(testStats, TestCreateRimMesh);
+	RUN_TEST(testStats, TestSubsets);
 	RUN_TEST(testStats, TestParallelFor);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "

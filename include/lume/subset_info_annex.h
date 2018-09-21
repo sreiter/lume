@@ -55,6 +55,16 @@ public:
 			m_data[3] = a;
 		}
 
+		bool operator == (const Color& c) const
+		{
+			return (r() == c.r() && g() == c.g() && b() == c.b() && a() == c.a());
+		}
+
+		bool operator != (const Color& c) const
+		{
+			return !this->operator == (c);
+		}
+
 		real_t& operator [] (const index_t i)		{return m_data [i];}
 		real_t operator [] (const index_t i) const	{return m_data [i];}
 
@@ -111,10 +121,12 @@ public:
 	SubsetProperties& subset_properties (const index_t i)				{return m_subsetProps.at (i);}
 	const SubsetProperties& subset_properties (const index_t i) const	{return m_subsetProps.at (i);}
 
-	using ImGuiExecutor = void (*) (std::vector<SubsetProperties>&);
+	index_t num_subset_properties () const								{return static_cast<index_t> (m_subsetProps.size());}
+
+	using ImGuiExecutor = void (*) (SubsetInfoAnnex*);
 	static void set_imgui_executor (ImGuiExecutor exec)	{s_imguiExecutor = exec;}
 
-	void do_imgui () override							{if(s_imguiExecutor) s_imguiExecutor (m_subsetProps);}
+	void do_imgui () override							{if(s_imguiExecutor) s_imguiExecutor (this);}
 	bool has_imgui () const override					{return s_imguiExecutor != nullptr;}
 
 private:
