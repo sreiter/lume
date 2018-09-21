@@ -77,8 +77,8 @@ public:
 	SPTAnnex annex (const grob_t grobType)			{return m_annexTable.annex (grobType);}
 	CSPTAnnex annex (const grob_t grobType) const	{return m_annexTable.annex (grobType);}
 
-	auto& operator [] (const GrobIndex& gi)				{return (*m_annexTable.annex (gi.grobType))[gi.index];}
-	const auto& operator [] (const GrobIndex& gi) const	{return (*m_annexTable.annex (gi.grobType))[gi.index];}
+	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return (*m_annexTable.annex (gi.grobType))[gi.index];}
+	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return (*m_annexTable.annex (gi.grobType))[gi.index];}
 
 	void resize_annexes_to_match_grobs (const index_t tupleSize = 0)
 	{

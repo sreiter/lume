@@ -88,7 +88,8 @@ target_include_directories(lume
 target_compile_features(lume PUBLIC cxx_range_for
                         			cxx_variadic_templates
 									cxx_lambdas
-									cxx_return_type_deduction)
+									#cxx_return_type_deduction
+									)
 
 
 if (BUILD_LUME_TESTS)
