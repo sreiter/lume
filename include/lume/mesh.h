@@ -107,9 +107,24 @@ public:
 			grobs (grobType).clear();
 	}
 
+	void clear (const GrobSet grobSet)
+	{
+		for(auto grobType : grobSet) {
+			if (has (grobType))
+				grobs (grobType).clear();
+		}
+	}
+
 	void insert (const Grob& grob)
 	{
 		grobs (grob.grob_type()).push_back (grob);
+	}
+
+	template <class iter_t>
+	void insert (const iter_t begin, const iter_t end)
+	{
+		for (iter_t i = begin; i != end; ++i)
+			insert (*i);
 	}
 
 	GrobArray& grobs (const grob_t grobType)
