@@ -224,6 +224,19 @@ static SubsetInfoAnnex::Color ParseColor (char* colStr)
 }
 
 
+// ugx uses a different order of 3d elements
+static std::vector <grob_t>
+UGXGrobTypeArrayFromGrobSet (const GrobSet& gs)
+{
+	switch (gs.dim()) {
+		case 0: return {VERTEX};
+		case 1: return {EDGE};
+		case 2: return {TRI, QUAD};
+		case 3: return {TET, HEX, PRISM, PYRA};
+		default: throw LumeError ("UGXGrobTypeArrayFromGrobSet: Unsupported grob set dimension");
+	}
+}
+
 template <class T>
 static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
                                             const string& annexName,
@@ -235,7 +248,7 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	
 	// indices in the node are referring to all elements of one dimension.
 	// we have to map them to indices of individual grob types.
-	TotalToGrobIndexMap indMap (*mesh, gs);
+	TotalToGrobIndexMap indMap (*mesh, UGXGrobTypeArrayFromGrobSet (gs));
 
 	ArrayAnnexTable <ArrayAnnex<T>> annexTable (mesh, annexName, gs, true);
 	annexTable.resize_annexes_to_match_grobs (1);
