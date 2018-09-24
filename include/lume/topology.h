@@ -100,13 +100,12 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 /** \note It is assumed, that `cornerInds` holds the corner indices of one or
 *			    more *grobs* of the same `grobType` in sequential order.
 * \note  `sideHashInOut is not cleared during this function. It is thus possible
-*		     call this method repeatedly on different `cornerInds` and `grobType` to
+*		     call this method repeatedly on different grobSets to
 *		     find all sides of a hybrid grid.*/
 index_t FindUniqueSides (GrobHash& sideHashInOut,
-                        const index_t* cornerInds,
-                        const index_t numCornerInds,
-                        const grob_t grobType,
-                        const index_t sideDim);
+                         Mesh& mesh,
+                         const GrobSet grobSet,
+                         const index_t sideDim);
 
 
 template <class TIndexVector>
@@ -129,12 +128,8 @@ void UniqueSidesToIndexArray (TIndexVector& indArrayInOut,
                               const grob_t grobType,
                               const index_t sideDim);
 
-/// Creates edge indices for a mesh with face or volume elements
-void CreateEdgeInds (Mesh& mesh);
-
-/// Creates faces indices for a mesh with volume elements
-/** \todo:  add support for elements with quadrilateral sides!*/
-void CreateFaceInds (Mesh& mesh);
+/// Creates grobs for all sides of the specified dimension
+void CreateSideGrobs (Mesh& mesh, const index_t sideDim);
 
 SPMesh CreateBoundaryMesh (SPMesh mesh, GrobSet grobSet, const bool* visibilities = nullptr);
 

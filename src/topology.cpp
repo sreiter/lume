@@ -159,67 +159,64 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 }
 
 
+// index_t FindUniqueSides (GrobHash& sideHashInOut,
+//                          const index_t* cornerInds,
+//                          const index_t numCornerInds,
+//                          const grob_t grobType,
+//                          const index_t sideDim)
+// {
+// 	Grob grob (grobType, cornerInds);
+// 	const index_t numGrobCorners = grob.num_corners();
+// 	index_t numInsertions = 0;
+// 	for (index_t igrob = 0; igrob < numCornerInds; igrob += numGrobCorners)
+// 	{
+// 		grob.set_global_corner_array(cornerInds + igrob);
+// 		for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
+// 			const auto r = sideHashInOut.insert(grob.side (sideDim, iside));
+// 			numInsertions += static_cast<index_t> (r.second);
+// 		}
+// 	}
+// 	return numInsertions;
+// }
+
 index_t FindUniqueSides (GrobHash& sideHashInOut,
-                         const index_t* cornerInds,
-                         const index_t numCornerInds,
-                         const grob_t grobType,
+                         Mesh& mesh,
+                         const GrobSet grobSet,
                          const index_t sideDim)
 {
-	Grob grob (grobType, cornerInds);
-	const index_t numGrobCorners = grob.num_corners();
 	index_t numInsertions = 0;
-	for (index_t igrob = 0; igrob < numCornerInds; igrob += numGrobCorners)
-	{
-		grob.set_global_corner_array(cornerInds + igrob);
-		for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
-			const auto r = sideHashInOut.insert(grob.side (sideDim, iside));
-			numInsertions += static_cast<index_t> (r.second);
+
+	for(auto grobType : grobSet) {
+		const index_t numCorners = GrobDesc (grobType).num_corners ();
+		const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
+
+		for(auto grob : mesh.grobs (grobType)) {
+			for(index_t iside = 0; iside < numSides; ++iside) {
+				const auto r = sideHashInOut.insert(grob.side (sideDim, iside));
+				numInsertions += static_cast<index_t> (r.second);
+			}
 		}
 	}
+
 	return numInsertions;
 }
 
 
 
-void CreateEdgeInds (Mesh& mesh)
+void CreateSideGrobs (Mesh& mesh, const index_t sideDim)
 {
 	const std::vector<grob_t> grobs = mesh.grob_types();
 
 	GrobHash hash;
 	for(auto gt : grobs) {
-		if(GrobDesc(gt).dim() > 1) {
-			FindUniqueSides (hash,
-							 mesh.grobs(gt).raw_ptr(),
-							 mesh.grobs(gt).num_indices(),
-							 gt,
-							 1);
-		}
+		if(GrobDesc(gt).dim() > sideDim)
+			FindUniqueSides (hash, mesh, gt, sideDim);
 	}
 	
-	mesh.grobs(EDGE).clear();
-	GrobHashToIndexArray (mesh.grobs(EDGE).underlying_array(), hash);
+	mesh.clear (GrobSetTypeByDim (sideDim));
+	mesh.insert (hash.begin(), hash.end());
 }
 
-
-void CreateFaceInds (Mesh& mesh)
-{
-//todo: add support for elements with quadrilateral sides!
-	const std::vector<grob_t> grobs = mesh.grob_types();
-
-	GrobHash hash;
-	for(auto gt : grobs) {
-		if(GrobDesc(gt).dim() > 2) {
-			FindUniqueSides (hash,
-							 mesh.grobs(gt).raw_ptr(),
-							 mesh.grobs(gt).num_indices(),
-							 gt,
-							 2);
-		}
-	}
-	
-	mesh.grobs(TRI).clear();
-	GrobHashToIndexArray (mesh.grobs(TRI).underlying_array(), hash);
-}
 
 
 static void CopyGrobsByValence (SPMesh target,
