@@ -33,12 +33,22 @@ void CreateRimMesh (SPMesh rimMeshOut,
                       SPMesh mesh,
                       GrobSet grobSet,
                       const std::function <bool (const GrobIndex& gi)>& visFunc,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                      const Neighborhoods* nbrhds)
 {
 	rimMeshOut->set_coords (mesh->coords());
 
 	GrobSet rimGrobSet = grobSet.side_set ();
-	Neighborhoods neighborhoods (mesh, rimGrobSet, grobSet);
+
+	Neighborhoods localNbrhds;
+	if (!nbrhds) {
+		localNbrhds.refresh (mesh, rimGrobSet, grobSet);
+		nbrhds = &localNbrhds;
+	}
+	else if (nbrhds->center_grob_set() != rimGrobSet || nbrhds->neighbor_grob_set() != grobSet)
+		throw LumeError ("CreateRimMesh can't operate on provided neighborhoods instance. ");
+	
+	const Neighborhoods& neighborhoods = *nbrhds;
 
 	for(auto rimGrobType : rimGrobSet) {
 		index_t counter = 0;
@@ -54,8 +64,9 @@ void CreateRimMesh (SPMesh rimMeshOut,
 				}
 			}
 			if (numVis == 1) {
-				rimMeshOut->grobs (rimGrobType).push_back (rimGrob);
-				gotRimGrobFunc (rgi, visNbrGrobIndex);
+				rimMeshOut->insert (rimGrob);
+				gotRimGrobFunc (GrobIndex(rimGrobType, rimMeshOut->num (rimGrobType)),
+				                visNbrGrobIndex);
 			}
 		}
 	}
@@ -64,30 +75,33 @@ void CreateRimMesh (SPMesh rimMeshOut,
 void CreateRimMesh (SPMesh rimMeshOut,
                       SPMesh mesh,
                       GrobSet grobSet,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                      const Neighborhoods* nbrhds)
 {
 	CreateRimMesh (rimMeshOut, mesh, grobSet, [](const GrobIndex&){return true;},
-	                 gotRimGrobFunc);
+	                 gotRimGrobFunc, nbrhds);
 }
 
 
 SPMesh CreateRimMesh (SPMesh mesh,
                       GrobSet grobSet,
                       const std::function <bool (const GrobIndex& gi)>& visFunc,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                      const Neighborhoods* nbrhds)
 {
 	auto rimMesh = std::make_shared <Mesh> ();
-	CreateRimMesh (rimMesh, mesh, grobSet, visFunc, gotRimGrobFunc);
+	CreateRimMesh (rimMesh, mesh, grobSet, visFunc, gotRimGrobFunc, nbrhds);
 	return rimMesh;
 }
 
 
 SPMesh CreateRimMesh (SPMesh mesh,
                       GrobSet grobSet,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc)
+                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                      const Neighborhoods* nbrhds)
 {
 	auto rimMesh = std::make_shared <Mesh> ();
-	CreateRimMesh (rimMesh, mesh, grobSet, gotRimGrobFunc);
+	CreateRimMesh (rimMesh, mesh, grobSet, gotRimGrobFunc, nbrhds);
 	return rimMesh;
 }
 
