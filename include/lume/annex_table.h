@@ -80,6 +80,16 @@ public:
 	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return (*m_annexTable.annex (gi.grobType))[gi.index];}
 	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return (*m_annexTable.annex (gi.grobType))[gi.index];}
 
+	void clear_arrays ()
+	{
+		auto annexes = m_annexTable.annexes();
+
+		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
+			if (annexes[i])
+				annexes[i]->clear();
+		}
+	}
+
 	void resize_annexes_to_match_grobs (const index_t tupleSize = 0)
 	{
 		auto annexes = m_annexTable.annexes();
