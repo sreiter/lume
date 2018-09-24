@@ -47,6 +47,19 @@ Neighborhoods ()
 Neighborhoods::
 Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 {
+	refresh (mesh, centerGrobTypes, neighborGrobTypes);
+}
+
+
+Neighborhoods::
+Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
+{
+	refresh (mesh, grobTypes, grobConnections);
+}
+
+void Neighborhoods::
+refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
+{
 	m_mesh = mesh;
 	m_centerGrobTypes = centerGrobTypes;
 	m_neighborGrobTypes = neighborGrobTypes;
@@ -57,8 +70,8 @@ Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 }
 
 
-Neighborhoods::
-Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
+void Neighborhoods::
+refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
 {
 	m_mesh = mesh;
 	m_centerGrobTypes = grobTypes;

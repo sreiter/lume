@@ -48,7 +48,7 @@ public:
     /** \note it has to hold true: centerGrobTypes != neighborGrobTypes
      * \{ */
     Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
-    // void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+    void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
     /** \} */
 
 	/// Creates a neighborhood between grobs of the same type using the specified grobConnections as links
@@ -68,7 +68,7 @@ public:
 	 *									- `grobConnections.neighbor_grob_types() == grobTypes`
 	 * \{ */
     Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
-	// void refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
+	void refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
 	/** \} */
 
     SPMesh mesh ();
