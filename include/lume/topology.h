@@ -50,12 +50,17 @@ namespace impl {
  * allows to map those indices to slimesh's indexing scheme.*/
 class TotalToGrobIndexMap {
 public:
-  TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs);
-  GrobIndex operator () (const index_t ind) const;
+	TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs);
+	TotalToGrobIndexMap (Mesh& mesh, const std::vector <grob_t>& gs);
+	TotalToGrobIndexMap (Mesh& mesh, std::vector <grob_t>&& gs);
+
+	GrobIndex operator () (const index_t ind) const;
 
 private:
-  index_t m_baseInds [MAX_GROB_SET_SIZE + 1];
-  const GrobSet m_grobSet;
+	void generate_base_inds (Mesh& mesh);
+
+	std::vector <index_t>	m_baseInds;
+	std::vector <grob_t>	m_grobTypes;
 };
 
 

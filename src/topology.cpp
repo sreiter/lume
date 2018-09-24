@@ -53,30 +53,52 @@ namespace impl {
 }// end of namespace impl
 
 TotalToGrobIndexMap::
-TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs) :
-    m_grobSet (gs)
+TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs)
 {
-    if (gs.size() > MAX_GROB_SET_SIZE)
-    	LumeError ("Internal error: MAX_GROB_SET_SIZE is wrong!");
+	m_grobTypes.reserve (gs.size());
+	for(auto grobType : gs)
+		m_grobTypes.push_back (grobType);
+	
+	generate_base_inds (mesh);
+}
 
+
+TotalToGrobIndexMap::
+TotalToGrobIndexMap (Mesh& mesh, const std::vector <grob_t>& gs) :
+	m_grobTypes (gs)
+{
+	generate_base_inds (mesh);
+}
+
+TotalToGrobIndexMap::
+TotalToGrobIndexMap (Mesh& mesh, std::vector <grob_t>&& gs) :
+	m_grobTypes (std::move (gs))
+{
+	generate_base_inds (mesh);
+}
+
+
+void TotalToGrobIndexMap::
+generate_base_inds (Mesh& mesh)
+{
+	m_baseInds.resize(m_grobTypes.size() + 1);
     m_baseInds[0] = 0;
-    for(index_t i = 0; i < gs.size(); ++i) {
-     	m_baseInds [i+1] = m_baseInds [i] + mesh.num (gs.grob_type (i));
-    }
+    const size_t numGrobTypes = m_grobTypes.size();
+    for(size_t i = 0; i < numGrobTypes; ++i)
+     	m_baseInds [i+1] = m_baseInds [i] + mesh.num (m_grobTypes [i]);
 }
 
 GrobIndex TotalToGrobIndexMap::
 operator () (const index_t ind) const
 {
-    for(size_t i = 0; i < m_grobSet.size(); ++i) {
+	const size_t numGrobTypes = m_grobTypes.size();
+    for(size_t i = 0; i < numGrobTypes; ++i) {
       	if (ind >= m_baseInds [i] && ind < m_baseInds [i+1])
-        	return GrobIndex(m_grobSet.grob_type(index_t(i)), ind - m_baseInds[i]);
+        	return GrobIndex(m_grobTypes[i], ind - m_baseInds[i]);
     }
 
     throw LumeError (string("TotalToGrobIndexMap: Couldn't map index ").
-    					append (to_string(ind)).
-    					append (" to GrobSet ").
-    					append (m_grobSet.name()));
+    					append (to_string(ind)));
     return GrobIndex (NO_GROB, 0);
 }
 
