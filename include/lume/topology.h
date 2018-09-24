@@ -121,12 +121,6 @@ void GrobHashToIndexArray (TIndexVector& indArrayInOut,
                            const GrobHash& hash,
                            grob_t grobType);
 
-template <class TIndexVector>
-void UniqueSidesToIndexArray (TIndexVector& indArrayInOut,
-                              const index_t* cornerInds,
-                              const index_t numCornerInds,
-                              const grob_t grobType,
-                              const index_t sideDim);
 
 /// Creates grobs for all sides of the specified dimension
 void CreateSideGrobs (Mesh& mesh, const index_t sideDim);
