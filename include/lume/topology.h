@@ -131,7 +131,6 @@ void UniqueSidesToIndexArray (TIndexVector& indArrayInOut,
 /// Creates grobs for all sides of the specified dimension
 void CreateSideGrobs (Mesh& mesh, const index_t sideDim);
 
-SPMesh CreateBoundaryMesh (SPMesh mesh, GrobSet grobSet, const bool* visibilities = nullptr);
 
 }//	end of namespace lume
 

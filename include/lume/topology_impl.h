@@ -75,19 +75,6 @@ void GrobHashToIndexArray (TIndexVector& indArrayInOut,
 	}
 }
 
-
-template <class TIndexVector>
-void UniqueSidesToIndexArray (TIndexVector& indArrayInOut,
-                              const index_t* cornerInds,
-                              const index_t numCornerInds,
-                              const grob_t grobType,
-                              const index_t sideDim)
-{
-	GrobHash hash;
-	FindUniqueSides (hash, cornerInds, numCornerInds, grobType, sideDim);
-	GrobHashToIndexArray (indArrayInOut, hash);
-}
-
 }//	end of namespace lume
 
 #endif	//__H__lume_topology_impl
