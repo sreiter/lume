@@ -34,6 +34,8 @@
 #include "lume/rim_mesh.h"
 #include "lume/subset_info_annex.h"
 
+#include "pettyprof/pettyprof.h"
+
 #include "tests.h"
 
 #include <iostream>
@@ -533,6 +535,17 @@ static void TestNeighborhoods (SPMesh mesh)
 	impl::TestNeighborhoods (mesh, CELLS, FACES);
 }
 
+static void TestFaceCellNeighborhoods (SPMesh mesh)
+{
+	PEPRO_BEGIN(FaceToCellNbrs);
+	impl::TestNeighborhoods (mesh, FACES, CELLS);
+	PEPRO_END();
+
+	PEPRO_BEGIN(CellToFaceNbrs);
+	impl::TestNeighborhoods (mesh, CELLS, FACES);
+	PEPRO_END();
+}
+
 
 namespace impl {
 	static void TestNeighborValence (NeighborIndices nbrs,
@@ -808,6 +821,9 @@ bool RunTests ()
 								  		 TestMesh ("test_meshes/tet_refined.ugx"),
 								  		 TestMesh ("test_meshes/elems_refined.ugx")};
 
+	// vector<TestMesh> largeMeshes {TestMesh ("test_meshes/2-spheres-tets.ugx")};
+
+
 	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
 
 	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, topologyTestMeshes);
@@ -824,6 +840,8 @@ bool RunTests ()
 	RUN_TEST(testStats, TestCreateRimMesh);
 	RUN_TEST(testStats, TestSubsets);
 	RUN_TEST(testStats, TestParallelFor);
+
+	// RUN_TEST_ON_MESHES(testStats, TestFaceCellNeighborhoods, largeMeshes);
 
 	cout << endl << "TESTS DONE: " << testStats.num_tests() << " tests were run, "
 		 << testStats.num_failed() << " failed." << endl << endl;

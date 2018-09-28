@@ -27,6 +27,7 @@
 
 #include "lume/neighborhoods.h"
 #include "lume/topology.h"
+#include "pettyprof/pettyprof.h"
 #include <limits>
 
 using namespace std;
@@ -60,6 +61,8 @@ Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnecti
 void Neighborhoods::
 refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 {
+	PEPRO_BEGIN(Neighborhoods__refresh);
+	
 	m_mesh = mesh;
 	m_centerGrobTypes = centerGrobTypes;
 	m_neighborGrobTypes = neighborGrobTypes;
@@ -73,6 +76,8 @@ refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 void Neighborhoods::
 refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
 {
+	PEPRO_BEGIN(Neighborhoods__refresh);
+
 	m_mesh = mesh;
 	m_centerGrobTypes = grobTypes;
 	m_neighborGrobTypes = grobTypes;

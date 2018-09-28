@@ -113,6 +113,7 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
 
 	index_t counter = 0;
 	
+	indexMapInOut.reserve (mesh.num (grobSet));
 	for (auto grobType : grobSet) {
 		grobBaseIndsOut [grobType] = counter;
 
@@ -130,6 +131,8 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
 {
+	indexMapInOut.reserve (mesh.num (grobSet));
+	
 	for (auto grobType : grobSet) {
 		if (!mesh.has (grobType))
 			continue;
