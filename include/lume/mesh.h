@@ -172,14 +172,14 @@ public:
 		return grobTypes;
 	}
 
-	index_t num (grob_t grobType)
+	index_t num (grob_t grobType) const
 	{
 		if (grobs_allocated (grobType))
 			return grobs (grobType).size ();
 		return 0;
 	}
 
-	index_t num (const GrobSet& grobSet)
+	index_t num (const GrobSet& grobSet) const
 	{
 		index_t counter = 0;
 		for(auto grobType : grobSet)
@@ -187,14 +187,14 @@ public:
 		return counter;
 	}
 
-	index_t num_indices (grob_t grobType)
+	index_t num_indices (grob_t grobType) const
 	{
 		if (grobs_allocated (grobType))
 			return grobs (grobType).num_indices ();
 		return 0;
 	}
 
-	index_t num_indices (const GrobSet& grobSet)
+	index_t num_indices (const GrobSet& grobSet) const
 	{
 		index_t counter = 0;
 		for(auto grobType : grobSet)
