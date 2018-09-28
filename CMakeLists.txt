@@ -79,9 +79,9 @@ target_include_directories(lume
     PUBLIC 
         $<INSTALL_INTERFACE:include>    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidxml-1.13
 )
 
@@ -101,4 +101,5 @@ if (BUILD_LUME_TESTS)
 
 	add_executable (lume_tests ${testSources})
 	target_link_libraries(lume_tests lume)
+
 endif (BUILD_LUME_TESTS)
