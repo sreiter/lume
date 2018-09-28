@@ -1,6 +1,6 @@
 # lume &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.com/sreiter/lume.svg?branch=master)](https://travis-ci.com/sreiter/lume)
 ## Introduction
-**lume** (**L**eightweight **U**nstructured **ME**shes) is a *BSD* licensed C++ library for the representation of unstructured hybrid meshes (or unstructured hybrid grids).
+**lume** (**L**ightweight **U**nstructured **ME**shes) is a *BSD* licensed C++ library for the representation of unstructured hybrid meshes (or unstructured hybrid grids).
 
 Featured element types are: *Vertices, Edges, Triangles, Quadrilaterals, Tetrahedra, Pyramids, Prisms, Hexahedra*.
 The set of available element types is easily extensible.
@@ -8,6 +8,31 @@ The set of available element types is easily extensible.
 By storing underlying data in large contiguous arrays, **lume** is especially suited for efficient iteration of mesh elements and associated data.
 
 The underlying data format (e.g. position data, normal data, element indices), is also compatible to many other libraries, e.g., to *OpenGL*.
+
+Please have a look at https://github.com/sreiter/lumeview for a lightweight OpenGL based cross platform mesh viewer based on **lume**.
+
+## Building lume as a part of your project
+**lume** features a CMake based build system. You can either build it as part of your project by simply adding the line
+    
+    add_subdirectory (lume)
+
+to the CMakeLists.txt of your project. To link it to your target, please use the following line:
+
+    target_link_libraries (YOUR_TARGET  lume)
+
+Necessary include directories will be automatically added to your target.
+
+## Building lume as a stand-alone library
+Of course you may also build lume as a stand-alone library. To this end create a 'build' directory in the **lume** root folder and from that build directory execute, e.g.:
+
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make -j
+
+When specifying the cmake option `-DBUILD_LUME_TESTS=ON`, an additional executable will be built which runs some tests on the lume library:
+
+    cmake -DBUILD_LUME_TESTS=ON ..
+    make -j
+    ./lume_tests
 
 ## License
 **lume** is licensed under a *2-clause BSD* license:
