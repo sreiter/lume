@@ -102,9 +102,11 @@ public:
 	};
 
 	
-	SubsetInfoAnnex();
-	SubsetInfoAnnex(const std::string& name);
-	virtual ~SubsetInfoAnnex();
+	SubsetInfoAnnex ();
+	SubsetInfoAnnex (const std::string& name);
+    SubsetInfoAnnex (SubsetInfoAnnex&& sia);
+
+	virtual ~SubsetInfoAnnex ();
 
 	const char* class_name () const override	{return "SubsetInfoAnnex";}
 		

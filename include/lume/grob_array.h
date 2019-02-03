@@ -30,6 +30,7 @@
 
 #include "grob.h"
 #include "grob_iterator.h"
+#include "tuple_vector.h"
 #include <initializer_list>
 #include <memory>
 #include <string>
@@ -43,31 +44,42 @@ class GrobArray {
 public:
 	using iterator = GrobIterator;
 	using const_iterator = GrobIterator;
+    using size_type = TupleVector<index_t>::size_type;
 
-	GrobArray () :
-		m_grobDesc (VERTEX),
-		m_array (m_grobDesc.num_corners ())
-	{}
+    GrobArray (GrobArray&& grobArray)
+        : m_grobDesc (std::move (grobArray.m_grobDesc))
+        , m_array (std::move (grobArray.m_array))
+    {}
 
 	GrobArray (grob_t grobType) :
 		m_grobDesc (grobType),
 		m_array (m_grobDesc.num_corners ())
 	{}
 
+    GrobArray (grob_t grobType, std::vector <index_t>&& inds) :
+        m_grobDesc (grobType),
+        m_array (m_grobDesc.num_corners (), std::move (inds))
+    {}
+
+    GrobArray (grob_t grobType, TupleVector <index_t>&& inds) :
+        m_grobDesc (grobType),
+        m_array (std::move (inds))
+    {}
+
 	inline void clear ()					{m_array.clear();}
 
 	bool empty() const 						{return m_array.empty();}
 
 	/// total number of grobs
-	inline index_t size () const			{return m_array.num_tuples ();}
-	inline index_t num_indices () const		{return m_array.size ();}
+	inline size_type size () const			{return m_array.num_tuples ();}
+	inline size_type num_indices () const	{return m_array.size ();}
 
-	inline index_t* raw_ptr() 				{return m_array.raw_ptr();}
-	inline const index_t* raw_ptr () const 	{return m_array.raw_ptr();}
+	inline index_t* data() 				    {return m_array.data();}
+	inline const index_t* data () const 	{return m_array.data();}
 
-	inline void resize (const index_t s)					{m_array.resize (s * num_grob_corners());}
-	inline void resize (const index_t s, const index_t v)	{m_array.resize (s * num_grob_corners(), v);}
-	inline void reserve (const index_t s)					{m_array.reserve (s * num_grob_corners());}
+	inline void resize (const size_type s)					{m_array.resize (s * m_array.tuple_size ());}
+	inline void resize (const size_type s, const index_t v)	{m_array.resize (s * m_array.tuple_size (), v);}
+	inline void reserve (const size_type s)					{m_array.reserve (s * m_array.tuple_size ());}
 
 	inline void push_back (std::initializer_list <index_t> inds)
 	{
@@ -99,20 +111,20 @@ public:
 			m_array.push_back (grob.corner(i));
 	}
 
-	inline const Grob operator [] (const index_t i) const	{return Grob (m_grobDesc.grob_type(), m_array.raw_ptr () + i * num_grob_corners());}
+	inline const Grob operator [] (const size_type i) const	{return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
 
-	inline iterator begin () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.raw_ptr());}
-	inline iterator end () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.raw_ptr() + m_array.size());}
+	inline iterator begin () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.data());}
+	inline iterator end () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.data() + m_array.size());}
 
 	GrobDesc grob_desc () const							{return m_grobDesc;}
 
-	IndexArrayAnnex& underlying_array ()				{return m_array;}
-	const IndexArrayAnnex& underlying_array () const	{return m_array;}
+	TupleVector <index_t>& underlying_array ()				{return m_array;}
+	const TupleVector <index_t>& underlying_array () const	{return m_array;}
 
 private:
 	inline index_t num_grob_corners () const			{return m_grobDesc.num_corners();}
 	GrobDesc				m_grobDesc;
-	IndexArrayAnnex			m_array;
+	TupleVector <index_t>	m_array;
 };
 
 using SPGrobArray	= std::shared_ptr <GrobArray>;

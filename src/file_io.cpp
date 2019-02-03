@@ -49,16 +49,20 @@ namespace lume {
 std::shared_ptr <Mesh> CreateMeshFromSTL (std::string filename)
 {
 	auto mesh = make_shared <Mesh> ();
-	ArrayAnnex <real_t> normals;
-	ArrayAnnex <index_t> solids;
+	TupleVector <real_t> coords (3);
+    TupleVector <real_t> normals (3);
+	TupleVector <index_t> solids;
+    GrobArray tris (TRI);
 
 	stl_reader::ReadStlFile (filename.c_str(),
-	                         *mesh->coords(),
+	                         coords,
 							 normals,
-							 mesh->grobs(TRI).underlying_array(),
+							 tris.underlying_array(),
 							 solids);
 
-	mesh->coords()->set_tuple_size(3);
+    mesh->set_annex (keys::vertexCoords, RealArrayAnnex (std::move (coords)));
+    mesh->set_annex (keys::vertexNormals, RealArrayAnnex (std::move (normals)));
+    mesh->set_grobs (std::move (tris));
 	return mesh;
 }
 
@@ -77,11 +81,9 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 
 	auto mesh = make_shared <Mesh> ();
 
-//	read nodes and store them in an array for index access
-	auto& coords = *mesh->coords();
-	coords.set_tuple_size (3);
+    {
+        std::vector <real_t> coords;
 
-	{
 		ifstream in(nodesFilename);
 		if (!in) throw FileNotFoundError (nodesFilename);
 
@@ -122,6 +124,8 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 				in >> bm;
 			}
 		}
+
+        mesh->set_annex (keys::vertexCoords, RealArrayAnnex (3, std::move (coords)));
 	}
 
 //	todo: read faces
@@ -180,7 +184,8 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 		if (numNodesPerTet != GrobDesc (TET).num_corners ())
 			throw FileParseError (string ("Bad number of nodes in tetrahedron in ") + filename);
 		
-		auto& tets = mesh->grobs (TET).underlying_array ();
+        GrobArray grobArrayTets (TET);
+        auto& tets = grobArrayTets.underlying_array ();
 		tets.resize (numTets * numNodesPerTet);
 
 		for(int i = 0; i < numTets; ++i)
@@ -196,18 +201,28 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 				in >> a;
 			}
 		}
+
+        mesh->set_grobs (std::move (grobArrayTets));
 	}
 
 	return mesh;
 }
 
-static void ReadIndicesToArrayAnnex (IndexArrayAnnex& indsOut, xml_node<>* node)
+template <class TVector>
+static void ReadIndices (TVector& indsOut, xml_node<>* node)
 {
 	char* p = strtok (node->value(), " ");
 	while (p) {
 		indsOut.push_back (atoi(p));
 		p = strtok (nullptr, " ");
 	}
+}
+
+static void ReadGrobs (Mesh& meshInOut, const grob_t gt, xml_node<>* node)
+{
+    GrobArray grobs (gt);
+    ReadIndices (grobs.underlying_array (), node);
+    meshInOut.set_grobs (std::move (grobs));
 }
 
 static SubsetInfoAnnex::Color ParseColor (char* colStr)
@@ -256,8 +271,8 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	// parse the node values and assign indices
 	char* p = strtok (node->value(), " ");
 	while (p) {
-		const auto ig = indMap (index_t (atoi(p)));
-		annexTable [ig] = value;
+		const auto gi = indMap (index_t (atoi(p)));
+		annexTable [gi] = value;
 		p = strtok (nullptr, " ");
 	}
 }
@@ -308,71 +323,88 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 		throw FileParseError (string ("no grid found in ") + filename);
 
 	auto mesh = make_shared <Mesh> ();
-	auto& coords = *mesh->coords();
 
-	int lastNumSrcCoords = -1;
-	xml_node<>* curNode = gridNode->first_node();
-	for(;curNode; curNode = curNode->next_sibling()) {
-		const char* name = curNode->name();
+    {//todo: move to separate function
+        int lastNumSrcCoords = -1;
+        std::vector <real_t> coords;
 
-		if(strcmp(name, "vertices") == 0 || strcmp(name, "constrained_vertices") == 0)
-		{
-			int numSrcCoords = -1;
-			xml_attribute<>* attrib = curNode->first_attribute("coords");
-			if(attrib)
-				numSrcCoords = atoi(attrib->value());
+        // forst read vertices
+    	for(xml_node<>* curNode = gridNode->first_node(); curNode; curNode = curNode->next_sibling())
+        {
+    		const char* name = curNode->name();
 
-			if (numSrcCoords < 1)
-				throw FileParseError (string ("Not enough coordinates provided in ") + filename);
+    		if(strcmp(name, "vertices") == 0 || strcmp(name, "constrained_vertices") == 0)
+    		{
+    			int numSrcCoords = -1;
+    			xml_attribute<>* attrib = curNode->first_attribute("coords");
+    			if(attrib)
+    				numSrcCoords = atoi(attrib->value());
 
-			if (lastNumSrcCoords >= 0 && lastNumSrcCoords != numSrcCoords)
-				throw FileParseError (string ("Can't read vertices with differing numbers "
-			            "of coordinates from ") + filename);
+    			if (numSrcCoords < 1)
+    				throw FileParseError (string ("Not enough coordinates provided in ") + filename);
 
-			lastNumSrcCoords = numSrcCoords;
-			coords.set_tuple_size (numSrcCoords);
-			
-		//	create a buffer with which we can access the data
-			char* p = strtok (curNode->value(), " ");
-			while (p) {
-			//	read the data
-				coords.push_back (real_t (atof(p)));
-				p = strtok (nullptr, " ");
-			}
-		}
+    			if (lastNumSrcCoords >= 0 && lastNumSrcCoords != numSrcCoords)
+    				throw FileParseError (string ("Can't read vertices with differing numbers "
+    			            "of coordinates from ") + filename);
 
-		else if(strcmp(name, "edges") == 0
+    			lastNumSrcCoords = numSrcCoords;
+    			
+    		//	create a buffer with which we can access the data
+    			char* p = strtok (curNode->value(), " ");
+    			while (p) {
+    			//	read the data
+    				coords.push_back (real_t (atof(p)));
+    				p = strtok (nullptr, " ");
+    			}
+    		}
+        }
+
+        if (lastNumSrcCoords > 0) {
+            const size_t numVrts = coords.size () / static_cast <size_t> (lastNumSrcCoords);
+                mesh->resize_vertices (numVrts - mesh->num (VERTEX));
+
+            mesh->set_annex (keys::vertexCoords,
+                             RealArrayAnnex (static_cast <index_t> (lastNumSrcCoords),
+                                             std::move (coords)));
+        }
+    }
+
+    // now read elements
+    for(xml_node<>* curNode = gridNode->first_node(); curNode; curNode = curNode->next_sibling())
+    {
+        const char* name = curNode->name();
+		if(strcmp(name, "edges") == 0
 		        || strcmp(name, "constraining_edges") == 0
 		        || strcmp(name, "constrained_edges") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->grobs (EDGE).underlying_array (), curNode);
+			ReadGrobs (*mesh, EDGE, curNode);
 		}
 
 		else if(strcmp(name, "triangles") == 0
 		        || strcmp(name, "constraining_triangles") == 0
 		        || strcmp(name, "constrained_triangles") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->grobs (TRI).underlying_array (), curNode);
+			ReadGrobs (*mesh, TRI, curNode);
 		}
 
 		else if(strcmp(name, "quadrilaterals") == 0
 		        || strcmp(name, "constraining_quadrilaterals") == 0
 		        || strcmp(name, "constrained_quadrilaterals") == 0)
 		{
-			ReadIndicesToArrayAnnex (mesh->grobs (QUAD).underlying_array (), curNode);
+			ReadGrobs (*mesh, QUAD, curNode);
 		}
 
 		else if(strcmp(name, "tetrahedrons") == 0)
-			ReadIndicesToArrayAnnex (mesh->grobs (TET).underlying_array (), curNode);
+			ReadGrobs (*mesh, TET, curNode);
 
 		else if(strcmp(name, "hexahedrons") == 0)
-			ReadIndicesToArrayAnnex (mesh->grobs (HEX).underlying_array (), curNode);
+			ReadGrobs (*mesh, HEX, curNode);
 
 		else if(strcmp(name, "pyramids") == 0)
-			ReadIndicesToArrayAnnex (mesh->grobs (PYRA).underlying_array (), curNode);
+			ReadGrobs (*mesh, PYRA, curNode);
 
 		else if(strcmp(name, "prisms") == 0)
-			ReadIndicesToArrayAnnex (mesh->grobs (PRISM).underlying_array (), curNode);
+			ReadGrobs (*mesh, PRISM, curNode);
 
 		// else if(strcmp(name, "octahedrons") == 0)
 		// 	bSuccess = create_octahedrons(volumes, grid, curNode, vertices);
@@ -385,8 +417,8 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 			if (xml_attribute<>* attrib = curNode->first_attribute("name"))
 				siName = attrib->value();
 
-			SPSubsetInfoAnnex subsetInfo = make_shared <SubsetInfoAnnex> (siName);
-			subsetInfo->add_subset (SubsetInfoAnnex::SubsetProperties ());
+			SubsetInfoAnnex subsetInfo (siName);
+			subsetInfo.add_subset (SubsetInfoAnnex::SubsetProperties ());
 
 			xml_node<>* subsetNode = curNode->first_node("subset");
 			index_t subsetIndex = 1;
@@ -399,21 +431,12 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 
 				ParseElementIndicesToArrayAnnex (mesh, siName, subsetNode, subsetIndex);
 
-				subsetInfo->add_subset (std::move (props));
+				subsetInfo.add_subset (std::move (props));
 				++subsetIndex;
 			}
 
-			mesh->set_annex (siName, NO_GROB, subsetInfo);
+			mesh->set_annex (AnnexKey (siName), std::move (subsetInfo));
 		}
-
-		// else if(strcmp(name, "vertex_attachment") == 0)
-		// 	bSuccess = read_attachment<Vertex>(grid, curNode);
-		// else if(strcmp(name, "edge_attachment") == 0)
-		// 	bSuccess = read_attachment<Edge>(grid, curNode);
-		// else if(strcmp(name, "face_attachment") == 0)
-		// 	bSuccess = read_attachment<Face>(grid, curNode);
-		// else if(strcmp(name, "volume_attachment") == 0)
-		// 	bSuccess = read_attachment<Volume>(grid, curNode);
 	}
 
 	return mesh;

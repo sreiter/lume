@@ -28,24 +28,26 @@
 #ifndef __H__lume_annex
 #define __H__lume_annex
 
-#include <memory>
 #include "custom_exception.h"
+#include "grob.h"
 
 namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (AnnexError, LumeError);
+
+class Mesh;
 
 ///	Base class for annexes, which can e.g. be annexed to an instance of Mesh
 class Annex {
 public:
 	virtual ~Annex () {};
 	virtual const char* class_name () const = 0;
-	virtual void do_imgui () {};
-	virtual bool has_imgui () const	{return false;}
-};
 
-using SPAnnex	= std::shared_ptr <Annex>;
-using CSPAnnex	= std::shared_ptr <const Annex>;
+    virtual void grobs_changed (const grob_t gt, Mesh& mesh) {}
+    
+    virtual void do_imgui () {}
+    virtual bool has_imgui () const {return false;}
+};
 
 }//	end of namespace lume
 

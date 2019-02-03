@@ -59,12 +59,12 @@ struct buf_traits {
 template <class buf_t>
 typename buf_traits <buf_t>::value_ptr_t
 buf_data_ptr (buf_t& b) {
-	return b.raw_ptr();
+	return b.data();
 }
 
 template <class T>
 T* buf_data_ptr (std::vector<T>& b) {
-	return &b.front();
+	return b.data();
 }
 
 
@@ -72,12 +72,12 @@ T* buf_data_ptr (std::vector<T>& b) {
 template <class buf_t>
 typename buf_traits <buf_t>::const_value_ptr_t
 buf_data_ptr (const buf_t& b) {
-	return b.raw_ptr();
+	return b.data();
 }
 
 template <class T>
 const T* buf_data_ptr (const std::vector<T>& b) {
-	return &b.front();
+	return b.data();
 }
 
 

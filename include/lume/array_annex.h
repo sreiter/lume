@@ -28,59 +28,64 @@
 #ifndef __H__lume_data_buffer
 #define __H__lume_data_buffer
 
-#include <iterator>
-#include <memory>
-#include <vector>
-#include "unpack.h"
-#include "types.h"
 #include "annex.h"
-#include "custom_exception.h"
+#include "tuple_vector.h"
 
 namespace lume {
-
-DECLARE_CUSTOM_EXCEPTION (BadTupleSizeError, AnnexError);
 
 template <class T>
 class ArrayAnnex : public Annex {
 public:
 	using value_type = T;
 	using value_t = value_type;
-	using size_type = index_t;
-	using iterator = typename std::vector<T>::iterator;
-	using const_iterator = typename std::vector<T>::const_iterator;
+	using size_type = typename TupleVector<T>::size_type;
+	using iterator = typename TupleVector<T>::iterator;
+	using const_iterator = typename TupleVector<T>::const_iterator;
 
-	ArrayAnnex ()	: m_tupleSize (1) {}
-	ArrayAnnex (const index_t tupleSize) : m_tupleSize (tupleSize) {}
+	ArrayAnnex ()
+        : m_vector (1)
+    {}
+
+	ArrayAnnex (const size_type tupleSize)
+        : m_vector (tupleSize)
+    {}
+
+    ArrayAnnex (const size_type tupleSize, const size_type numTuples)
+        : m_vector (tupleSize, numTuples)
+    {}
+
+    ArrayAnnex (ArrayAnnex&& aa)
+        : m_vector (std::move (aa.m_vector))
+    {}
+
+    ArrayAnnex (const size_type tupleSize, std::vector <T>&& vec)
+        : m_vector (tupleSize, std::move (vec))
+    {}
+
+    ArrayAnnex (TupleVector <T>&& vec)
+        : m_vector (std::move (vec))
+    {}
 
 	const char* class_name () const override	{return "ArrayAnnex";}
 
-	inline void clear ()					{m_vector.clear();}
+    bool empty() const { return m_vector.empty(); }
 
-	bool empty() const { return m_vector.empty(); }
+    /// total number of entries, counting individual components
+    inline size_type size () const            {return m_vector.size ();}
 
-	/// total number of entries, counting individual components
-	inline index_t size () const			{return static_cast<index_t>(m_vector.size());}
+    inline size_type num_tuples () const      {return m_vector.num_tuples ();}
 
-	inline index_t num_tuples () const		{return size() / tuple_size();}
+    /// number of individual components making up a tuple
+    inline size_type tuple_size () const       {return m_vector.tuple_size ();}
 
-	/// number of individual components making up a tuple
-	inline index_t tuple_size () const				{return m_tupleSize;}
-	inline void set_tuple_size (const index_t ts)	{m_tupleSize = ts;}
+    inline T* data()                        {m_vector.data ();}
+    inline const T* data () const           {return m_vector.data ();}
 
-	inline T* raw_ptr() { if (size()) return &m_vector[0]; return NULL; }
-	inline const T* raw_ptr () const { if (size()) return &m_vector[0]; return NULL; }
+	inline T& operator [] (const size_type i)				{return m_vector[i];}
+	inline const T& operator [] (const size_type i) const	{return m_vector[i];}
 
-	inline void resize (const index_t s)				{m_vector.resize (s);}
-	inline void resize (const index_t s, const T& v)	{m_vector.resize (s, v);}
-	inline void reserve (const index_t s)				{m_vector.reserve (s);}
-
-	inline void push_back (const T& v)					{m_vector.push_back (v);}
-
-	inline T& operator [] (const index_t i)				{return m_vector[i];}
-	inline const T& operator [] (const index_t i) const	{return m_vector[i];}
-
-	inline T& at (const index_t i)					{return m_vector.at(i);}
-	inline const T& at (const index_t i) const		{return m_vector.at(i);}
+	inline T& at (const size_type i)					{return m_vector.at(i);}
+	inline const T& at (const size_type i) const		{return m_vector.at(i);}
 
 	inline T& back ()						{return m_vector.back();}
 	inline const T& back () const			{return m_vector.back();}
@@ -91,18 +96,11 @@ public:
 	inline const_iterator end () const		{return m_vector.end();}
 
 private:
-	std::vector <T>	m_vector;
-	index_t			m_tupleSize;
+	TupleVector <T>	m_vector;
 };
-
 
 using RealArrayAnnex		= ArrayAnnex <real_t>;
 using IndexArrayAnnex		= ArrayAnnex <index_t>;
-
-using SPRealArrayAnnex		= std::shared_ptr <RealArrayAnnex>;
-using SPIndexArrayAnnex		= std::shared_ptr <IndexArrayAnnex>;
-using CSPRealArrayAnnex		= std::shared_ptr <const RealArrayAnnex>;
-using CSPIndexArrayAnnex	= std::shared_ptr <const IndexArrayAnnex>;
 
 }//	end of namespace lume
 

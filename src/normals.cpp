@@ -24,7 +24,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+#include "lume/array_annex.h"
 #include "lume/normals.h"
 #include "lume/mesh.h"
 #include "lume/vec_math_raw.h"
@@ -45,46 +45,54 @@ real_t* TriangleNormal3 (real_t* normalOut,
 	return VecNormalize (VecCross3 (normalOut, d0, d1), 3);
 }
 
+void
+ComputeFaceVertexNormals3 (Mesh& mesh,
+                           RealArrayAnnex& normalAnnex)
+{
+    auto const& coordsAnnex = mesh.annex (keys::vertexCoords, 3);
+
+    if (coordsAnnex.tuple_size() != 3)
+        throw BadTupleSizeError (std::to_string (coordsAnnex.tuple_size()));
+    
+    if (normalAnnex.tuple_size() != 3)
+        throw BadTupleSizeError (std::to_string (normalAnnex.tuple_size()));
+
+    VecSet (UNPACK_DS(normalAnnex), 0);
+
+    const real_t*   coords      = coordsAnnex.data();
+    real_t*         normals     = normalAnnex.data();
+    
+    for(auto gt : GrobSet (FACES)) {
+        const index_t*  inds        = mesh.grobs (gt).data();
+        const size_t   numInds     = mesh.grobs (gt).num_indices();
+        const size_t   numCorners  = mesh.grobs (gt).grob_desc ().num_corners ();
+        const size_t   offset = numCorners / 2;
+
+        for (size_t i = 0; i < numInds; i += numCorners) {
+            const index_t* elem = inds + i;
+
+            real_t d0[3];
+            real_t d1[3];
+
+            VecSub (d0, 3, coords + elem[offset] * 3, coords + elem[0] * 3);
+            VecSub (d1, 3, coords + elem[1 + offset] * 3, coords + elem[1] * 3);
+
+            real_t n[3];
+            VecNormalize (VecCross3 (n, d0, d1), 3);
+
+            for(size_t j = 0; j < numCorners; ++j)
+                VecAppend (normals + elem [j] * 3, 3, n);
+        }
+    }
+
+    VecTupNormalize (UNPACK_DST(normalAnnex));
+}
 
 void
 ComputeFaceVertexNormals3 (Mesh& mesh,
-						  const std::string& normalId)
+						   const std::string& normalId)
 {
-	if (mesh.coords()->tuple_size() != 3)
-		throw BadTupleSizeError (std::to_string (mesh.coords()->tuple_size()));
-
-	auto& normalArray = *mesh.annex<RealArrayAnnex> (normalId, VERTEX);
-	normalArray.set_tuple_size (3);
-	normalArray.resize (mesh.num_coords());
-	VecSet (UNPACK_DS(normalArray), 0);
-
-	const real_t*	coords		= mesh.coords()->raw_ptr();
-	real_t* 		normals		= normalArray.raw_ptr();
-	
-	for(auto gt : GrobSet (FACES)) {
-		const index_t*	inds		= mesh.grobs (gt).raw_ptr();
-		const index_t	numInds		= mesh.grobs (gt).num_indices();
-		const index_t	numCorners	= mesh.grobs (gt).grob_desc ().num_corners ();
-		const index_t	offset = numCorners / 2;
-
-		for (index_t i = 0; i < numInds; i += numCorners) {
-			const index_t* elem = inds + i;
-
-			real_t d0[3];
-			real_t d1[3];
-
-			VecSub (d0, 3, coords + elem[offset] * 3, coords + elem[0] * 3);
-			VecSub (d1, 3, coords + elem[1 + offset] * 3, coords + elem[1] * 3);
-
-			real_t n[3];
-			VecNormalize (VecCross3 (n, d0, d1), 3);
-
-			for(index_t j = 0; j < numCorners; ++j)
-				VecAppend (normals + elem [j] * 3, 3, n);
-		}
-	}
-
-	VecTupNormalize (UNPACK_DST(normalArray));
+    ComputeFaceVertexNormals3 (mesh, mesh.annex <RealArrayAnnex> (AnnexKey (VERTEX, normalId), 3));
 }
 
 }// end of namespace lume

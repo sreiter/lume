@@ -86,6 +86,7 @@ void FillHigherDimNeighborMap (TIndexVector& nbrMapOut,
 
 	FillHigherDimNeighborOffsetMap (offsetsOut, mesh, grobSet, nbrGrobSet, grobToIndexMap);
 
+    static constexpr index_t NO_GROB = NUM_GROB_TYPES;
 	nbrMapOut.clear ();
 	nbrMapOut.resize (offsetsOut.back() * 2, NO_GROB);
 	
@@ -242,7 +243,7 @@ void FillNeighborMap (TIndexVector& elemMapOut,
 		for(auto grobType : grobSet) {
 			grobBaseIndsOut [grobType] = counter;
 			for(auto grob : mesh.grobs (grobType)) {
-				offsetsOut [counter] = elemMapOut.size() / 2;
+				offsetsOut [counter] = static_cast <index_t> (elemMapOut.size() / 2);
 				grobHash.clear();
 
 				const index_t numSides = grob.num_sides(linkDim);
@@ -266,7 +267,7 @@ void FillNeighborMap (TIndexVector& elemMapOut,
 				++counter;
 			}
 		}
-		offsetsOut [counter] = elemMapOut.size() / 2;
+		offsetsOut [counter] = static_cast <index_t> (elemMapOut.size() / 2);
 	}
 	else {
 		throw LumeError ("linkDim > grobDim currently not supported.");

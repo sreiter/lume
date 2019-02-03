@@ -37,7 +37,7 @@ namespace impl {
 void PrintGrobDescs ()
 {
 	cout << "Overview over all available grid objects:\n\n";
-	for(index_t igrob = 0; igrob < NO_GROB; ++igrob) {
+	for(index_t igrob = 0; igrob < NUM_GROB_TYPES; ++igrob) {
 		GrobDesc desc (static_cast<grob_t> (igrob));
 
 		cout << igrob + 1 << ": " << desc.name().c_str() << endl;

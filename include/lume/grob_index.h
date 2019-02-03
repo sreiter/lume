@@ -28,6 +28,7 @@
 #ifndef __H__lume_grob_index
 #define __H__lume_grob_index
 
+#include <limits>
 #include "grob.h"
 
 namespace lume {
@@ -38,14 +39,18 @@ namespace lume {
  */
 struct GrobIndex {
 	GrobIndex () :
-		grobType (NO_GROB),
-		index (0)
+        grobType (VERTEX),
+        index (invalid_index ())
 	{}
 
 	GrobIndex (grob_t _grobType, index_t _index) :
 		grobType (_grobType),
 		index (_index)
 	{}
+
+    bool valid () const             {return index != invalid_index ();}
+    
+    static index_t invalid_index () {return std::numeric_limits <index_t>::max ();}
 
 	grob_t	grobType;
 	index_t	index;

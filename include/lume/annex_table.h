@@ -27,6 +27,7 @@
 #ifndef __H__lume_annex_table
 #define __H__lume_annex_table
 
+#include <array>
 #include "grob.h"
 #include "mesh.h"
 
@@ -35,75 +36,63 @@ namespace lume {
 template <class TAnnex>
 class AnnexTable {
 public:
-	
-	using SPTAnnex = std::shared_ptr <TAnnex>;
-	using CSPTAnnex = std::shared_ptr <const TAnnex>;
 
-	AnnexTable (SPMesh mesh, const std::string& annexName, GrobSet grobSet, bool createMissing)
+    template <class ... AnnexConstructorArgs>
+	AnnexTable (SPMesh mesh, const std::string& annexName, GrobSet grobSet)
 	{
 		m_mesh = mesh;
-		for(auto gt : grobSet) {
-			if (createMissing || mesh->has_annex <TAnnex> (annexName, gt))
-				m_annexes [gt] = mesh->annex <TAnnex> (annexName, gt);
-		}
+		for(auto gt : grobSet)
+        {
+            if (mesh->has_annex <TAnnex> (AnnexKey (gt, annexName)))
+            {
+                m_annexes [gt] = &mesh->annex_ptr <TAnnex> (AnnexKey (annexName, gt));
+            }
+            else
+            {
+                m_annexes [gt] = nullptr;
+            }
+        }
 	}
 
-	SPTAnnex annex (const grob_t grobType)			{return m_annexes [grobType];}
-	CSPTAnnex annex (const grob_t grobType) const	{return m_annexes [grobType];}
+    bool has_annex (const grob_t grobType) const
+    {
+        return m_annexes [grobType] != nullptr;
+    }
 
-	SPTAnnex* annexes ()							{return m_annexes;}
-	const SPTAnnex* annexes () const				{return m_annexes;}
+	Annex& annex (const grob_t grobType)
+    {
+        assert (m_annexes [grobType] != nullptr);
+        return *m_annexes [grobType];
+    }
+
+	const Annex& annex (const grob_t grobType) const
+    {
+        assert (m_annexes [grobType] != nullptr);
+        return *m_annexes [grobType];
+    }
 
 	SPMesh mesh ()			{return m_mesh;}
 	CSPMesh mesh () const	{return m_mesh;}
 
 private:
-	SPMesh		m_mesh;
-	SPTAnnex 	m_annexes [NUM_GROB_TYPES];
+	SPMesh m_mesh;
+	std::array <TAnnex*, NUM_GROB_TYPES> m_annexes;
 };
 
 
 template <class TAnnex>
 class ArrayAnnexTable {
 public:
-	
-	using SPTAnnex = std::shared_ptr <TAnnex>;
-	using CSPTAnnex = std::shared_ptr <const TAnnex>;
-
-	ArrayAnnexTable (SPMesh mesh, const std::string& annexName, GrobSet grobSet, bool createMissing) :
-		m_annexTable (mesh, annexName, grobSet, createMissing)
+	ArrayAnnexTable (SPMesh mesh, const std::string& annexName, GrobSet grobSet) :
+		m_annexTable (mesh, annexName, grobSet)
 	{}
 
-	SPTAnnex annex (const grob_t grobType)			{return m_annexTable.annex (grobType);}
-	CSPTAnnex annex (const grob_t grobType) const	{return m_annexTable.annex (grobType);}
+    bool has_annex (const grob_t grobType) const        {return m_annexTable.has_annex (grobType);}
+	Annex& annex (const grob_t grobType)			    {return m_annexTable.annex (grobType);}
+	const Annex& annex (const grob_t grobType) const	{return m_annexTable.annex (grobType);}
 
-	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return (*m_annexTable.annex (gi.grobType))[gi.index];}
-	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return (*m_annexTable.annex (gi.grobType))[gi.index];}
-
-	void clear_arrays ()
-	{
-		auto annexes = m_annexTable.annexes();
-
-		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
-			if (annexes[i])
-				annexes[i]->clear();
-		}
-	}
-
-	void resize_annexes_to_match_grobs (const index_t tupleSize = 0)
-	{
-		auto annexes = m_annexTable.annexes();
-		SPMesh mesh = m_annexTable.mesh();
-
-		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
-			if (annexes[i]) {
-				auto& a = annexes[i];
-				if (tupleSize > 0)
-					a->set_tuple_size (tupleSize);
-				a->resize (mesh->num (static_cast<grob_t>(i)) * a->tuple_size());
-			}
-		}
-	}
+	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return m_annexTable.annex (gi.grobType) [gi.index];}
+	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return m_annexTable.annex (gi.grobType) [gi.index];}
 
 private:
 	AnnexTable <TAnnex>	m_annexTable;

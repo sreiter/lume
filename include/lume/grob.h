@@ -35,35 +35,34 @@
 namespace lume {
 
 enum grob_t {
-	VERTEX,
-	EDGE,
-	TRI,
-	QUAD,
-	TET,
-	HEX,
-	PYRA,
-	PRISM,
-	NO_GROB
+    VERTEX,
+    EDGE,
+    TRI,
+    QUAD,
+    TET,
+    HEX,
+    PYRA,
+    PRISM
 };
+
+static const index_t NUM_GROB_TYPES = PRISM + 1;
+static const index_t MAX_GROB_DIM = 3;
 
 enum grob_set_t {
-	VERTICES	= VERTEX,
-	EDGES		= EDGE,
-	TRIS		= TRI,
-	QUADS		= QUAD,
-	TETS		= TET,
-	HEXS		= HEX,
-	PYRAS		= PYRA,
-	PRISMS		= PRISM,
+    VERTICES    = VERTEX,
+    EDGES       = EDGE,
+    TRIS        = TRI,
+    QUADS       = QUAD,
+    TETS        = TET,
+    HEXS        = HEX,
+    PYRAS       = PYRA,
+    PRISMS      = PRISM,
 
-	NO_GROB_SET	= NO_GROB,
-
-	FACES,
-	CELLS
+    NO_GROB_SET,
+    FACES,
+    CELLS
 };
 
-static const index_t MAX_GROB_DIM = 3;
-static const index_t NUM_GROB_TYPES = NO_GROB;
 static const index_t MAX_GROB_SET_SIZE = 4;
 
 static const index_t MAX_CORNERS [] = {

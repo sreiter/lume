@@ -36,22 +36,6 @@ using namespace std;
 
 namespace lume {
 
-namespace impl {
-	void GenerateVertexIndicesFromCoords (Mesh& mesh)
-	{
-		GrobArray& vrts = mesh.grobs (VERTEX);
-		const index_t oldNumVrts = vrts.size();
-		const index_t newNumVrts = mesh.coords()->num_tuples();
-		if (newNumVrts > oldNumVrts){
-			vrts.reserve (newNumVrts);
-			for(index_t i = oldNumVrts; i < newNumVrts; ++i)
-				vrts.push_back ({i});
-		}
-		else
-			vrts.resize (newNumVrts);
-	}
-}// end of namespace impl
-
 TotalToGrobIndexMap::
 TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs)
 {
@@ -85,7 +69,7 @@ generate_base_inds (Mesh& mesh)
     m_baseInds[0] = 0;
     const size_t numGrobTypes = m_grobTypes.size();
     for(size_t i = 0; i < numGrobTypes; ++i)
-     	m_baseInds [i+1] = m_baseInds [i] + mesh.num (m_grobTypes [i]);
+     	m_baseInds [i+1] = m_baseInds [i] + static_cast <index_t> (mesh.num (m_grobTypes [i]));
 }
 
 GrobIndex TotalToGrobIndexMap::
@@ -99,7 +83,7 @@ operator () (const index_t ind) const
 
     throw LumeError (string("TotalToGrobIndexMap: Couldn't map index ").
     					append (to_string(ind)));
-    return GrobIndex (NO_GROB, 0);
+    return GrobIndex ();
 }
 
 
@@ -218,7 +202,7 @@ void CreateSideGrobs (Mesh& mesh, const index_t sideDim)
 	}
 	
 	mesh.clear (GrobSetTypeByDim (sideDim));
-	mesh.insert (hash.begin(), hash.end());
+	mesh.insert_grobs (hash.begin(), hash.end());
 }
 
 

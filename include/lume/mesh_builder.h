@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,74 +22,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef __H__lume_mesh_builder
+#define __H__lume_mesh_builder
 
-#include "lume/subset_info_annex.h"
-
-using namespace std;
+#include <array>
+#include "annex.h"
+#include "grob_array.h"
+#include "mesh_anney_key.h"
 
 namespace lume {
 
-SubsetInfoAnnex::ImGuiExecutor SubsetInfoAnnex::s_imguiExecutor = nullptr;
+class Mesh;
 
-SubsetInfoAnnex::
-SubsetInfoAnnex()
-{}
+class MeshBuilder {
+public:
+    MeshBuilder ();
 
-SubsetInfoAnnex::
-SubsetInfoAnnex(const std::string& name) :
-	m_name (name)
-{}
+    GrobArray& grob_array (grob_t gt)   {return m_grobArrays.at (gt);}
 
-SubsetInfoAnnex::
-SubsetInfoAnnex (SubsetInfoAnnex&& sia) :
-    m_name (std::move (sia.m_name)),
-    m_subsetProps (std::move (sia.m_subsetProps))
-{   
-}
+private:
+    std::array <GrobArray, NUM_GROB_TYPES>  m_grobArrays;
+    AnnexStorage <MeshAnnexKey, Annex>      m_annexStorage;
+};
 
-SubsetInfoAnnex::
-~SubsetInfoAnnex()
-{}
+}//    end of namespace lume
 
-void SubsetInfoAnnex::
-set_name (const std::string& name)
-{
-	m_name = name;
-}
-
-const std::string& SubsetInfoAnnex::
-name () const
-{
-	return m_name;
-}
-
-void SubsetInfoAnnex::
-add_subset (const SubsetProperties& p)
-{
-	m_subsetProps.push_back (p);
-}
-
-void SubsetInfoAnnex::
-add_subset (SubsetProperties&& p)
-{
-	m_subsetProps.push_back (std::move (p));
-}
-
-
-void SubsetInfoAnnex::
-set_subset (const index_t i, const SubsetProperties& p)
-{
-	if (m_subsetProps.size() <= i)
-		m_subsetProps.resize (i+1);
-	m_subsetProps [i] = p;
-}
-
-void SubsetInfoAnnex::
-set_subset (const index_t i, SubsetProperties&& p)
-{
-	if (m_subsetProps.size() <= i)
-		m_subsetProps.resize (i+1);
-	m_subsetProps [i] = std::move (p);
-}
-	
-}//	end of namespace lume
+#endif    //__H__lume_mesh_builder

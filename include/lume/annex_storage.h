@@ -33,83 +33,90 @@
 #include <vector>
 #include <string>
 #include "annex.h"
+#include "annex_key.h"
 #include "custom_exception.h"
 
 namespace lume {
 
 DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
 
-template <class TKey, class T>
 class AnnexStorage
 {
 public:
-	using value_t		= std::shared_ptr <T>;
-	using const_value_t	= std::shared_ptr <const T>;
-	using annex_map_t	= std::map <TKey, value_t>;
+    using key_t         = std::pair <int, std::string>;
+	using value_t		= std::shared_ptr <Annex>;
+	using const_value_t	= std::shared_ptr <const Annex>;
+	using annex_map_t	= std::map <key_t, value_t>;
 
-	annex_map_t& annex_map ()						{return m_annexMap;}
-
-	const annex_map_t& annex_map () const			{return m_annexMap;}
-
-	bool has_annex (const TKey& id) const
+	bool has_annex (const key_t& id) const
 	{
 		auto i = m_annexMap.find (id);
 		return i != m_annexMap.end ();
 	}
 
-	template <class TConstruct = T>
-	value_t annex (const TKey& id)
-	{
-		auto d = m_annexMap[id];
-		if(!d)
-			m_annexMap[id] = d = std::make_shared <TConstruct> ();
-		return d;
-	}
+    template <class T>
+    bool has_annex (const key_t& id) const
+    {
+        auto i = m_annexMap.find (id);
+        return i != m_annexMap.end ()
+               && dynamic_cast <const T*> (i->second.get ()) != nullptr;
+    }
 
-	const_value_t annex (const TKey& id) const
+    template <class T, class ... ConstructorArgs>
+    value_t annex (const key_t& id, Mesh& mesh, ConstructorArgs&& ... args)
+    {
+        auto& annex = m_annexMap [id];
+        if (!annex)
+            annex = std::make_shared <T> (std::forward <ConstructorArgs> (args)...);
+        return annex;
+    }
+
+	const_value_t annex (const key_t& id) const
 	{
 		auto i = m_annexMap.find (id);
 		if (i == m_annexMap.end())
-			throw NoSuchAnnexError (std::to_string (id));
-		            
+			throw NoSuchAnnexError (id.second);
 		return i->second;
 	}
 
-	template <class TConcreteType>
-	value_t optional_annex (const TKey& id)
+	value_t optional_annex (const key_t& id)
 	{
 		auto i = m_annexMap.find (id);
 		if (i == m_annexMap.end())
-			return std::shared_ptr<TConcreteType>();
+			return std::shared_ptr<Annex>();
 		return i->second;
 	}
 
-	template <class TConcreteType>
-	const_value_t optional_annex (const TKey& id) const
+	const_value_t optional_annex (const key_t& id) const
 	{
 		auto i = m_annexMap.find (id);
 		if (i == m_annexMap.end())
-			return std::shared_ptr<const TConcreteType>();
+			return std::shared_ptr<const Annex>();
 		return i->second;
 	}
 
-	void set_annex (const TKey& id, const value_t& annex)
+	void set_annex (const key_t& id, const value_t& annex, Mesh& mesh)
 	{
+        if (!annex)
+            return;
 		m_annexMap[id] = annex;
+        if (id.first >= 0 && id.first < NUM_GROB_TYPES)
+            annex->grobs_changed (static_cast <grob_t> (id.first), mesh);
 	}
 
-	void remove_annex (const TKey& id)
+	void remove_annex (const key_t& id)
 	{
 		m_annexMap.erase (id);
 	}
 
-	std::vector <TKey> collect_keys () const
-	{
-		std::vector <TKey> keys;
-		for (auto& e : m_annexMap)
-			keys.push_back (e.first);
-		return keys;
-	}
+    void grobs_changed (const grob_t gt, Mesh& mesh)
+    {
+        for (auto& e: m_annexMap)
+        {
+            if (e.first.first == static_cast <int> (gt))
+                e.second->grobs_changed (gt, mesh);
+        }
+    }
 	
 private:
 	annex_map_t	m_annexMap;

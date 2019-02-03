@@ -67,7 +67,6 @@ refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes)
 	m_centerGrobTypes = centerGrobTypes;
 	m_neighborGrobTypes = neighborGrobTypes;
 
-	m_nbrs.set_tuple_size (2);
 	impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
 	                       m_centerGrobTypes, m_neighborGrobTypes);
 }
@@ -82,7 +81,6 @@ refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections)
 	m_centerGrobTypes = grobTypes;
 	m_neighborGrobTypes = grobTypes;
 
-	m_nbrs.set_tuple_size (2);
 	impl::FillNeighborMap (m_nbrs, m_offsets, m_grobBaseInds, *m_mesh,
 	                       grobTypes, grobConnections);
 }
@@ -136,7 +134,7 @@ offset_index (const GrobIndex& gi) const
 const index_t* Neighborhoods::first_neighbor (const GrobIndex& gi) const
 {
 	const index_t o = m_offsets [offset_index (gi)] * 2;
-	return m_nbrs.raw_ptr() +  o;
+	return m_nbrs.data() +  o;
 }
 
 

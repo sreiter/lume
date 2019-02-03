@@ -28,6 +28,7 @@
 #ifndef __H__lume_neighborhoods
 #define __H__lume_neighborhoods
 
+#include "array_annex.h"
 #include "grob_index.h"
 #include "mesh.h" // use forward instead
 #include "neighbors.h"
@@ -86,8 +87,8 @@ private:
 	index_t offset_index (const GrobIndex& gi) const;
 	const index_t* first_neighbor (const GrobIndex& gi) const;
 
-    IndexArrayAnnex m_offsets;
-    IndexArrayAnnex m_nbrs;
+    TupleVector <index_t> m_offsets;
+    TupleVector <index_t> m_nbrs {2};
     index_t         m_grobBaseInds [NUM_GROB_TYPES];
     SPMesh			m_mesh;
     GrobSet			m_centerGrobTypes;
