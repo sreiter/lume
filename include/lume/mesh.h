@@ -246,16 +246,13 @@ public:
         m_annexStorage.remove_annex (key.storage_key ());
     }
 
-	/**	returns the annex array for the given id.
-        If the annex is not yet present, it constructs it with the given constructor arguments.
-        \note If the annex exists already, constructor arguments are simply ignored.*/
-    template <class T, class ... ConstructorArgs>
-    T&
-    annex (const AnnexKey& key, ConstructorArgs&& ... args)
+	template <class T>
+	const T&
+	annex (const AnnexKey& key) const
     {
         assert (key.group_id () >= 0 && key.group_id () < m_grobLinks.size ());
 
-        Annex* basePtr = m_annexStorage.optional_annex (key.storage_key ()).get ();
+        const Annex* basePtr = m_annexStorage.optional_annex (key.storage_key ()).get ();
 
         if (!basePtr
             && m_grobLinks [key.group_id ()] != nullptr)
@@ -263,10 +260,7 @@ public:
             basePtr = m_grobLinks [key.group_id ()]->m_annexStorage.optional_annex (key.storage_key ()).get ();
         }
 
-        if (!basePtr)            
-            basePtr = m_annexStorage.annex <T> (key.storage_key (), *this, std::forward <ConstructorArgs> (args)...).get ();
-
-        T* ptr = dynamic_cast<T*> (basePtr);
+        const T* ptr = dynamic_cast<const T*> (basePtr);
 
         if (!ptr)
         {
@@ -279,45 +273,26 @@ public:
         return *ptr;
     }
 
-    template <class T, class ... ConstructorArgs>
-    typename TypedAnnexKey <T>::type&
-    annex (const TypedAnnexKey <T>& key, ConstructorArgs&& ... args)
-    {
-        return annex <T> (key, std::forward <ConstructorArgs> (args)...);
-    }
-
-	template <class T>
-	const T&
-	annex (const AnnexKey& key) const
-    {
-        assert (key.group_id () >= 0 && key.group_id () < m_grobLinks.size ());
-
-        const Annex* basePtr = m_annexStorage.optional_annex (key).get ();
-
-        if (!basePtr
-            && m_grobLinks [key.group_id ()] != nullptr)
-        {
-            basePtr = m_grobLinks [key.group_id ()]->optional_annex (key);
-        }
-
-        const T* ptr = std::dynamic_cast<const T*> (basePtr);
-
-        if (!ptr)
-        {
-            throw AnnexTypeError (std::string ("incompatible type '")
-                                  .append (typename (T))
-                                  .append ("' requested for annex key '")
-                                  .append (key.name ())
-                                  .append ("'."));
-        }
-        return *ptr;
-    }
-
     template <class T>
     const typename TypedAnnexKey <T>::type&
     annex (const TypedAnnexKey <T>& key) const
     {
-        return annex <typename T> (key);
+        return annex <typename T> (static_cast <const AnnexKey&> (key));
+    }
+
+    /** returns the annex array for the given id.*/
+    template <class T>
+    T&
+    annex (const AnnexKey& key)
+    {
+        return const_cast <T&> (const_cast <const Mesh*> (this)->annex <T> (key));
+    }
+
+    template <class T>
+    typename TypedAnnexKey <T>::type&
+    annex (const TypedAnnexKey <T>& key)
+    {
+        return annex <T> (static_cast <const AnnexKey&> (key));
     }
 
 private:

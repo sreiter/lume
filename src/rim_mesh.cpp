@@ -65,7 +65,8 @@ void CreateRimMesh (SPMesh rimMeshOut,
 			}
 			if (numVis == 1) {
 				rimMeshOut->insert_grob (rimGrob);
-				gotRimGrobFunc (GrobIndex(rimGrobType, rimMeshOut->num (rimGrobType)),
+				gotRimGrobFunc (GrobIndex(rimGrobType,
+                                          static_cast <index_t> (rimMeshOut->num (rimGrobType))),
 				                visNbrGrobIndex);
 			}
 		}

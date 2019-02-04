@@ -152,6 +152,7 @@ void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
 
 	FillLowerDimNeighborOffsetMap (offsetsOut, mesh, grobSet, nbrGrobSet);
 
+    constexpr index_t NO_GROB = NUM_GROB_TYPES;
 	nbrMapOut.clear ();
 	nbrMapOut.resize (offsetsOut.back() * 2, NO_GROB);
 

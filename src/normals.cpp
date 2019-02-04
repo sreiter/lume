@@ -49,13 +49,19 @@ void
 ComputeFaceVertexNormals3 (Mesh& mesh,
                            RealArrayAnnex& normalAnnex)
 {
-    auto const& coordsAnnex = mesh.annex (keys::vertexCoords, 3);
+    if (!mesh.has_annex (keys::vertexCoords))
+        return;
+
+    auto const& coordsAnnex = mesh.annex (keys::vertexCoords);
 
     if (coordsAnnex.tuple_size() != 3)
         throw BadTupleSizeError (std::to_string (coordsAnnex.tuple_size()));
     
     if (normalAnnex.tuple_size() != 3)
         throw BadTupleSizeError (std::to_string (normalAnnex.tuple_size()));
+
+    if (normalAnnex.size () != coordsAnnex.size ())
+        throw AnnexError ("Provided coordinate and normal annexes have different size.");
 
     VecSet (UNPACK_DS(normalAnnex), 0);
 
@@ -92,7 +98,10 @@ void
 ComputeFaceVertexNormals3 (Mesh& mesh,
 						   const std::string& normalId)
 {
-    ComputeFaceVertexNormals3 (mesh, mesh.annex <RealArrayAnnex> (AnnexKey (VERTEX, normalId), 3));
+    auto const normalKey = TypedAnnexKey <RealArrayAnnex> (VERTEX, normalId);
+    if (!mesh.has_annex (normalKey))
+        mesh.set_annex (normalKey, RealArrayAnnex {3});
+    ComputeFaceVertexNormals3 (mesh, mesh.annex (normalKey));
 }
 
 }// end of namespace lume

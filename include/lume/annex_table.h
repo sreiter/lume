@@ -45,7 +45,7 @@ public:
         {
             if (mesh->has_annex <TAnnex> (AnnexKey (gt, annexName)))
             {
-                m_annexes [gt] = &mesh->annex_ptr <TAnnex> (AnnexKey (annexName, gt));
+                m_annexes [gt] = &mesh->annex <TAnnex> (AnnexKey (gt, annexName));
             }
             else
             {
@@ -59,13 +59,13 @@ public:
         return m_annexes [grobType] != nullptr;
     }
 
-	Annex& annex (const grob_t grobType)
+	TAnnex& annex (const grob_t grobType)
     {
         assert (m_annexes [grobType] != nullptr);
         return *m_annexes [grobType];
     }
 
-	const Annex& annex (const grob_t grobType) const
+	const TAnnex& annex (const grob_t grobType) const
     {
         assert (m_annexes [grobType] != nullptr);
         return *m_annexes [grobType];

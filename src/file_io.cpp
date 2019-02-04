@@ -265,12 +265,22 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	// we have to map them to indices of individual grob types.
 	TotalToGrobIndexMap indMap (*mesh, UGXGrobTypeArrayFromGrobSet (gs));
 
-	ArrayAnnexTable <ArrayAnnex<T>> annexTable (mesh, annexName, gs, true);
-	annexTable.resize_annexes_to_match_grobs (1);
+    for (auto gt : gs)
+    {
+        auto const key = TypedAnnexKey <ArrayAnnex <T>> (gt, annexName);
+        if (mesh->has (gt)
+            && !mesh->has_annex (key))
+        {
+            mesh->set_annex (key, ArrayAnnex <T> {});
+        }
+    }
+
+	ArrayAnnexTable <ArrayAnnex<T>> annexTable (mesh, annexName, gs);
 
 	// parse the node values and assign indices
 	char* p = strtok (node->value(), " ");
 	while (p) {
+        assert (annexTable.has_annex (gt)); // make sure that an annex for the given grob type is present
 		const auto gi = indMap (index_t (atoi(p)));
 		annexTable [gi] = value;
 		p = strtok (nullptr, " ");

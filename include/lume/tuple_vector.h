@@ -86,12 +86,12 @@ public:
     inline size_type num_tuples () const      {return size() / tuple_size();}
 
     /// number of individual components making up a tuple
-    inline size_type tuple_size () const              {return m_tupleSize;}
+    inline size_type tuple_size () const        {return m_tupleSize;}
 
-    inline T* data()               {m_vector.data ();}
-    inline const T* data () const  {return m_vector.data ();}
+    inline T* data()                            {return m_vector.data ();}
+    inline const T* data () const               {return m_vector.data ();}
 
-    inline void clear ()                                        {m_vector.clear();}
+    inline void clear ()                                  {m_vector.clear();}
     inline void resize (const size_type s)                {m_vector.resize (s);}
     inline void resize (const size_type s, const T& v)    {m_vector.resize (s, v);}
     inline void reserve (const size_type s)               {m_vector.reserve (s);}

@@ -78,7 +78,7 @@ public:
     /// number of individual components making up a tuple
     inline size_type tuple_size () const       {return m_vector.tuple_size ();}
 
-    inline T* data()                        {m_vector.data ();}
+    inline T* data()                        {return m_vector.data ();}
     inline const T* data () const           {return m_vector.data ();}
 
 	inline T& operator [] (const size_type i)				{return m_vector[i];}
