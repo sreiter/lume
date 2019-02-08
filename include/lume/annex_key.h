@@ -25,6 +25,7 @@
 #ifndef __H__lume_mesh_annex_key
 #define __H__lume_mesh_annex_key
 
+#include <optional>
 #include <string>
 #include "grob.h"
 #include "annex_storage.h"
@@ -67,9 +68,12 @@ public:
         return m_storageKey.second;
     }
 
-    int group_id () const
+    std::optional <grob_t> grob_type () const
     {
-        return m_storageKey.first;
+        if (m_storageKey.first < NUM_GROB_TYPES)
+            return static_cast <grob_t> (m_storageKey.first);
+
+        return {};
     }
 
     const storage_key_t& storage_key () const

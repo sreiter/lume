@@ -32,6 +32,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -189,20 +190,18 @@ public:
 		return NO_GROB_SET;
 	}
 
-    void link_grobs_and_annexes (grob_t grobType, const std::shared_ptr <Mesh>& targetMesh)
+    void link_grobs_and_annexes (const std::shared_ptr <Mesh>& targetMesh, std::optional <grob_t> grobType = {})
     {
-        m_grobLinks.at (grobType) = targetMesh;
+        if (grobType)
+            m_grobLinks.at (*grobType) = targetMesh;
+        else
+            m_grobLinks.at (NUM_GROB_TYPES) = targetMesh;
     }
 
     void link_grobs_and_annexes (const GrobSet& grobSet, const std::shared_ptr <Mesh>& targetMesh)
     {
         for (auto const grobType : grobSet)
             link_grobs_and_annexes (grobType, targetMesh);
-    }
-
-    void link_non_grob_annexes (std::shared_ptr <Mesh>& targetMesh)
-    {
-        m_grobLinks.at (NUM_GROB_TYPES) = targetMesh;
     }
 
     void remove_all_links ()
@@ -250,14 +249,14 @@ public:
 	const T&
 	annex (const AnnexKey& key) const
     {
-        assert (key.group_id () >= 0 && key.group_id () < m_grobLinks.size ());
+        assert (link_index (key) >= 0 && link_index (key) < m_grobLinks.size ());
 
         const Annex* basePtr = m_annexStorage.optional_annex (key.storage_key ()).get ();
 
         if (!basePtr
-            && m_grobLinks [key.group_id ()] != nullptr)
+            && m_grobLinks [link_index (key)] != nullptr)
         {
-            basePtr = m_grobLinks [key.group_id ()]->m_annexStorage.optional_annex (key.storage_key ()).get ();
+            basePtr = m_grobLinks [link_index (key)]->m_annexStorage.optional_annex (key.storage_key ()).get ();
         }
 
         const T* ptr = dynamic_cast<const T*> (basePtr);
@@ -296,6 +295,12 @@ public:
     }
 
 private:
+    int link_index (const AnnexKey& key) const
+    {
+        auto const optionalGrobType = key.grob_type ();
+        return optionalGrobType ? *optionalGrobType : NUM_GROB_TYPES;
+    }
+
     GrobArray& grob_array (const grob_t grobType)
     {
         if (m_grobLinks [grobType] != nullptr)

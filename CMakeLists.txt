@@ -85,11 +85,7 @@ target_include_directories(lume
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidxml-1.13
 )
 
-target_compile_features(lume PUBLIC cxx_range_for
-                        			cxx_variadic_templates
-									cxx_lambdas
-									#cxx_return_type_deduction
-									)
+target_compile_features(lume PUBLIC cxx_std_17)
 
 
 if (BUILD_LUME_TESTS)

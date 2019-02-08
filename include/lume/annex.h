@@ -28,6 +28,7 @@
 #ifndef __H__lume_annex
 #define __H__lume_annex
 
+#include <optional>
 #include "custom_exception.h"
 #include "grob.h"
 
@@ -40,13 +41,65 @@ class Mesh;
 ///	Base class for annexes, which can e.g. be annexed to an instance of Mesh
 class Annex {
 public:
-	virtual ~Annex () {};
+	virtual ~Annex ()
+    {
+        if (bound_mesh () == nullptr)
+            unbind_from_mesh ();
+    };
+
 	virtual const char* class_name () const = 0;
 
-    virtual void grobs_changed (const grob_t gt, Mesh& mesh) {}
+    void bind_to_mesh (const Mesh& mesh, std::optional <grob_t> grobType = {})
+    {
+        m_boundMesh = &mesh;
+        m_boundGrobType = grobType;
+        on_bind_to_mesh ();
+    }
     
-    virtual void do_imgui () {}
-    virtual bool has_imgui () const {return false;}
+    void unbind_from_mesh ()
+    {
+        m_boundMesh = nullptr;
+        m_boundGrobType = {};
+        on_unbind_from_mesh ();
+    }
+
+    virtual void grobs_changed (grob_t grobType, const Mesh& mesh);
+
+    const Mesh* bound_mesh () const
+    {
+        return m_boundMesh;
+    }
+
+    std::optional <grob_t> bound_grob_type () const
+    {
+        return m_boundGrobType;
+    }
+
+    virtual void do_imgui ()
+    {
+    }
+
+    virtual bool has_imgui () const
+    {
+        return false;
+    }
+    
+protected:
+    virtual void on_bind_to_mesh ()
+    {
+    }
+
+    virtual void on_unbind_from_mesh ()
+    {
+    }
+
+    virtual void on_grobs_changed ()
+    {
+    }
+
+private:
+    const Mesh*             m_boundMesh {nullptr};
+    std::optional <grob_t>  m_boundGrobType;
 };
 
 }//	end of namespace lume
