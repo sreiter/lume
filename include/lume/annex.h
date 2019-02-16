@@ -41,60 +41,21 @@ class Mesh;
 ///	Base class for annexes, which can e.g. be annexed to an instance of Mesh
 class Annex {
 public:
-	virtual ~Annex ()
-    {
-        if (bound_mesh () == nullptr)
-            unbind_from_mesh ();
-    };
+    Annex () = default;
+    
+	virtual ~Annex () = default;
 
 	virtual const char* class_name () const = 0;
 
-    void bind_to_mesh (const Mesh& mesh, std::optional <grob_t> grobType = {})
-    {
-        m_boundMesh = &mesh;
-        m_boundGrobType = grobType;
-        on_bind_to_mesh ();
-    }
-    
-    void unbind_from_mesh ()
-    {
-        m_boundMesh = nullptr;
-        m_boundGrobType = {};
-        on_unbind_from_mesh ();
-    }
-
-    virtual void grobs_changed (grob_t grobType, const Mesh& mesh);
-
-    const Mesh* bound_mesh () const
-    {
-        return m_boundMesh;
-    }
-
-    std::optional <grob_t> bound_grob_type () const
-    {
-        return m_boundGrobType;
-    }
+    virtual void update (const Mesh& mesh, std::optional <grob_t> grobType)
+    {}
 
     virtual void do_imgui ()
-    {
-    }
+    {}
 
     virtual bool has_imgui () const
     {
         return false;
-    }
-    
-protected:
-    virtual void on_bind_to_mesh ()
-    {
-    }
-
-    virtual void on_unbind_from_mesh ()
-    {
-    }
-
-    virtual void on_grobs_changed ()
-    {
     }
 
 private:

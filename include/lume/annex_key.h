@@ -34,55 +34,34 @@ namespace lume {
 
 class AnnexKey {
 public:
-    using storage_key_t = AnnexStorage::key_t;
-
-    AnnexKey ()
-        : m_storageKey (-1, "")
-    {}
+    AnnexKey () = default;
     
-    AnnexKey (const char* name)
-        : m_storageKey (NUM_GROB_TYPES, name)
-    {}
-
-    AnnexKey (const std::string& name)
-        : m_storageKey (NUM_GROB_TYPES, name)
-    {}
-
-    AnnexKey (grob_t grobType, const char* name)
-        : m_storageKey (grobType, name)
-    {}
-
-    AnnexKey (grob_t grobType, const std::string& name)
-        : m_storageKey (grobType, name)
+    AnnexKey (std::string name, std::optional <grob_t> grobType = {})
+        : m_name (std::move (name))
+        , m_grobType (grobType)
     {}
 
     virtual ~AnnexKey () = default;
 
     bool operator < (const AnnexKey& key) const
     {
-        return m_storageKey < key.m_storageKey;
+        return m_grobType < key.m_grobType
+               && m_name < key.m_name;
     }
 
     const std::string& name () const
     {
-        return m_storageKey.second;
+        return m_name;
     }
 
     std::optional <grob_t> grob_type () const
     {
-        if (m_storageKey.first < NUM_GROB_TYPES)
-            return static_cast <grob_t> (m_storageKey.first);
-
-        return {};
-    }
-
-    const storage_key_t& storage_key () const
-    {
-        return m_storageKey;
+        return m_grobType;
     }
 
 private:
-    storage_key_t m_storageKey;
+    std::string m_name;
+    std::optional m_grobType;
 };
 
 template <class T>
@@ -93,20 +72,8 @@ public:
 
     TypedAnnexKey () = default;
     
-    TypedAnnexKey (const char* name)
-        : AnnexKey (name)
-    {}
-
-    TypedAnnexKey (const std::string& name)
-        : AnnexKey (name)
-    {}
-
-    TypedAnnexKey (grob_t grobType, const char* name)
-        : AnnexKey (grobType, name)
-    {}
-
-    TypedAnnexKey (grob_t grobType, const std::string& name)
-        : AnnexKey (grobType, name)
+    TypedAnnexKey (std::string name, std::optional <grob_t> grobType = {})
+        : AnnexKey (std::move (name), grobType)
     {}
 };
 

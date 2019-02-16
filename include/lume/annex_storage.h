@@ -43,7 +43,7 @@ DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
 class AnnexStorage
 {
 public:
-    using key_t         = std::pair <int, std::string>;
+    using key_t         = AnnexKey;
 	using value_t		= std::shared_ptr <Annex>;
 	using const_value_t	= std::shared_ptr <const Annex>;
 	using annex_map_t	= std::map <key_t, value_t>;
@@ -100,8 +100,7 @@ public:
         if (!annex)
             return;
 		m_annexMap[id] = annex;
-        if (id.first >= 0 && id.first < NUM_GROB_TYPES)
-            annex->grobs_changed (static_cast <grob_t> (id.first), mesh);
+        annex->update (mesh, id.grob_type ());
 	}
 
 	void remove_annex (const key_t& id)
@@ -109,12 +108,12 @@ public:
 		m_annexMap.erase (id);
 	}
 
-    void grobs_changed (const grob_t gt, Mesh& mesh)
+    void annex_update (const Mesh& mesh, std::optional <grob_t> grobType)
     {
         for (auto& e: m_annexMap)
         {
-            if (e.first.first == static_cast <int> (gt))
-                e.second->grobs_changed (gt, mesh);
+            if (e.first.grob_type () == grobType)
+                e.second->update (mesh, grobType);
         }
     }
 	
