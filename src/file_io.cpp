@@ -267,7 +267,7 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 
     for (auto gt : gs)
     {
-        auto const key = TypedAnnexKey <ArrayAnnex <T>> (gt, annexName);
+        auto const key = TypedAnnexKey <ArrayAnnex <T>> (annexName, gt);
         if (mesh->has (gt)
             && !mesh->has_annex (key))
         {

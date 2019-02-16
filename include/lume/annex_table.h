@@ -43,9 +43,10 @@ public:
 		m_mesh = mesh;
 		for(auto gt : grobSet)
         {
-            if (mesh->has_annex <TAnnex> (AnnexKey (gt, annexName)))
+            const TypedAnnexKey <TAnnex> annexKey (annexName, gt);
+            if (mesh->has_annex (annexKey))
             {
-                m_annexes [gt] = &mesh->annex <TAnnex> (AnnexKey (gt, annexName));
+                m_annexes [gt] = &mesh->annex (annexKey);
             }
             else
             {

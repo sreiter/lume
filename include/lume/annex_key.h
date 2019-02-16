@@ -28,7 +28,6 @@
 #include <optional>
 #include <string>
 #include "grob.h"
-#include "annex_storage.h"
 
 namespace lume {
 
@@ -61,7 +60,7 @@ public:
 
 private:
     std::string m_name;
-    std::optional m_grobType;
+    std::optional <grob_t> m_grobType;
 };
 
 template <class T>
@@ -81,8 +80,8 @@ template <class T> class ArrayAnnex;
 
 namespace keys
 {
-    const TypedAnnexKey <ArrayAnnex <real_t>> vertexCoords (VERTEX, "coords");
-    const TypedAnnexKey <ArrayAnnex <real_t>> vertexNormals (VERTEX, "normal");
+    const TypedAnnexKey <ArrayAnnex <real_t>> vertexCoords ("coords", VERTEX);
+    const TypedAnnexKey <ArrayAnnex <real_t>> vertexNormals ("normal", VERTEX);
 }
 
 }//    end of namespace lume

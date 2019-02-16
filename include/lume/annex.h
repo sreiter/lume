@@ -57,10 +57,6 @@ public:
     {
         return false;
     }
-
-private:
-    const Mesh*             m_boundMesh {nullptr};
-    std::optional <grob_t>  m_boundGrobType;
 };
 
 }//	end of namespace lume

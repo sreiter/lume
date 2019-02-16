@@ -39,7 +39,6 @@
 
 #include "annex.h"
 #include "annex_key.h"
-#include "annex_storage.h"
 #include "grob.h"
 #include "grob_array.h"
 #include "grob_hash.h"
@@ -48,6 +47,7 @@
 
 namespace lume {
 
+DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
 DECLARE_CUSTOM_EXCEPTION (AnnexTypeError, AnnexError);
 
 /** A mesh holds index arrays to define a net and provides annexes to store associtated data.
@@ -79,6 +79,10 @@ public:
     void resize_vertices (const size_t s)
     {
         auto& vertices = grob_array (VERTEX);
+        
+        if (s == vertices.size ())
+            return;
+
         if (s < vertices.size ())
         {
             vertices.resize (s);
@@ -94,25 +98,38 @@ public:
 
 	void insert_grob (const Grob& grob)
 	{
-		grob_array (grob.grob_type()).push_back (grob);
+		grob_array (grob.grob_type ()).push_back (grob);
+        annex_update (grob.grob_type ());
 	}
 
 	template <class iter_t>
 	void insert_grobs (const iter_t begin, const iter_t end)
 	{
+        std::array <bool, NUM_GROB_TYPES> wasInserted {};
+
 		for (iter_t i = begin; i != end; ++i)
-            grob_array (i->grob_type()).push_back (*i);
+        {
+            const grob_t grobType = i->grob_type ();
+            grob_array (grobType).push_back (*i);
+            wasInserted [grobType] = true;
+        }
+
+        for(size_t i = 0; i < NUM_GROB_TYPES; ++i) {
+            if (wasInserted [i])
+                annex_update (static_cast <grob_t> (i));
+        }
 	}
 
     void set_grobs (GrobArray&& grobs)
     {
         const grob_t grobType = grobs.grob_desc ().grob_type ();
         
-        if (m_grobLinks [grobType] != nullptr)
-            m_grobLinks [grobType]->set_grobs (std::move (grobs));
+        if (m_linkedMeshes [grobType] != nullptr)
+            m_linkedMeshes [grobType]->set_grobs (std::move (grobs));
 
         m_grobArrays [grobType].reset ();
-        m_grobArrays [grobType] = std::unique_ptr <GrobArray> (new GrobArray (std::move (grobs)));
+        m_grobArrays [grobType] = std::make_unique <GrobArray> (std::move (grobs));
+        annex_update (grobType);
     }
 
 	const GrobArray& grobs (const grob_t grobType) const
@@ -190,78 +207,80 @@ public:
 		return NO_GROB_SET;
 	}
 
-    void link_grobs_and_annexes (const std::shared_ptr <Mesh>& targetMesh, std::optional <grob_t> grobType = {})
+    void link_mesh (const std::shared_ptr <Mesh>& targetMesh, std::optional <grob_t> grobType = {})
     {
-        if (grobType)
-            m_grobLinks.at (*grobType) = targetMesh;
-        else
-            m_grobLinks.at (NUM_GROB_TYPES) = targetMesh;
+        linked_mesh (grobType) = targetMesh;
     }
 
-    void link_grobs_and_annexes (const GrobSet& grobSet, const std::shared_ptr <Mesh>& targetMesh)
+    void link_mesh (const std::shared_ptr <Mesh>& targetMesh, const GrobSet& grobSet)
     {
         for (auto const grobType : grobSet)
-            link_grobs_and_annexes (grobType, targetMesh);
+            linked_mesh (grobType) = targetMesh;
     }
 
     void remove_all_links ()
     {
-        for (auto& link : m_grobLinks)
+        for (auto& link : m_linkedMeshes)
             link.reset ();
     }
 
 	bool has_annex (const AnnexKey& key) const
     {
-        return m_annexStorage.has_annex (key.storage_key ());
-    }
-
-	template <class T>
-	bool has_annex (const AnnexKey& key) const
-    {
-        return m_annexStorage.has_annex <T> (key.storage_key ());
+        return m_annexMap.find (key) != m_annexMap.end ();
     }
 
     template <class T>
     bool has_annex (const TypedAnnexKey <T>& key) const
     {
-        return m_annexStorage.has_annex <T> (key.storage_key ());
+        auto i = m_annexMap.find (key);
+        return i != m_annexMap.end ()
+               && dynamic_cast <const T*> (i->second.get ()) != nullptr;
     }
 
     template <class T>
-    void set_annex (const AnnexKey& key, T&& annex)
+    T& set_annex (const AnnexKey& key, T&& annex)
     {
-        m_annexStorage.set_annex (key.storage_key (), std::make_shared <T> (std::move (annex)), *this);
+        const auto ret = m_annexMap.insert_or_assign (key, std::make_unique <T> (std::move (annex)));
+        assert (ret.second == true);
+        T& newAnnex = *static_cast <T*> (ret.first->second.get ());
+        newAnnex.update (*this, key.grob_type ());
+        return newAnnex;
     }
 
-    template <class T>
-    void set_annex (const TypedAnnexKey <T>& key, T&& annex)
-    {
-        m_annexStorage.set_annex (key.storage_key (), std::make_shared <T> (std::move (annex)), *this);
-    }
-
-    /// removes an annex from a mesh.
     void remove_annex (const AnnexKey& key)
     {
-        m_annexStorage.remove_annex (key.storage_key ());
+        m_annexMap.erase (key);
     }
 
 	template <class T>
-	const T&
-	annex (const AnnexKey& key) const
+    const typename TypedAnnexKey <T>::type&
+    annex (const TypedAnnexKey <T>& key) const
     {
-        assert (link_index (key) >= 0 && link_index (key) < m_grobLinks.size ());
-
-        const Annex* basePtr = m_annexStorage.optional_annex (key.storage_key ()).get ();
-
-        if (!basePtr
-            && m_grobLinks [link_index (key)] != nullptr)
+        const Annex* annex = nullptr;
+        auto annexIter = m_annexMap.find (key);
+        if (annexIter != m_annexMap.end ())
         {
-            basePtr = m_grobLinks [link_index (key)]->m_annexStorage.optional_annex (key.storage_key ()).get ();
+            annex = annexIter->second.get ();
+        }
+        else if (linked_mesh (key.grob_type ()) != nullptr)
+        {
+            annexIter = linked_mesh (key.grob_type ())->m_annexMap.find (key);
+            if (annexIter != linked_mesh (key.grob_type ())->m_annexMap.end ())
+            {
+                annex = annexIter->second.get ();
+            }
         }
 
-        const T* ptr = dynamic_cast<const T*> (basePtr);
+        if (annex == nullptr)
+        {
+            throw NoSuchAnnexError (std::string ("no annex found for the given key '")
+                                    .append (key.name ())
+                                    .append ("'."));
+        }
 
-        if (!ptr)
+        const T* typedAnnex = dynamic_cast<const T*> (annex);
+
+        if (typedAnnex == nullptr)
         {
             throw AnnexTypeError (std::string ("incompatible type '")
                                   .append (typeid (T).name ())
@@ -269,42 +288,33 @@ public:
                                   .append (key.name ())
                                   .append ("'."));
         }
-        return *ptr;
-    }
-
-    template <class T>
-    const typename TypedAnnexKey <T>::type&
-    annex (const TypedAnnexKey <T>& key) const
-    {
-        return annex <typename T> (static_cast <const AnnexKey&> (key));
-    }
-
-    /** returns the annex array for the given id.*/
-    template <class T>
-    T&
-    annex (const AnnexKey& key)
-    {
-        return const_cast <T&> (const_cast <const Mesh*> (this)->annex <T> (key));
+        return *typedAnnex;
     }
 
     template <class T>
     typename TypedAnnexKey <T>::type&
     annex (const TypedAnnexKey <T>& key)
     {
-        return annex <T> (static_cast <const AnnexKey&> (key));
+        return const_cast <T&> (const_cast <const Mesh*> (this)->annex <T> (key));
     }
 
 private:
-    int link_index (const AnnexKey& key) const
+    std::shared_ptr <Mesh>& linked_mesh (std::optional <grob_t> grobType)
     {
-        auto const optionalGrobType = key.grob_type ();
-        return optionalGrobType ? *optionalGrobType : NUM_GROB_TYPES;
+        const int index = grobType ? *grobType : NUM_GROB_TYPES;
+        return m_linkedMeshes [index];
+    }
+
+    const std::shared_ptr <Mesh>& linked_mesh (std::optional <grob_t> grobType) const
+    {
+        const int index = grobType ? *grobType : NUM_GROB_TYPES;
+        return m_linkedMeshes [index];
     }
 
     GrobArray& grob_array (const grob_t grobType)
     {
-        if (m_grobLinks [grobType] != nullptr)
-            return m_grobLinks [grobType]->grob_array (grobType);
+        if (m_linkedMeshes [grobType] != nullptr)
+            return m_linkedMeshes [grobType]->grob_array (grobType);
 
         if (m_grobArrays [grobType] == nullptr)
             m_grobArrays [grobType] = std::unique_ptr <GrobArray> (new GrobArray (grobType));
@@ -331,14 +341,26 @@ private:
 
     bool grobs_allocated (const grob_t grobType) const
     {
-        if (m_grobLinks [grobType] != nullptr)
-            return m_grobLinks [grobType]->grobs_allocated (grobType);
+        if (linked_mesh (grobType) != nullptr)
+            return linked_mesh (grobType)->grobs_allocated (grobType);
         return m_grobArrays [grobType].get() != nullptr;
     }
 
-	std::array <std::unique_ptr <GrobArray>, NUM_GROB_TYPES> m_grobArrays;
-    std::array <std::shared_ptr <Mesh>, NUM_GROB_TYPES + 1>  m_grobLinks;
-	AnnexStorage		                                     m_annexStorage;
+    void annex_update (std::optional <grob_t> grobType)
+    {
+        if (linked_mesh (grobType) != nullptr)
+            linked_mesh (grobType)->annex_update (grobType);
+        
+        for (auto& e: m_annexMap)
+        {
+            if (e.first.grob_type () == grobType)
+                e.second->update (*this, grobType);
+        }
+    }
+
+	std::array <std::unique_ptr <GrobArray>, NUM_GROB_TYPES>   m_grobArrays;
+    std::array <std::shared_ptr <Mesh>, NUM_GROB_TYPES + 1>    m_linkedMeshes;
+	std::map <AnnexKey, std::unique_ptr <Annex>>               m_annexMap;
 };
 
 using SPMesh = std::shared_ptr <Mesh>;

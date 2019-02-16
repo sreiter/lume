@@ -94,6 +94,7 @@ public:
     inline void clear ()                                  {m_vector.clear();}
     inline void resize (const size_type s)                {m_vector.resize (s);}
     inline void resize (const size_type s, const T& v)    {m_vector.resize (s, v);}
+    inline void set_num_tuples (const size_type num)      {m_vector.resize (num * tuple_size ());}
     inline void reserve (const size_type s)               {m_vector.reserve (s);}
 
     inline T& operator [] (const size_type i)             {return m_vector[i];}

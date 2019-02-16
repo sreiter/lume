@@ -68,6 +68,12 @@ public:
 
 	const char* class_name () const override	{return "ArrayAnnex";}
 
+    void update (const Mesh& mesh, std::optional <grob_t> grobType) override
+    {
+        if (grobType)
+            m_vector.set_num_tuples (mesh.num (*grobType));
+    }
+
     bool empty() const { return m_vector.empty(); }
 
     /// total number of entries, counting individual components

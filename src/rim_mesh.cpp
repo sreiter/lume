@@ -36,7 +36,7 @@ void CreateRimMesh (SPMesh rimMeshOut,
                       const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
                       const Neighborhoods* nbrhds)
 {
-	rimMeshOut->link_grobs_and_annexes (VERTEX, mesh);
+	rimMeshOut->link_mesh (mesh, VERTICES);
 
 	GrobSet rimGrobSet = grobSet.side_set ();
 

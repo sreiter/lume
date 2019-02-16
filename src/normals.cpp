@@ -98,7 +98,7 @@ void
 ComputeFaceVertexNormals3 (Mesh& mesh,
 						   const std::string& normalId)
 {
-    auto const normalKey = TypedAnnexKey <RealArrayAnnex> (VERTEX, normalId);
+    auto const normalKey = TypedAnnexKey <RealArrayAnnex> (normalId, VERTEX);
     if (!mesh.has_annex (normalKey))
         mesh.set_annex (normalKey, RealArrayAnnex {3});
     ComputeFaceVertexNormals3 (mesh, mesh.annex (normalKey));
