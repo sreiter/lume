@@ -38,9 +38,6 @@
 #include "stl_reader/stl_reader.h"
 #include "rapidxml/rapidxml.hpp"
 
-//debugging:
-#include <iostream>
-
 // disables warnings generated for strtok through MSVC
 #pragma warning(disable:4996)
 
@@ -270,18 +267,13 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	// we have to map them to indices of individual grob types.
 	TotalToGrobIndexMap indMap (*mesh, UGXGrobTypeArrayFromGrobSet (gs));
 
-    std::cout << ">>>>\n";
-    std::cout << "Parsing indices for grobSet " << gs.name () << std::endl;
     for (auto gt : gs)
     {
-        std::cout << "  checking grob type " << GrobDesc (gt).name () << std::endl;
         const TypedAnnexKey <ArrayAnnex <T>> key (annexName, gt);
         if (mesh->has (gt)
             && !mesh->has_annex (key))
         {
-            std::cout << "  Creating Annex " << annexName << " for grob " << GrobDesc (gt).name () << std::endl;
             mesh->set_annex (key, ArrayAnnex <T> {});
-            std::cout << "    new annex size: " << mesh->annex (key).size () << std::endl;
         }
     }
 
