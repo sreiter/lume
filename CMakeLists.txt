@@ -28,9 +28,6 @@
 cmake_minimum_required(VERSION 3.1)
 project (lume LANGUAGES CXX)
 
-option (BUILD_LUME_TESTS "Build 'lume_test' executable and configure test environment" OFF)
-message (STATUS "BUILD_LUME_TESTS: " ${BUILD_LUME_TESTS} "    (enable/disable with cmake option -DBUILD_LUME_TESTS=ON/OFF)")
-
 set (sources
         src/subset_info_annex.cpp
         src/file_io.cpp
@@ -45,6 +42,7 @@ set (sources
 
 set (headers
      	include/lume/annex.h
+        include/lume/annex_key.h
      	include/lume/array_annex.h
      	include/lume/array_iterator.h
      	include/lume/custom_exception.h
@@ -64,6 +62,7 @@ set (headers
      	include/lume/subset_info_annex.h
      	include/lume/topology.h
      	include/lume/topology_impl.h
+        include/lume/tuple_vector.h
      	include/lume/types.h
      	include/lume/unpack.h
      	include/lume/vec_math_raw.h)
@@ -86,15 +85,13 @@ target_include_directories(lume
 
 target_compile_features(lume PUBLIC cxx_std_17)
 
+# lume_tests executable and test environment
+file(COPY "test/test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
 
-if (BUILD_LUME_TESTS)
-	file(COPY "test/test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
+set (testSources
+     	test/tests.cpp
+     	test/tests_main.cpp)
 
-	set (testSources
-	     	test/tests.cpp
-	     	test/tests_main.cpp)
+add_executable (lume_tests ${testSources})
+target_link_libraries(lume_tests lume)
 
-	add_executable (lume_tests ${testSources})
-	target_link_libraries(lume_tests lume)
-
-endif (BUILD_LUME_TESTS)
