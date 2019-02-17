@@ -44,7 +44,7 @@ public:
         m_index (invalid_index ())
 	{}
 
-	GrobIndex (grob_t _grobType, index_t _index) :
+	GrobIndex (GrobType _grobType, index_t _index) :
 		m_grobType (_grobType),
 		m_index (_index)
 	{}
@@ -53,11 +53,11 @@ public:
     
     static index_t invalid_index () {return std::numeric_limits <index_t>::max ();}
 
-    grob_t grob_type () const       {return m_grobType;}
+    GrobType grob_type () const       {return m_grobType;}
     index_t index () const          {return m_index;}
 
 private:
-	grob_t	m_grobType;
+	GrobType	m_grobType;
 	index_t	m_index;
 };
 

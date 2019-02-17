@@ -46,8 +46,8 @@ class Mesh;
 class TotalToGrobIndexMap {
 public:
 	TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs);
-	TotalToGrobIndexMap (Mesh& mesh, const std::vector <grob_t>& gs);
-	TotalToGrobIndexMap (Mesh& mesh, std::vector <grob_t>&& gs);
+	TotalToGrobIndexMap (Mesh& mesh, const std::vector <GrobType>& gs);
+	TotalToGrobIndexMap (Mesh& mesh, std::vector <GrobType>&& gs);
 
 	GrobIndex operator () (const index_t ind) const;
 
@@ -55,7 +55,7 @@ private:
 	void generate_base_inds (Mesh& mesh);
 
 	std::vector <index_t>	m_baseInds;
-	std::vector <grob_t>	m_grobTypes;
+	std::vector <GrobType>	m_grobTypes;
 };
 
 
@@ -119,7 +119,7 @@ void GrobHashToTypeArray (TIndexVector& typeArrayInOut,
 template <class TIndexVector>
 void GrobHashToIndexArray (TIndexVector& indArrayInOut,
                            const GrobHash& hash,
-                           grob_t grobType);
+                           GrobType grobType);
 
 
 /// Creates grobs for all sides of the specified dimension

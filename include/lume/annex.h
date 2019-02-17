@@ -47,7 +47,7 @@ public:
 
 	virtual const char* class_name () const = 0;
 
-    virtual void update (const Mesh& mesh, std::optional <grob_t> grobType)
+    virtual void update (const Mesh& mesh, std::optional <GrobType> grobType)
     {}
 
     virtual void do_imgui ()

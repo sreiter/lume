@@ -42,7 +42,7 @@ GrobIndex NeighborIndices::
 neighbor (const index_t i) const
 {
 	const index_t* p = m_neighborhoods->first_neighbor(m_grobIndex) + i * 2;
-	return GrobIndex (static_cast<grob_t>(p[0]), p[1]);
+	return GrobIndex (static_cast<GrobType>(p[0]), p[1]);
 }
 
 

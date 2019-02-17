@@ -48,14 +48,14 @@ TotalToGrobIndexMap (Mesh& mesh, const GrobSet& gs)
 
 
 TotalToGrobIndexMap::
-TotalToGrobIndexMap (Mesh& mesh, const std::vector <grob_t>& gs) :
+TotalToGrobIndexMap (Mesh& mesh, const std::vector <GrobType>& gs) :
 	m_grobTypes (gs)
 {
 	generate_base_inds (mesh);
 }
 
 TotalToGrobIndexMap::
-TotalToGrobIndexMap (Mesh& mesh, std::vector <grob_t>&& gs) :
+TotalToGrobIndexMap (Mesh& mesh, std::vector <GrobType>&& gs) :
 	m_grobTypes (std::move (gs))
 {
 	generate_base_inds (mesh);
@@ -193,7 +193,7 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 
 void CreateSideGrobs (Mesh& mesh, const index_t sideDim)
 {
-	const std::vector<grob_t> grobs = mesh.grob_types();
+	const std::vector<GrobType> grobs = mesh.grob_types();
 
 	GrobHash hash;
 	for(auto gt : grobs) {

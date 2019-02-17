@@ -220,7 +220,7 @@ static void ReadIndices (TVector& indsOut, xml_node<>* node)
 	}
 }
 
-static void ReadGrobs (Mesh& meshInOut, const grob_t gt, xml_node<>* node)
+static void ReadGrobs (Mesh& meshInOut, const GrobType gt, xml_node<>* node)
 {
     GrobArray grobs (gt);
     ReadIndices (grobs.underlying_array (), node);
@@ -242,7 +242,7 @@ static SubsetInfoAnnex::Color ParseColor (char* colStr)
 
 
 // ugx uses a different order of 3d elements
-static std::vector <grob_t>
+static std::vector <GrobType>
 UGXGrobTypeArrayFromGrobSet (const GrobSet& gs)
 {
 	switch (gs.dim()) {

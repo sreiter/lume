@@ -35,7 +35,7 @@ class AnnexKey {
 public:
     AnnexKey () = default;
     
-    AnnexKey (std::string name, std::optional <grob_t> grobType = {})
+    AnnexKey (std::string name, std::optional <GrobType> grobType = {})
         : m_name (std::move (name))
         , m_grobType (grobType)
     {}
@@ -54,14 +54,14 @@ public:
         return m_name;
     }
 
-    std::optional <grob_t> grob_type () const
+    std::optional <GrobType> grob_type () const
     {
         return m_grobType;
     }
 
 private:
     std::string m_name;
-    std::optional <grob_t> m_grobType;
+    std::optional <GrobType> m_grobType;
 };
 
 template <class T>
@@ -72,7 +72,7 @@ public:
 
     TypedAnnexKey () = default;
     
-    TypedAnnexKey (std::string name, std::optional <grob_t> grobType = {})
+    TypedAnnexKey (std::string name, std::optional <GrobType> grobType = {})
         : AnnexKey (std::move (name), grobType)
     {}
 };

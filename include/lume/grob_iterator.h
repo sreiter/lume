@@ -41,7 +41,7 @@ public:
 	using pointer = const Grob*;
 	using reference = const Grob&;
 
-	GrobIterator (grob_t grobType, const index_t* globalCornerArray) :
+	GrobIterator (GrobType grobType, const index_t* globalCornerArray) :
 		m_grob (grobType, globalCornerArray),
 		m_numCorners (m_grob.num_corners ())
 	{}

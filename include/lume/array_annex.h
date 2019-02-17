@@ -69,7 +69,7 @@ public:
 
 	const char* class_name () const override	{return "ArrayAnnex";}
 
-    void update (const Mesh& mesh, std::optional <grob_t> grobType) override
+    void update (const Mesh& mesh, std::optional <GrobType> grobType) override
     {
         if (grobType)
             m_vector.set_num_tuples (mesh.num (*grobType));

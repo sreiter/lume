@@ -38,7 +38,7 @@ void PrintGrobDescs ()
 {
 	cout << "Overview over all available grid objects:\n\n";
 	for(index_t igrob = 0; igrob < NUM_GROB_TYPES; ++igrob) {
-		GrobDesc desc (static_cast<grob_t> (igrob));
+		GrobDesc desc (static_cast<GrobType> (igrob));
 
 		cout << igrob + 1 << ": " << desc.name().c_str() << endl;
 		cout << "dim: " << desc.dim() << endl;
@@ -67,7 +67,7 @@ void PrintGrobSetDescs ()
 {
 	cout << "Overview over all available grid objects sets:\n\n";
 	for(index_t igrobSet = 0; igrobSet <= CELLS; ++igrobSet) {
-		GrobSet gs (static_cast<grob_set_t> (igrobSet));
+		GrobSet gs (static_cast<GrobSetType> (igrobSet));
 
 		cout << igrobSet + 1 << ": " << gs.name().c_str() << endl;
 		cout << "dim:  " << gs.dim() << endl;
@@ -89,7 +89,7 @@ void PrintGrobSetDescs ()
 
 }// end of namespace impl
 
-const std::string& GrobName (grob_t grob)
+const std::string& GrobName (GrobType grob)
 {
 	static const std::string names [] = {
 		std::string ("vertex"),
@@ -106,7 +106,7 @@ const std::string& GrobName (grob_t grob)
 	return names[grob];
 }
 
-const std::string& GrobSetName (grob_set_t grobSet)
+const std::string& GrobSetName (GrobSetType grobSet)
 {
 	static const std::string names [] = {
 		std::string ("vertices"),
@@ -126,7 +126,7 @@ const std::string& GrobSetName (grob_set_t grobSet)
 }
 
 
-grob_set_t GrobSetTypeByDim (index_t dim)
+GrobSetType GrobSetTypeByDim (index_t dim)
 {
 	if (dim > MAX_GROB_DIM)
 		return NO_GROB_SET;

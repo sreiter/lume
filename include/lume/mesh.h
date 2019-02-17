@@ -109,20 +109,20 @@ public:
 
 		for (iter_t i = begin; i != end; ++i)
         {
-            const grob_t grobType = i->grob_type ();
+            const GrobType grobType = i->grob_type ();
             grob_array (grobType).push_back (*i);
             wasInserted [grobType] = true;
         }
 
         for(size_t i = 0; i < NUM_GROB_TYPES; ++i) {
             if (wasInserted [i])
-                annex_update (static_cast <grob_t> (i));
+                annex_update (static_cast <GrobType> (i));
         }
 	}
 
     void set_grobs (GrobArray&& grobs)
     {
-        const grob_t grobType = grobs.grob_desc ().grob_type ();
+        const GrobType grobType = grobs.grob_desc ().grob_type ();
         
         if (m_linkedMeshes [grobType] != nullptr)
             m_linkedMeshes [grobType]->set_grobs (std::move (grobs));
@@ -132,7 +132,7 @@ public:
         annex_update (grobType);
     }
 
-	const GrobArray& grobs (const grob_t grobType) const
+	const GrobArray& grobs (const GrobType grobType) const
 	{
 		return grob_array (grobType);
 	}
@@ -142,7 +142,7 @@ public:
 		return grobs (grobIndex.grob_type ()) [grobIndex.index ()];
 	}
 
-	bool has (const grob_t grobType) const
+	bool has (const GrobType grobType) const
 	{
 		return grobs_allocated (grobType) && grobs (grobType).size();
 	}
@@ -156,18 +156,18 @@ public:
 		return false;
 	}
 
-	std::vector <grob_t> grob_types() const
+	std::vector <GrobType> grob_types() const
 	{
-		std::vector <grob_t> grobTypes;
+		std::vector <GrobType> grobTypes;
 		for(index_t i = 0; i < NUM_GROB_TYPES; ++i) {
-			const grob_t grobType = static_cast<grob_t> (i);
+			const GrobType grobType = static_cast<GrobType> (i);
 			if (has (grobType))
 				grobTypes.push_back (grobType);
 		}
 		return grobTypes;
 	}
 
-	size_type num (grob_t grobType) const
+	size_type num (GrobType grobType) const
 	{
 		if (grobs_allocated (grobType))
 			return grobs (grobType).size ();
@@ -182,7 +182,7 @@ public:
 		return counter;
 	}
 
-	size_type num_indices (grob_t grobType) const
+	size_type num_indices (GrobType grobType) const
 	{
 		if (grobs_allocated (grobType))
 			return grobs (grobType).num_indices ();
@@ -197,17 +197,17 @@ public:
 		return counter;
 	}
 
-	grob_set_t grob_set_type_of_highest_dim () const
+	GrobSetType grob_set_type_of_highest_dim () const
 	{
 		for(int dim = (int)MAX_GROB_DIM; dim >= 0; --dim) {
-			grob_set_t gst = GrobSetTypeByDim ((index_t)dim);
+			GrobSetType gst = GrobSetTypeByDim ((index_t)dim);
 			if (has (gst))
 				return gst;
 		}
 		return NO_GROB_SET;
 	}
 
-    void link_mesh (const std::shared_ptr <Mesh>& targetMesh, std::optional <grob_t> grobType = {})
+    void link_mesh (const std::shared_ptr <Mesh>& targetMesh, std::optional <GrobType> grobType = {})
     {
         linked_mesh (grobType) = targetMesh;
     }
@@ -298,19 +298,19 @@ public:
     }
 
 private:
-    std::shared_ptr <Mesh>& linked_mesh (std::optional <grob_t> grobType)
+    std::shared_ptr <Mesh>& linked_mesh (std::optional <GrobType> grobType)
     {
         const int index = grobType ? *grobType : NUM_GROB_TYPES;
         return m_linkedMeshes [index];
     }
 
-    const std::shared_ptr <Mesh>& linked_mesh (std::optional <grob_t> grobType) const
+    const std::shared_ptr <Mesh>& linked_mesh (std::optional <GrobType> grobType) const
     {
         const int index = grobType ? *grobType : NUM_GROB_TYPES;
         return m_linkedMeshes [index];
     }
 
-    GrobArray& grob_array (const grob_t grobType)
+    GrobArray& grob_array (const GrobType grobType)
     {
         if (m_linkedMeshes [grobType] != nullptr)
             return m_linkedMeshes [grobType]->grob_array (grobType);
@@ -321,7 +321,7 @@ private:
         return *m_grobArrays [grobType];
     }
 
-    const GrobArray& grob_array (const grob_t grobType) const
+    const GrobArray& grob_array (const GrobType grobType) const
     {
         if (!grobs_allocated (grobType))
         {
@@ -338,14 +338,14 @@ private:
         return *m_grobArrays [grobType];
     }
 
-    bool grobs_allocated (const grob_t grobType) const
+    bool grobs_allocated (const GrobType grobType) const
     {
         if (linked_mesh (grobType) != nullptr)
             return linked_mesh (grobType)->grobs_allocated (grobType);
         return m_grobArrays [grobType].get() != nullptr;
     }
 
-    void annex_update (std::optional <grob_t> grobType)
+    void annex_update (std::optional <GrobType> grobType)
     {
         if (linked_mesh (grobType) != nullptr)
             linked_mesh (grobType)->annex_update (grobType);

@@ -34,7 +34,7 @@
 
 namespace lume {
 
-enum grob_t {
+enum GrobType {
     VERTEX,
     EDGE,
     TRI,
@@ -48,7 +48,7 @@ enum grob_t {
 static const index_t NUM_GROB_TYPES = PRISM + 1;
 static const index_t MAX_GROB_DIM = 3;
 
-enum grob_set_t {
+enum GrobSetType {
     VERTICES    = VERTEX,
     EDGES       = EDGE,
     TRIS        = TRI,
@@ -471,7 +471,7 @@ static const index_t GROB_SET_DESC_OFFESTS[] = {
 };
 
 
-static const grob_set_t GROB_SET_TYPE_BY_DIM[] = {
+static const GrobSetType GROB_SET_TYPE_BY_DIM[] = {
 	VERTICES,
 	EDGES,
 	FACES,
@@ -487,15 +487,15 @@ void PrintGrobSetDescs ();
 }//	end of namespace impl
 
 ///	returns the name of a grob
-const std::string& GrobName (grob_t grob);
+const std::string& GrobName (GrobType grob);
 
 ///	returns the name of a grob set
-const std::string& GrobSetName (grob_set_t grobSet);
+const std::string& GrobSetName (GrobSetType grobSet);
 
 ///	returns the largest constant from grob_set_t for a given dimension
 /** If no grob set for the given dimension exists, `NO_GROB_SET` is returned.
  * \returns VERTICES (dim==0), EDGES (dim==1), FACES (dim==2), CELLS (dim==3), NO_GROB_SET (else)*/
-grob_set_t GrobSetTypeByDim (index_t dim);
+GrobSetType GrobSetTypeByDim (index_t dim);
 
 ///	Describes a class of **grid objects** in terms of local corner indices and sides.
 /** A `GrobDesc` is a descriptor object for a given type of *grid object*.
@@ -509,11 +509,11 @@ grob_set_t GrobSetTypeByDim (index_t dim);
  */
 class GrobDesc {
 public:
-	GrobDesc (grob_t grobType) :
+	GrobDesc (GrobType grobType) :
 		m_offset (impl::GROB_DESC_OFFSETS [grobType])
 	{}
 
-	inline grob_t grob_type () const						{return static_cast<grob_t>(impl::GROB_DESCS [m_offset]);}
+	inline GrobType grob_type () const						{return static_cast<GrobType>(impl::GROB_DESCS [m_offset]);}
 	const std::string& name () const				{return GrobName (grob_type());}
 	inline index_t dim () const						{return impl::GROB_DESCS [m_offset + 1];}
 	inline index_t num_corners () const				{return (grob_type() == VERTEX) ? 1 : impl::GROB_DESCS [side_offset (0)];}
@@ -530,14 +530,14 @@ public:
 		return impl::GROB_DESCS [side_offset (sideDim)];
 	}
 
-	inline grob_set_t side_set_type (const index_t sideDim) const
+	inline GrobSetType side_set_type (const index_t sideDim) const
 	{
-		return grob_set_t (impl::GROB_DESCS[m_offset + 2 + sideDim]);
+		return GrobSetType (impl::GROB_DESCS[m_offset + 2 + sideDim]);
 	}
 
-	inline grob_t side_type (const index_t sideDim, const index_t sideIndex) const
+	inline GrobType side_type (const index_t sideDim, const index_t sideIndex) const
 	{
-		return static_cast<grob_t> (impl::GROB_DESCS [side_desc_offset (sideDim, sideIndex)]);
+		return static_cast<GrobType> (impl::GROB_DESCS [side_desc_offset (sideDim, sideIndex)]);
 	}
 	
 	inline GrobDesc side_desc (const index_t sideDim, const index_t sideIndex) const
@@ -628,7 +628,7 @@ private:
  */
 class Grob {
 public:
-	Grob (grob_t grobType, const index_t* corners = nullptr) :
+	Grob (GrobType grobType, const index_t* corners = nullptr) :
 		m_globCornerInds (corners),
 		m_cornerOffsets (impl::Array_16_4::ascending_order ()),
 		m_desc (grobType)
@@ -668,7 +668,7 @@ public:
 
 	inline index_t dim () const							{return m_desc.dim ();}
 	
-	inline grob_t grob_type () const					{return m_desc.grob_type ();}
+	inline GrobType grob_type () const					{return m_desc.grob_type ();}
 	
 	inline GrobDesc desc () const 						{return m_desc;}
 
@@ -743,7 +743,7 @@ public:
 	}
 
 private:
-	Grob (grob_t grobType, const index_t* globCornerInds, const impl::Array_16_4& cornerOffsets) :
+	Grob (GrobType grobType, const index_t* globCornerInds, const impl::Array_16_4& cornerOffsets) :
 		m_globCornerInds (globCornerInds),
 		m_cornerOffsets (cornerOffsets),
 		m_desc (grobType)
@@ -759,11 +759,11 @@ private:
 class GrobSet {
 public:
 	struct iterator {
-		using value_type = grob_t;
+		using value_type = GrobType;
 		
 		iterator () : index (0), set (nullptr) {}
 		iterator (index_t i, const GrobSet* gs ) : index (i), set (gs) {}
-		grob_t operator * () const	{return set->grob_type (index);}
+		GrobType operator * () const	{return set->grob_type (index);}
 		bool operator == (const iterator& it) const	{return index == it.index && set == it.set;}
 		bool operator != (const iterator& it) const	{return index != it.index || set != it.set;}
 		iterator& operator ++ ()					{++index; return *this;}
@@ -777,25 +777,25 @@ public:
 		m_offset (impl::GROB_SET_DESC_OFFESTS [NO_GROB_SET])
 	{}
 	
-	GrobSet (const grob_set_t glt) :
+	GrobSet (const GrobSetType glt) :
 		m_offset (impl::GROB_SET_DESC_OFFESTS [glt])
 	{}
 
-	GrobSet (const grob_t glt) :
+	GrobSet (const GrobType glt) :
 		m_offset (impl::GROB_SET_DESC_OFFESTS [glt])
 	{}
 
 	bool operator == (const GrobSet& gs) const			{return m_offset == gs.m_offset;}
 	bool operator != (const GrobSet& gs) const			{return m_offset != gs.m_offset;}
 
-	grob_set_t type () const							{return grob_set_t (impl::GROB_SET_DESCS [m_offset]);}
+	GrobSetType type () const							{return GrobSetType (impl::GROB_SET_DESCS [m_offset]);}
 	index_t dim () const								{return impl::GROB_SET_DESCS [m_offset + 1];}
 	const std::string& name () const					{return GrobSetName (type ());}
 	index_t size () const								{return impl::GROB_SET_DESCS [m_offset + 2];}
-	grob_t grob_type (const index_t i) const			{return grob_t (impl::GROB_SET_DESCS [m_offset + 3 + i]);}
+	GrobType grob_type (const index_t i) const			{return GrobType (impl::GROB_SET_DESCS [m_offset + 3 + i]);}
 
-	grob_set_t side_set (const index_t sideDim) const	{return grob_set_t(impl::GROB_SET_DESCS [m_offset + 3 + size() + sideDim]);}
-	grob_set_t side_set () const						{return side_set (dim() - 1);}
+	GrobSetType side_set (const index_t sideDim) const	{return GrobSetType(impl::GROB_SET_DESCS [m_offset + 3 + size() + sideDim]);}
+	GrobSetType side_set () const						{return side_set (dim() - 1);}
 
 	iterator begin () const		{return iterator (0, this);}
 	iterator end () const		{return iterator (size(), this);}

@@ -55,18 +55,18 @@ public:
         }
 	}
 
-    bool has_annex (const grob_t grobType) const
+    bool has_annex (const GrobType grobType) const
     {
         return m_annexes [grobType] != nullptr;
     }
 
-	TAnnex& annex (const grob_t grobType)
+	TAnnex& annex (const GrobType grobType)
     {
         assert (m_annexes [grobType] != nullptr);
         return *m_annexes [grobType];
     }
 
-	const TAnnex& annex (const grob_t grobType) const
+	const TAnnex& annex (const GrobType grobType) const
     {
         assert (m_annexes [grobType] != nullptr);
         return *m_annexes [grobType];
@@ -88,9 +88,9 @@ public:
 		m_annexTable (mesh, annexName, grobSet)
 	{}
 
-    bool has_annex (const grob_t grobType) const        {return m_annexTable.has_annex (grobType);}
-	Annex& annex (const grob_t grobType)			    {return m_annexTable.annex (grobType);}
-	const Annex& annex (const grob_t grobType) const	{return m_annexTable.annex (grobType);}
+    bool has_annex (const GrobType grobType) const        {return m_annexTable.has_annex (grobType);}
+	Annex& annex (const GrobType grobType)			    {return m_annexTable.annex (grobType);}
+	const Annex& annex (const GrobType grobType) const	{return m_annexTable.annex (grobType);}
 
 	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return m_annexTable.annex (gi.grob_type ()) [gi.index ()];}
 	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return m_annexTable.annex (gi.grob_type ()) [gi.index ()];}

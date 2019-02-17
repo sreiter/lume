@@ -75,13 +75,13 @@ private:
 namespace impl {
 
 	/// tests whether the grob_type() method of a GrobDesc of a given grob_t returns the correct grob_type.
-	static void TestGrobDescType (grob_t gt)
+	static void TestGrobDescType (GrobType gt)
 	{
 		COND_FAIL (GrobDesc (gt).grob_type () != gt,
 		           "Bad GrobDesc::grob_type() for grob type " << gt);
 	}
 
-	static void TestGrobDescTypes (grob_set_t gs)
+	static void TestGrobDescTypes (GrobSetType gs)
 	{
 		for(auto gt : GrobSet(gs)) {
 			TestGrobDescType (gt);
@@ -106,7 +106,7 @@ static void TestCreateMeshFromFile (const string& meshName)
 
 
 namespace impl {
-	void TestGrobArrayLength (Mesh& mesh, grob_t grobType)
+	void TestGrobArrayLength (Mesh& mesh, GrobType grobType)
 	{
 		if (!mesh.has (grobType))
 			return;
@@ -140,7 +140,7 @@ static void TestGrobArrays (SPMesh mesh)
 
 
 namespace impl {
-	void TestGrobIterator (Mesh& mesh, grob_t grobType)
+	void TestGrobIterator (Mesh& mesh, GrobType grobType)
 	{
 		if (!mesh.has (grobType))
 			return;

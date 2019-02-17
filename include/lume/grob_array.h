@@ -51,17 +51,17 @@ public:
         , m_array (std::move (grobArray.m_array))
     {}
 
-	GrobArray (grob_t grobType) :
+	GrobArray (GrobType grobType) :
 		m_grobDesc (grobType),
 		m_array (m_grobDesc.num_corners ())
 	{}
 
-    GrobArray (grob_t grobType, std::vector <index_t>&& inds) :
+    GrobArray (GrobType grobType, std::vector <index_t>&& inds) :
         m_grobDesc (grobType),
         m_array (m_grobDesc.num_corners (), std::move (inds))
     {}
 
-    GrobArray (grob_t grobType, TupleVector <index_t>&& inds) :
+    GrobArray (GrobType grobType, TupleVector <index_t>&& inds) :
         m_grobDesc (grobType),
         m_array (std::move (inds))
     {}

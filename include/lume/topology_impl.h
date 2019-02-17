@@ -61,7 +61,7 @@ void GrobHashToTypeArray (TIndexVector& typeArrayInOut,
 template <class TIndexVector>
 void GrobHashToIndexArray (TIndexVector& indArrayInOut,
                            const GrobHash& hash,
-                           grob_t grobType)
+                           GrobType grobType)
 {
 	using iter_t = GrobHash::const_iterator;
 	const iter_t iend = hash.end();
