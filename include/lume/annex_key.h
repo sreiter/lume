@@ -45,7 +45,8 @@ public:
     bool operator < (const AnnexKey& key) const
     {
         return m_grobType < key.m_grobType
-               && m_name < key.m_name;
+               || (m_grobType == key.m_grobType
+                   && m_name < key.m_name);
     }
 
     const std::string& name () const

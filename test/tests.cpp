@@ -111,8 +111,8 @@ namespace impl {
 		if (!mesh.has (grobType))
 			return;
 
-		GrobArray& ga = mesh.grobs (grobType);
-		IndexArrayAnnex& ia = ga.underlying_array ();
+		const GrobArray& ga = mesh.grobs (grobType);
+		const TupleVector <index_t>& ia = ga.underlying_array ();
 
 		COND_FAIL (ia.tuple_size() != ga.grob_desc().num_corners(),
 		           "Tuple size of underlying index array does not match the number of corners of the given GrobArray");
@@ -145,8 +145,8 @@ namespace impl {
 		if (!mesh.has (grobType))
 			return;
 
-		GrobArray& grobArray = mesh.grobs (grobType);
-		IndexArrayAnnex& indArray = grobArray.underlying_array ();
+		const GrobArray& grobArray = mesh.grobs (grobType);
+		const TupleVector <index_t>& indArray = grobArray.underlying_array ();
 
 		index_t indCounter = 0;
 		for(auto grob : grobArray) {
@@ -295,17 +295,16 @@ namespace impl {
 		const index_t sideDim = sideGrobSet.dim();
 		GrobSet grobSet (GrobSetTypeByDim (sideDim + 1));
 
-		try {
-			for(auto gt : grobSet) {
-				for(auto grob : mesh->grobs (gt)) {
-					for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
-						indexMap.at (grob.side (sideDim, iside));
-					}
+		for(auto gt : grobSet) {
+			for(auto grob : mesh->grobs (gt)) {
+				for(index_t iside = 0; iside < grob.num_sides(sideDim); ++iside) {
+					COND_FAIL (indexMap.find (grob.side (sideDim, iside)) == indexMap.end (),
+                               "side of grob could not be found in grobToIndexMap of all side grobs")
+                    {
+
+                    }
 				}
 			}
-		}
-		catch (std::out_of_range&) {
-			FAIL ("side of grob could not be found in grobToIndexMap of all side grobs");
 		}
 	}
 }// end of namespace impl
@@ -556,7 +555,7 @@ namespace impl {
 		COND_FAIL (numNbrs != expectedValence,
 		           "Wrong number of " << nbrs.neighborhoods()->neighbor_grob_set().name()
 		           << " neighbors of a "
-		           << GrobName (nbrs.center_grob_index().grobType)
+		           << GrobName (nbrs.center_grob_index().grob_type ())
 		           << " linked by " << linkGrobSetName
 		           << ". Expected " << expectedValence << " but got " << numNbrs);
 	}
@@ -576,7 +575,7 @@ namespace impl {
 		Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, linkGrobSet, FACES));
 
 		for(auto grobType : GrobSet(FACES)) {
-			const index_t numGrobs = mesh->num (grobType);
+			const index_t numGrobs = static_cast <index_t> (mesh->num (grobType));
 			for(index_t i = 0; i < numGrobs; ++i) {
 				const GrobIndex gi (grobType, i);
 
@@ -644,20 +643,22 @@ static void TestSubsets ()
 	const string subsetInfoName = "defSH";
 	auto mesh = CreateMeshFromFile ("test_meshes/circle_with_subsets.ugx");
 
-	COND_FAIL (!mesh->has_annex <SubsetInfoAnnex> (subsetInfoName, NO_GROB),
+	COND_FAIL (!mesh->has_annex (TypedAnnexKey <SubsetInfoAnnex> (subsetInfoName)),
 	           "'defSH' SubsetInfoAnnex missing");
 	vector<index_t> numInds (6, 0);
 
 	for(auto grobType : GrobSet(FACES)) {
-		COND_FAIL (!mesh->has_annex <IndexArrayAnnex> (subsetInfoName, grobType),
+        const TypedAnnexKey <IndexArrayAnnex> annexKey (subsetInfoName, grobType);
+		COND_FAIL (!mesh->has_annex (annexKey),
 		           "Missing IndexArrayAnnex '" << subsetInfoName << "' at grobs "
 		           "of type " << GrobName (grobType));
 
-		auto& subsetInds = *mesh->annex <IndexArrayAnnex> (subsetInfoName, grobType);
+		auto& subsetInds = mesh->annex (annexKey);
 
 		auto& grobs = mesh->grobs (grobType);
 		COND_FAIL (grobs.size() != subsetInds.size(),
-		           "Number of grobs and number of subset indices do not match for "
+		           "Number of grobs (" << grobs.size() << ") and "
+                   "number of subset indices (" << subsetInds.size () << ") do not match for "
 		           "grob type " << GrobName (grobType));
 
 		for(index_t i = 0; i < subsetInds.size(); ++i) {
@@ -681,7 +682,7 @@ static void TestSubsets ()
 namespace impl {
 	void TestParallelFor (const size_t size, const int minBlockSize = 0)
 	{
-		vector <int> v;
+		vector <size_t> v;
 		v.resize(size, 0);
 
 		parallel_for (0, v.size(), [&v] (size_t i) {v[i] = i;}, minBlockSize);
@@ -694,7 +695,7 @@ namespace impl {
 
 	//	now set them all to 0 and check again. Use container based implementation
 	//	with by-reference callback argument.
-		parallel_for (v, [] (int& entry) {entry = 0;}, minBlockSize);
+		parallel_for (v, [] (size_t& entry) {entry = 0;}, minBlockSize);
 
 		for(size_t i = 0; i < v.size(); ++i) {
 			COND_FAIL (0 != v[i], "TestParallelFor (minBlockSize:" << minBlockSize

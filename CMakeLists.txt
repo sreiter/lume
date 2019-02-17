@@ -45,7 +45,6 @@ set (sources
 
 set (headers
      	include/lume/annex.h
-     	include/lume/annex_storage.h
      	include/lume/array_annex.h
      	include/lume/array_iterator.h
      	include/lume/custom_exception.h

@@ -259,8 +259,8 @@ void FillNeighborMap (TIndexVector& elemMapOut,
 							continue;
 
 						if (grobHash.insert (nbrGrob).second) {
-							elemMapOut.push_back (nbrGrobInd.grobType);
-							elemMapOut.push_back (nbrGrobInd.index);
+							elemMapOut.push_back (nbrGrobInd.grob_type ());
+							elemMapOut.push_back (nbrGrobInd.index ());
 						}
 					}
 				}

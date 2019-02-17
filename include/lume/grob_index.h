@@ -37,23 +37,28 @@ namespace lume {
 /** \todo	grobType and index should be private and only availablle through method calls.
  * \todo	store grobType and index in one 64-bit unsigned integer.
  */
-struct GrobIndex {
+class GrobIndex {
+public:
 	GrobIndex () :
-        grobType (VERTEX),
-        index (invalid_index ())
+        m_grobType (VERTEX),
+        m_index (invalid_index ())
 	{}
 
 	GrobIndex (grob_t _grobType, index_t _index) :
-		grobType (_grobType),
-		index (_index)
+		m_grobType (_grobType),
+		m_index (_index)
 	{}
 
-    bool valid () const             {return index != invalid_index ();}
+    bool valid () const             {return m_index != invalid_index ();}
     
     static index_t invalid_index () {return std::numeric_limits <index_t>::max ();}
 
-	grob_t	grobType;
-	index_t	index;
+    grob_t grob_type () const       {return m_grobType;}
+    index_t index () const          {return m_index;}
+
+private:
+	grob_t	m_grobType;
+	index_t	m_index;
 };
 
 }//	end of namespace lume

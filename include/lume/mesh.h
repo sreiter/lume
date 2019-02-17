@@ -139,7 +139,7 @@ public:
 
 	Grob grob (const GrobIndex& grobIndex) const
 	{
-		return grobs (grobIndex.grobType) [grobIndex.index];
+		return grobs (grobIndex.grob_type ()) [grobIndex.index ()];
 	}
 
 	bool has (const grob_t grobType) const
@@ -241,7 +241,6 @@ public:
     T& set_annex (const AnnexKey& key, T&& annex)
     {
         const auto ret = m_annexMap.insert_or_assign (key, std::make_unique <T> (std::move (annex)));
-        assert (ret.second == true);
         T& newAnnex = *static_cast <T*> (ret.first->second.get ());
         newAnnex.update (*this, key.grob_type ());
         return newAnnex;

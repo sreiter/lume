@@ -92,8 +92,8 @@ public:
 	Annex& annex (const grob_t grobType)			    {return m_annexTable.annex (grobType);}
 	const Annex& annex (const grob_t grobType) const	{return m_annexTable.annex (grobType);}
 
-	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return m_annexTable.annex (gi.grobType) [gi.index];}
-	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return m_annexTable.annex (gi.grobType) [gi.index];}
+	typename TAnnex::value_type& operator [] (const GrobIndex& gi)				{return m_annexTable.annex (gi.grob_type ()) [gi.index ()];}
+	const typename TAnnex::value_type& operator [] (const GrobIndex& gi) const	{return m_annexTable.annex (gi.grob_type ()) [gi.index ()];}
 
 private:
 	AnnexTable <TAnnex>	m_annexTable;

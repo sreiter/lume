@@ -183,10 +183,10 @@ void parallel_for (TRandAccIter1 begin,
 		auto blockSize = restLen / restBlocks;
 
 	//	process one additional entry until (blockSize * restBlocks == restLen)
-		if (blockSize * restBlocks < restLen)
+		if (blockSize * restBlocks < static_cast <size_t> (restLen))
 			++blockSize;
 
-		auto tend = begin + blockSize;
+		TRandAccIter1 tend = static_cast <TRandAccIter1> (begin + blockSize);
 		auto f = std::async (std::launch::async,
 	                         [begin, tend, func] () {
 	                          	for (iter_t i = begin; i < tend; ++i)

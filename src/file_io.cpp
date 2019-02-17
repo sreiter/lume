@@ -38,6 +38,9 @@
 #include "stl_reader/stl_reader.h"
 #include "rapidxml/rapidxml.hpp"
 
+//debugging:
+#include <iostream>
+
 // disables warnings generated for strtok through MSVC
 #pragma warning(disable:4996)
 
@@ -60,6 +63,7 @@ std::shared_ptr <Mesh> CreateMeshFromSTL (std::string filename)
 							 tris.underlying_array(),
 							 solids);
 
+    mesh->resize_vertices (coords.num_tuples ());
     mesh->set_annex (keys::vertexCoords, RealArrayAnnex (std::move (coords)));
     mesh->set_annex (keys::vertexNormals, RealArrayAnnex (std::move (normals)));
     mesh->set_grobs (std::move (tris));
@@ -82,7 +86,7 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 	auto mesh = make_shared <Mesh> ();
 
     {
-        std::vector <real_t> coords;
+        TupleVector <real_t> coords (3);
 
 		ifstream in(nodesFilename);
 		if (!in) throw FileNotFoundError (nodesFilename);
@@ -125,7 +129,8 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 			}
 		}
 
-        mesh->set_annex (keys::vertexCoords, RealArrayAnnex (3, std::move (coords)));
+        mesh->resize_vertices (coords.num_tuples ());
+        mesh->set_annex (keys::vertexCoords, RealArrayAnnex (std::move (coords)));
 	}
 
 //	todo: read faces
@@ -265,13 +270,18 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	// we have to map them to indices of individual grob types.
 	TotalToGrobIndexMap indMap (*mesh, UGXGrobTypeArrayFromGrobSet (gs));
 
+    std::cout << ">>>>\n";
+    std::cout << "Parsing indices for grobSet " << gs.name () << std::endl;
     for (auto gt : gs)
     {
-        auto const key = TypedAnnexKey <ArrayAnnex <T>> (annexName, gt);
+        std::cout << "  checking grob type " << GrobDesc (gt).name () << std::endl;
+        const TypedAnnexKey <ArrayAnnex <T>> key (annexName, gt);
         if (mesh->has (gt)
             && !mesh->has_annex (key))
         {
+            std::cout << "  Creating Annex " << annexName << " for grob " << GrobDesc (gt).name () << std::endl;
             mesh->set_annex (key, ArrayAnnex <T> {});
+            std::cout << "    new annex size: " << mesh->annex (key).size () << std::endl;
         }
     }
 
@@ -280,8 +290,8 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	// parse the node values and assign indices
 	char* p = strtok (node->value(), " ");
 	while (p) {
-        assert (annexTable.has_annex (gt)); // make sure that an annex for the given grob type is present
 		const auto gi = indMap (index_t (atoi(p)));
+        assert (annexTable.has_annex (gi.grob_type ())); // make sure that an annex for the given grob type is present
 		annexTable [gi] = value;
 		p = strtok (nullptr, " ");
 	}
@@ -420,9 +430,6 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 		// 	bSuccess = create_octahedrons(volumes, grid, curNode, vertices);
 
 		else if(strcmp(name, "subset_handler") == 0) {
-		//	make sure that vertex indices are present
-			impl::GenerateVertexIndicesFromCoords (*mesh);
-
 			string siName = "subsetHandler";
 			if (xml_attribute<>* attrib = curNode->first_attribute("name"))
 				siName = attrib->value();
@@ -471,8 +478,6 @@ std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
 	else {
 		throw FileSuffixError (filename);
 	}
-
-	impl::GenerateVertexIndicesFromCoords (*mesh);
 	return mesh;
 }
 
