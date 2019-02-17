@@ -29,6 +29,7 @@
 #define __H__lume_data_buffer
 
 #include "annex.h"
+#include "mesh.h"
 #include "tuple_vector.h"
 
 namespace lume {
