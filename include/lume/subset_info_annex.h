@@ -139,9 +139,6 @@ private:
 
 };
 
-using SPSubsetInfoAnnex = std::shared_ptr <SubsetInfoAnnex>;
-using CSPSubsetInfoAnnex = std::shared_ptr <const SubsetInfoAnnex>;
-
 }//	end of namespace lume
 
 #endif	//__H__lume_subset_info_annex
