@@ -51,17 +51,19 @@ namespace lume {
  */
 class Grob {
 public:
+    /// Defines the maximum number of corners that any `Grob` may have.
+    /** For all Grobs `g` holds: `g.num_grobs() <= Grob::maxNumCorners`.
+        \note This limitation arises from the use of Array_16_4 which is used to
+              store local corner indices*/
+    static constexpr index_t maxNumCorners = 16;
+
+    using CornerIndexContainer = std::array <index_t, maxNumCorners>;
+
 	Grob (GrobType grobType, const index_t* corners = nullptr) :
 		m_globCornerInds (corners),
 		m_cornerOffsets (impl::Array_16_4::ascending_order ()),
 		m_desc (grobType)
 	{}
-
-    /// Returns the maximum number of corners that any `Grob` may have.
-    /** For all Grobs `g` holds: `g.num_grobs() <= Grob::max_num_grobs()`.
-        \note This limitation arises from the use of Array_16_4 which is used to
-              store local corner indices*/
-    static constexpr index_t maxNumCorners = 16;
 
 	///	only compares corners, ignores order and orientation.
 	bool operator == (const Grob& g) const
@@ -69,8 +71,8 @@ public:
 		if (m_desc.grob_type() != g.m_desc.grob_type())
 			return false;
 
-		std::array <index_t, maxNumCorners> gCorners;
-		g.corners (gCorners);
+		CornerIndexContainer gCorners;
+		g.collect_corners (gCorners);
 
 		const index_t numCorners = num_corners ();
 		for(index_t i = 0; i < numCorners; ++i) {
@@ -125,7 +127,7 @@ public:
 	 *
 	 * \returns	The number of corners of the specified side
 	 */
-	inline index_t corners (std::array <index_t, maxNumCorners>& cornersOut) const
+	inline index_t collect_corners (CornerIndexContainer& cornersOut) const
 	{
 		const index_t numCorners = num_corners();
 		for(index_t i = 0; i < numCorners; ++i)
