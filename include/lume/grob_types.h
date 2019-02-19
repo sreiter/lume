@@ -22,29 +22,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __H__lume_mesh_builder
-#define __H__lume_mesh_builder
+#ifndef __H__lume_grob_types
+#define __H__lume_grob_types
 
-#include <array>
-#include "annex.h"
-#include "grob_array.h"
-#include "mesh_anney_key.h"
+#include <string>
+#include "types.h"
 
 namespace lume {
 
-class Mesh;
-
-class MeshBuilder {
-public:
-    MeshBuilder ();
-
-    GrobArray& grob_array (grob_t gt)   {return m_grobArrays.at (gt);}
-
-private:
-    std::array <GrobArray, NUM_GROB_TYPES>  m_grobArrays;
-    AnnexStorage <MeshAnnexKey, Annex>      m_annexStorage;
+enum GrobType {
+    VERTEX,
+    EDGE,
+    TRI,
+    QUAD,
+    TET,
+    HEX,
+    PYRA,
+    PRISM
 };
+
+static const index_t NUM_GROB_TYPES = PRISM + 1;
+static const index_t MAX_GROB_DIM = 3;
+
+/// returns the name of a GrobType
+const std::string& GrobTypeName (GrobType grob);
 
 }//    end of namespace lume
 
-#endif    //__H__lume_mesh_builder
+#endif    //__H__lume_grob_types

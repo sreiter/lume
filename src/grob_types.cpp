@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,3 +22,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "lume/grob_types.h"
+
+namespace lume {
+
+const std::string& GrobTypeName (GrobType grob)
+{
+    static const std::string names [] = {
+        std::string ("vertex"),
+        std::string ("edge"),
+        std::string ("tri"),
+        std::string ("quad"),
+        std::string ("tet"),
+        std::string ("hex"),
+        std::string ("pyra"),
+        std::string ("prism"),
+        std::string ("invalid")
+    };
+
+    return names[grob];
+}
+    
+}// end of namespace lume

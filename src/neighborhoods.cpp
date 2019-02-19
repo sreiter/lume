@@ -37,7 +37,7 @@ namespace lume {
 Neighborhoods::
 Neighborhoods ()
 {
-	for(index_t i = 0; i < MAX_GROB_SET_SIZE; ++i)
+	for(index_t i = 0; i < NUM_GROB_TYPES; ++i)
 		m_grobBaseInds[i] = 0;
 
 	m_centerGrobTypes = NO_GROB_SET;
@@ -101,7 +101,7 @@ neighbor_indices (const GrobIndex gi) const
 	if (baseIndex >= m_offsets.size())
 		throw LumeError (std::string("This Neighborhoods instance doesn't provide "
 		                             "neighbors for grobs of type ")
-						.append (GrobName (gi.grob_type ())));
+						.append (GrobTypeName (gi.grob_type ())));
 
 	return NeighborIndices (gi, this);
 }

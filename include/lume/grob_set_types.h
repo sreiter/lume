@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,3 +22,37 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef __H__lume_grob_set_types
+#define __H__lume_grob_set_types
+
+#include <string>
+#include "grob_types.h"
+
+namespace lume {
+
+enum GrobSetType {
+    VERTICES    = VERTEX,
+    EDGES       = EDGE,
+    TRIS        = TRI,
+    QUADS       = QUAD,
+    TETS        = TET,
+    HEXS        = HEX,
+    PYRAS       = PYRA,
+    PRISMS      = PRISM,
+
+    NO_GROB_SET,
+    FACES,
+    CELLS
+};
+
+/// returns the name of a grob set
+const std::string& GrobSetTypeName (GrobSetType grobSet);
+
+/// returns the largest constant from grob_set_t for a given dimension
+/** If no grob set for the given dimension exists, `NO_GROB_SET` is returned.
+ * \returns VERTICES (dim==0), EDGES (dim==1), FACES (dim==2), CELLS (dim==3), NO_GROB_SET (else)*/
+GrobSetType GrobSetTypeByDim (index_t dim);
+
+}//    end of namespace lume
+
+#endif    //__H__lume_grob_set_types

@@ -24,23 +24,27 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 cmake_minimum_required(VERSION 3.1)
 project (lume LANGUAGES CXX)
 
 set (sources
-        src/subset_info_annex.cpp
         src/file_io.cpp
         src/grob.cpp
+        src/grob_desc.cpp
+        src/grob_set.cpp
+        src/grob_set_types.cpp
+        src/grob_types.cpp
         src/mesh.cpp
         src/neighborhoods.cpp
         src/neighbors.cpp
         src/normals.cpp
         src/rim_mesh.cpp
+        src/subset_info_annex.cpp
         src/topology.cpp
     )
 
 set (headers
+        include/lume/impl/array_16_4.h
      	include/lume/annex.h
         include/lume/annex_key.h
      	include/lume/array_annex.h
@@ -52,6 +56,9 @@ set (headers
      	include/lume/grob_hash.h
      	include/lume/grob_index.h
      	include/lume/grob_iterator.h
+        include/lume/grob_set.h
+        include/lume/grob_set_types.h
+        include/lume/grob_types.h
      	include/lume/mesh.h
      	include/lume/neighborhoods.h
      	include/lume/neighborhoods_impl.hpp
@@ -67,7 +74,9 @@ set (headers
      	include/lume/unpack.h
      	include/lume/vec_math_raw.h)
 
-add_library (lume ${sources} ${headers})
+set (privateHeaders)
+
+add_library (lume ${sources} ${headers} ${private_headers})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)

@@ -71,6 +71,60 @@ private:
 };
 
 
+namespace impl {
+    void PrintGrobDescs ()
+    {
+        cout << "Overview over all available grid objects:\n\n";
+        for(index_t igrob = 0; igrob < NUM_GROB_TYPES; ++igrob) {
+            GrobDesc desc (static_cast<GrobType> (igrob));
+
+            cout << igrob + 1 << ": " << desc.name().c_str() << endl;
+            cout << "dim: " << desc.dim() << endl;
+
+            for(index_t sideDim = 0; sideDim < desc.dim(); ++sideDim) {
+                const index_t numSides = desc.num_sides (sideDim);
+                cout << "side set of dim " << sideDim << ": " << GrobSetTypeName (desc.side_set_type (sideDim)).c_str() << endl;
+                cout << "sides of dim " << sideDim << ": " << numSides << endl;
+                for(index_t iside = 0; iside < numSides; ++iside) {
+                    cout << "  side " << iside << ": type = " <<
+                        desc.side_desc (sideDim, iside).name().c_str() << ", on corners:";
+
+                    const index_t* corners = desc.local_side_corners (sideDim, iside);
+                    for(index_t i = 0; i < desc.num_side_corners (sideDim, iside); ++i)
+                    {
+                        cout << " " << corners[i];
+                    }
+                    cout << endl;
+                }
+            }
+            cout << endl;
+        }
+    }
+
+    void PrintGrobSetDescs ()
+    {
+        cout << "Overview over all available grid objects sets:\n\n";
+        for(index_t igrobSet = 0; igrobSet <= CELLS; ++igrobSet) {
+            GrobSet gs (static_cast<GrobSetType> (igrobSet));
+
+            cout << igrobSet + 1 << ": " << gs.name().c_str() << endl;
+            cout << "dim:  " << gs.dim() << endl;
+            cout << "size: " << gs.size() << endl;
+
+            cout << "grobs:";
+            
+            for (auto gt : gs)
+                cout << " " << GrobTypeName (gt).c_str();
+
+            cout << endl;
+
+            for(index_t sideDim = 0; sideDim < gs.dim(); ++sideDim) 
+                cout << "side set " << sideDim << "D: " << GrobSetTypeName (gs.side_set(sideDim)).c_str() << endl;
+
+            cout << endl;
+        }
+    }
+}
 
 namespace impl {
 
@@ -502,8 +556,8 @@ namespace impl {
 				COND_FAIL (numNbrs != valences [grob],
 				           "Mismatch between the number of neighbors ("
 				           << numNbrs << ") in a neighborhood of '"
-				           << GrobName (gt) << "' and the valence of that '"
-				           << GrobName (gt) << "' (" << valences [grob] << ")");
+				           << GrobTypeName (gt) << "' and the valence of that '"
+				           << GrobTypeName (gt) << "' (" << valences [grob] << ")");
 
 				if (nbrGrobDim < grobDim) {
 					TestNeighborsAreSides (mesh, grob, nbrs);
@@ -555,7 +609,7 @@ namespace impl {
 		COND_FAIL (numNbrs != expectedValence,
 		           "Wrong number of " << nbrs.neighborhoods()->neighbor_grob_set().name()
 		           << " neighbors of a "
-		           << GrobName (nbrs.center_grob_index().grob_type ())
+		           << GrobTypeName (nbrs.center_grob_index().grob_type ())
 		           << " linked by " << linkGrobSetName
 		           << ". Expected " << expectedValence << " but got " << numNbrs);
 	}
@@ -651,7 +705,7 @@ static void TestSubsets ()
         const TypedAnnexKey <IndexArrayAnnex> annexKey (subsetInfoName, grobType);
 		COND_FAIL (!mesh->has_annex (annexKey),
 		           "Missing IndexArrayAnnex '" << subsetInfoName << "' at grobs "
-		           "of type " << GrobName (grobType));
+		           "of type " << GrobTypeName (grobType));
 
 		auto& subsetInds = mesh->annex (annexKey);
 
@@ -659,7 +713,7 @@ static void TestSubsets ()
 		COND_FAIL (grobs.size() != subsetInds.size(),
 		           "Number of grobs (" << grobs.size() << ") and "
                    "number of subset indices (" << subsetInds.size () << ") do not match for "
-		           "grob type " << GrobName (grobType));
+		           "grob type " << GrobTypeName (grobType));
 
 		for(index_t i = 0; i < subsetInds.size(); ++i) {
 			COND_FAIL (subsetInds[i] >= numInds.size(), "Invalid subset index encountered: " << subsetInds[i]);

@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,3 +22,47 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "lume/grob_set_types.h"
+
+namespace {
+
+using namespace lume;
+
+const GrobSetType g_grobSetTypeByDim [] = {
+    VERTICES,
+    EDGES,
+    FACES,
+    CELLS
+};
+}// end of empty namespace
+
+namespace lume {
+
+const std::string& GrobSetTypeName (GrobSetType grobSet)
+{
+    static const std::string names [] = {
+        std::string ("vertices"),
+        std::string ("edges"),
+        std::string ("tris"),
+        std::string ("quads"),
+        std::string ("tets"),
+        std::string ("hexs"),
+        std::string ("pyras"),
+        std::string ("prisms"),
+        std::string ("invalid"),
+        std::string ("faces"),
+        std::string ("cells"),
+    };
+
+    return names[grobSet];
+}
+
+GrobSetType GrobSetTypeByDim (index_t dim)
+{
+    if (dim < 0 || dim > MAX_GROB_DIM)
+        return NO_GROB_SET;
+
+    return g_grobSetTypeByDim [dim];
+}
+
+}// end of namespace lume

@@ -43,6 +43,7 @@
 #include "grob_array.h"
 #include "grob_hash.h"
 #include "grob_index.h"
+#include "grob_set.h"
 #include "types.h"
 
 namespace lume {
