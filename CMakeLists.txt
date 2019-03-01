@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 3.1)
 project (lume LANGUAGES CXX)
 
 set (sources
+        src/commands/types.cpp
         src/file_io.cpp
         src/grob.cpp
         src/grob_desc.cpp
@@ -103,4 +104,11 @@ set (testSources
 
 add_executable (lume_tests ${testSources})
 target_link_libraries(lume_tests lume)
+
+#lumeshell
+set (lumeshellSources
+        lumeshell/lumeshell.cpp)
+
+add_executable (lumeshell ${lumeshellSources})
+target_link_libraries(lumeshell lume)
 

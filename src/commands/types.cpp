@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,33 +22,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstdlib>
 
-#ifndef __H__lume_custom_exception
-#define __H__lume_custom_exception
+#include "lume/commands/types.h"
+#include "lume/file_io.h"
 
-#include <stdexcept>
-#include <string>
-
-///	Declares an exception class. baseClass should derive from std::exception or similar.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-	class className : public baseClass {\
-	public:\
-		className () : baseClass ("") {setup_msg ("");}\
-		className (const char* what) : baseClass ("") {setup_msg(what);}\
-		className (const std::string& what) : baseClass ("") {setup_msg(what.c_str());}\
-		const char* what () const noexcept override {return m_what.c_str();}\
-        template <class T>\
-        className& operator << (const T& t) {m_what.append (t); return *this;}\
-	private:\
-		void setup_msg (const char* what) {m_what.append (#className).append (": ").append (what);}\
-		std::string	m_what;\
-	}; 
-	
 namespace lume {
+namespace commands {
 
-/// The base class for all exceptions thrown by slimesh
-DECLARE_CUSTOM_EXCEPTION (LumeError, std::runtime_error);
+Variant VariantFromString (Type type, const char* s)
+{
+    switch (type)
+    {
+        case Type::Char:         return static_cast <char>          (std::strtol   (s, nullptr, 0));
+        case Type::UnsignedChar: return static_cast <unsigned char> (std::strtoul  (s, nullptr, 0));
+        case Type::Int:          return static_cast <int>           (std::strtol   (s, nullptr, 0));
+        case Type::UnsignedInt:  return static_cast <unsigned int>  (std::strtoul  (s, nullptr, 0));
+        case Type::SizeT:        return static_cast <size_t>        (std::strtoull (s, nullptr, 0));
 
-}//	end of namespace lume
+        case Type::Float:        return std::strtof (s, nullptr);
+        case Type::Double:       return std::strtod (s, nullptr);
 
-#endif	//__H__lume_custom_exception
+        case Type::String:       return std::string (s);
+
+        case Type::Mesh:         return CreateMeshFromFile (s);
+    }
+
+    return {};
+}
+
+}// end of namespace commands
+}// end of namespace lume

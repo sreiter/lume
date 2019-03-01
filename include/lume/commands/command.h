@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,33 +22,48 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef __H__lume_command
+#define __H__lume_command
 
-#ifndef __H__lume_custom_exception
-#define __H__lume_custom_exception
-
-#include <stdexcept>
 #include <string>
+#include <vector>
 
-///	Declares an exception class. baseClass should derive from std::exception or similar.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-	class className : public baseClass {\
-	public:\
-		className () : baseClass ("") {setup_msg ("");}\
-		className (const char* what) : baseClass ("") {setup_msg(what);}\
-		className (const std::string& what) : baseClass ("") {setup_msg(what.c_str());}\
-		const char* what () const noexcept override {return m_what.c_str();}\
-        template <class T>\
-        className& operator << (const T& t) {m_what.append (t); return *this;}\
-	private:\
-		void setup_msg (const char* what) {m_what.append (#className).append (": ").append (what);}\
-		std::string	m_what;\
-	}; 
-	
+#include "arguments.h"
+
 namespace lume {
+namespace commands {
 
-/// The base class for all exceptions thrown by slimesh
-DECLARE_CUSTOM_EXCEPTION (LumeError, std::runtime_error);
+class Command
+{
+public:
+    Command (std::string name, std::string description)
+        : m_name (std::move (name))
+        , m_description (std::move (description))
+    {}
 
-}//	end of namespace lume
+    virtual ~Command () = default;
 
-#endif	//__H__lume_custom_exception
+    const std::string& name () const            {return m_name;}
+    const std::string& description () const     {return m_description;}
+
+    virtual int        version () const         {return 1;}
+    
+    virtual std::vector <ArgumentDesc> argument_descs () const   {return {};}
+
+    void execute (const Arguments& args)
+    {
+        run (args);
+    }
+
+protected:
+    virtual void run (const Arguments& args) = 0;
+
+private:
+    std::string m_name;
+    std::string m_description;
+};
+
+}// end of namespace commands
+}// end of namespace lume
+
+#endif    //__H__lume_command
