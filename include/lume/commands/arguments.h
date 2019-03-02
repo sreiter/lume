@@ -34,6 +34,7 @@ namespace commands {
 
 DECLARE_CUSTOM_EXCEPTION (BadArgumentError, LumeError);
 DECLARE_CUSTOM_EXCEPTION (ArgumentsInitializationError, LumeError);
+DECLARE_CUSTOM_EXCEPTION (BadNumberOfArgumentsError, LumeError);
 
 class ArgumentDesc
 {
@@ -106,6 +107,9 @@ private:
     const std::vector <ArgumentDesc>&   m_argDescs;
     const std::vector <Variant>&        m_argValues;
 };
+
+/// Translates the given set of strings to arguments corresponding to the specified argument descs
+std::vector <Variant> TranslateArguments (const std::vector <ArgumentDesc>& argDescs, int argc, char** argv);
 
 }// end of namespace commands
 }// end of namespace lume

@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 3.1)
 project (lume LANGUAGES CXX)
 
 set (sources
+        src/commands/arguments.cpp
         src/commands/types.cpp
         src/file_io.cpp
         src/grob.cpp

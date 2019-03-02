@@ -33,6 +33,7 @@
 namespace lume {
 namespace commands {
 
+DECLARE_CUSTOM_EXCEPTION (UnknownCommandError, LumeError);
 DECLARE_CUSTOM_EXCEPTION (CommandExecutionError, LumeError);
 
 class Commander
@@ -45,32 +46,50 @@ public:
     // }
 
     template <class T>
-    void add (std::string name)
+    void add ()
     {
-        m_commands.emplace (std::move (name), std::make_unique <T> ());
+        auto cmd = std::make_unique <T> ();
+        m_commands.emplace (cmd->name (), std::move (cmd));
     }
 
-    // void run (const std::string& name, const Arguments& args)
-    // {
-    //     m_commands.at (name)->execute (args);
-    // }
-
-    void run (const std::string& name)
+    void run (const std::string& name, Arguments& args)
     {
-        std::vector <ArgumentDesc> argDescs;
-        std::vector <Variant>      argValues;
-
         try {
-            m_commands.at (name)->execute (Arguments::create (argDescs, argValues));
+            get_command (name).execute (args);
         }
         catch (std::runtime_error& err)
         {
-            throw CommandExecutionError () << "An error occurred during execution of command '"
-                                           << name << "':\n" << "  -> " << err.what ();
+            throw CommandExecutionError () << "In '" << name << "':\n" << "  -> " << err.what ();
+        }
+    }
+
+    void run (const std::string& name, int argc, char** argv)
+    {
+        auto& command = get_command (name);
+
+        try {
+            std::vector <ArgumentDesc> argDescs = command.argument_descs ();
+            std::vector <Variant>      argValues = TranslateArguments (argDescs, argc, argv);
+            command.execute (Arguments::create (argDescs, argValues));
+        }
+        catch (std::runtime_error& err)
+        {
+            throw CommandExecutionError () << "In '" << name << "':\n" << "  -> " << err.what ();
         }
     }
 
 private:
+    Command& get_command (const std::string& name)
+    {
+        auto iter = m_commands.find (name);
+
+        if (iter == m_commands.end () || iter->second == nullptr) {
+            throw UnknownCommandError () << name;
+        }
+
+        return *iter->second;
+    }
+
     std::map <std::string, std::unique_ptr <Command>> m_commands;
 };
 

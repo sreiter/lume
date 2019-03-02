@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,35 +22,26 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "lume/commands/arguments.h"
 
-#ifndef __H__lume_custom_exception
-#define __H__lume_custom_exception
-
-#include <stdexcept>
-#include <string>
-
-///	Declares an exception class. baseClass should derive from std::exception or similar.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-	class className : public baseClass {\
-	public:\
-		className () : baseClass ("") {setup_msg ("");}\
-		className (const char* what) : baseClass ("") {setup_msg(what);}\
-		className (const std::string& what) : baseClass ("") {setup_msg(what.c_str());}\
-		const char* what () const noexcept override {return m_what.c_str();}\
-        template <class T>\
-        className& operator << (const T& t) {m_what.append (std::to_string (t)); return *this;}\
-        className& operator << (const std::string& t) {m_what.append (t); return *this;}\
-        className& operator << (const char* t) {m_what.append (t); return *this;}\
-	private:\
-		void setup_msg (const char* what) {m_what.append (#className).append (": ").append (what);}\
-		std::string	m_what;\
-	}; 
-	
 namespace lume {
+namespace commands {
 
-/// The base class for all exceptions thrown by slimesh
-DECLARE_CUSTOM_EXCEPTION (LumeError, std::runtime_error);
+std::vector <Variant> TranslateArguments (const std::vector <ArgumentDesc>& argDescs, int argc, char** argv)
+{
+    if (static_cast <int> (argDescs.size ()) != argc) {
+        throw BadNumberOfArgumentsError () << "Expected " << argDescs.size () << ", but given " << argc << ".";
+    }
 
-}//	end of namespace lume
+    std::vector <Variant> values;
+    values.reserve (argDescs.size ());
 
-#endif	//__H__lume_custom_exception
+    for (size_t i = 0; i < argDescs.size (); ++i) {
+        values.push_back (VariantFromString (argDescs [i].type (), argv [i]));
+    }
+
+    return values;
+}
+
+}// end of namespace commands
+}// end of namespace lume

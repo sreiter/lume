@@ -52,8 +52,7 @@ namespace commands {
 
             std::cout << "Mesh contents:" << std::endl;
             auto grobTypes = mesh->grob_types ();
-            for (auto gt : grobTypes)
-            {
+            for (auto gt : grobTypes) {
                 std::cout << "  " << GrobTypeName (gt) << ": \t" << mesh->num (gt) << std::endl;
             }
         }
@@ -70,12 +69,12 @@ int main (int argc, char** argv)
 
     try {
         lume::commands::Commander commander;
-        commander.add <lume::commands::PrintMeshContents> ("PrintMeshContents");
+        commander.add <lume::commands::PrintMeshContents> ();
 
         bool printHelp = true;
         if (argc >= 2)
         {
-            commander.run (argv[1]);
+            commander.run (argv[1], argc - 2, argv + 2);
         }
     }
     catch (std::runtime_error& err)
