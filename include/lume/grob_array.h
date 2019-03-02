@@ -87,10 +87,8 @@ public:
 		using std::to_string;
 
 		if (inds.size() != num_grob_corners())
-			throw BadNumberOfIndices (string ("expected: ").
-			                          append (to_string (num_grob_corners())).
-			                          append (", given: ").
-			                          append (to_string (inds.size())));
+			throw BadNumberOfIndices () << "expected: " << num_grob_corners()
+			                            << ", given: " << inds.size();
 
 		for(auto i : inds) 
 			m_array.push_back (i);
@@ -102,10 +100,8 @@ public:
 		using std::to_string;
 
 		if (grob.num_corners() != num_grob_corners())
-			throw BadNumberOfIndices (string ("expected: ").
-			                          append (to_string (num_grob_corners())).
-			                          append (", given: ").
-			                          append (to_string (grob.num_corners())));
+			throw BadNumberOfIndices () << "expected: " << num_grob_corners()
+			                            << ", given: " << grob.num_corners();
 
 		for(index_t i = 0; i < grob.num_corners(); ++i)
 			m_array.push_back (grob.corner(i));

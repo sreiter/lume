@@ -50,8 +50,8 @@ namespace tests {
 
 DECLARE_CUSTOM_EXCEPTION (TestError, LumeError);
 
-#define FAIL(msg)	{std::stringstream ss; ss << msg; throw(TestError(ss.str()));}
-#define COND_FAIL(cond, msg)	if(cond){FAIL(msg);}
+#define FAIL(msg)	            throw TestError() << msg;
+#define COND_FAIL(cond, msg)    if(cond) {FAIL(msg);}
 
 
 class TestStats {

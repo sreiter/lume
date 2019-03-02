@@ -31,28 +31,45 @@
 #include <stdexcept>
 #include <string>
 
-///	Declares an exception class. baseClass should derive from std::exception or similar.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-	class className : public baseClass {\
-	public:\
-		className () : baseClass ("") {setup_msg ("");}\
-		className (const char* what) : baseClass ("") {setup_msg(what);}\
-		className (const std::string& what) : baseClass ("") {setup_msg(what.c_str());}\
-		const char* what () const noexcept override {return m_what.c_str();}\
-        template <class T>\
-        className& operator << (const T& t) {m_what.append (std::to_string (t)); return *this;}\
-        className& operator << (const std::string& t) {m_what.append (t); return *this;}\
-        className& operator << (const char* t) {m_what.append (t); return *this;}\
-	private:\
-		void setup_msg (const char* what) {m_what.append (#className).append (": ").append (what);}\
-		std::string	m_what;\
-	}; 
-	
 namespace lume {
 
 /// The base class for all exceptions thrown by slimesh
-DECLARE_CUSTOM_EXCEPTION (LumeError, std::runtime_error);
+class LumeError : public std::runtime_error
+{
+public:
+    LumeError ()
+        : std::runtime_error ("")
+        , m_what ("LumeError: ")
+    {}
 
-}//	end of namespace lume
+    const char* what () const noexcept override {return m_what.c_str();}
 
+    template <class T>
+    LumeError& operator << (const T& t) {m_what.append (std::to_string (t)); return *this;}
+    LumeError& operator << (const std::string& t) {m_what.append (t); return *this;}
+    LumeError& operator << (const char* t) {m_what.append (t); return *this;}
+
+protected:
+    LumeError (const char* derivedClassName)
+        : std::runtime_error ("")
+        , m_what (derivedClassName)
+    {
+        m_what.append (": ");
+    }
+
+private:
+    std::string m_what;
+};
+
+}// end of namespace lume
+
+///	Declares an exception class. baseClass should derive be LumeError or a derived class.
+#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
+	class className : public baseClass {\
+	public:\
+		className () : baseClass (#className) {}\
+    protected:\
+        className (const char* derivedClassName) : baseClass (derivedClassName) {}\
+	}; 
+	
 #endif	//__H__lume_custom_exception

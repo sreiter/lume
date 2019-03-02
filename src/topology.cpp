@@ -81,8 +81,7 @@ operator () (const index_t ind) const
         	return GrobIndex(m_grobTypes[i], ind - m_baseInds[i]);
     }
 
-    throw LumeError (string("TotalToGrobIndexMap: Couldn't map index ").
-    					append (to_string(ind)));
+    throw LumeError () << "TotalToGrobIndexMap: Couldn't map index " << ind;
     return GrobIndex ();
 }
 
@@ -164,7 +163,7 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 		}
 	}
 	else
-		throw LumeError ("ComputeGrobValences is currently not implemented for grobs.dim() == nbrGrobs.dim(). Sorry.");
+		throw LumeError () << "ComputeGrobValences is currently not implemented for grobs.dim() == nbrGrobs.dim(). Sorry.";
 }
 
 

@@ -39,7 +39,7 @@ int main (int argc, char** argv)
 
 	try {
 		if (!lume::tests::RunTests ())
-			throw LumeError ("lume::RunTests did not succeed!");
+			throw LumeError () << "lume::RunTests did not succeed!";
 	}
 	catch (std::exception& e) {
 		cout << "\nAn ERROR occurred during execution:\n";

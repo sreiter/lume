@@ -47,7 +47,7 @@ void FillHigherDimNeighborOffsetMap (TIndexVector& offsetsOut,
 	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
 	if (nbrGrobSetDim <= grobSetDim)
-		throw LumeError ("neighbor dimension has to be higher than central grob set dimension");
+		throw LumeError () << "neighbor dimension has to be higher than central grob set dimension";
 
 	for (auto nbrGrobType : nbrGrobSet) {
 		for(auto nbrGrob : mesh.grobs (nbrGrobType)) {
@@ -79,7 +79,7 @@ void FillHigherDimNeighborMap (TIndexVector& nbrMapOut,
 	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
 	if (nbrGrobSetDim <= grobSetDim)
-		throw LumeError ("neighbor dimension has to be higher than central grob set dimension");
+		throw LumeError () << "neighbor dimension has to be higher than central grob set dimension";
 
 	GrobHashMap <index_t> grobToIndexMap;
 	FillGrobToIndexMap (grobToIndexMap, grobBaseIndsOut, mesh, grobSet);
@@ -124,7 +124,7 @@ void FillLowerDimNeighborOffsetMap (TIndexVector& offsetsOut,
 	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
 	if (nbrGrobSetDim >= grobSetDim)
-		throw LumeError ("neighbor dimension has to be lower than central grob set dimension");
+		throw LumeError () << "neighbor dimension has to be lower than central grob set dimension";
 
 	offsetsOut [0] = 0;
 	index_t counter = 1;
@@ -148,7 +148,7 @@ void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
 	const index_t nbrGrobSetDim = nbrGrobSet.dim();
 
 	if (nbrGrobSetDim >= grobSetDim)
-		throw LumeError ("neighbor dimension has to be lower than central grob set dimension");
+		throw LumeError () << "neighbor dimension has to be lower than central grob set dimension";
 
 	FillLowerDimNeighborOffsetMap (offsetsOut, mesh, grobSet, nbrGrobSet);
 
@@ -197,8 +197,8 @@ void FillNeighborMap (TIndexVector& nbrMapOut,
 		FillLowerDimNeighborMap (nbrMapOut, offsetsOut, grobBaseIndsOut, mesh, grobSet, nbrGrobSet);
 	}
 	else {
-		throw LumeError ("FillNeighborMap: Please use a different overload of 'FillNeighborMap' "
-						 "for neighborhoods where the center- and neighbor-grob-sets are equal.");
+		throw LumeError () << "FillNeighborMap: Please use a different overload of 'FillNeighborMap' "
+						      "for neighborhoods where the center- and neighbor-grob-sets are equal.";
 	}
 }
 
@@ -212,14 +212,14 @@ void FillNeighborMap (TIndexVector& elemMapOut,
                       const Neighborhoods& grobConnections)
 {
 	if (grobConnections.center_grob_set() == grobSet)
-		throw LumeError (std::string("Provided grobConnections have the wrong central_grob_type. "
-		                 "Expected something else than").append(grobSet.name())
-						 .append(", since this is also the type of the central and neighbored elements"));
+		throw LumeError () << "Provided grobConnections have the wrong central_grob_type. "
+		                      "Expected something else than" << grobSet.name()
+						   << ", since this is also the type of the central and neighbored elements.";
 
 	if (grobConnections.neighbor_grob_set() != grobSet)
-		throw LumeError (std::string("Provided grobConnections have the wrong neighbor_grob_type. "
-		                 "Expected ").append(grobSet.name()).append (", provided: ")
-						 .append(grobConnections.neighbor_grob_set().name()));
+		throw LumeError () << "Provided grobConnections have the wrong neighbor_grob_type. Expected "
+		                   << grobSet.name() << ", provided: "
+                           << grobConnections.neighbor_grob_set().name();
 
 
 	const GrobSet linkSet = grobConnections.center_grob_set();
@@ -271,7 +271,7 @@ void FillNeighborMap (TIndexVector& elemMapOut,
 		offsetsOut [counter] = static_cast <index_t> (elemMapOut.size() / 2);
 	}
 	else {
-		throw LumeError ("linkDim > grobDim currently not supported.");
+		throw LumeError () << "linkDim > grobDim currently not supported.";
 	}
 
 }

@@ -99,9 +99,9 @@ neighbor_indices (const GrobIndex gi) const
 	const index_t baseIndex = base_index (gi);
 
 	if (baseIndex >= m_offsets.size())
-		throw LumeError (std::string("This Neighborhoods instance doesn't provide "
-		                             "neighbors for grobs of type ")
-						.append (GrobTypeName (gi.grob_type ())));
+		throw LumeError () << "This Neighborhoods instance doesn't provide "
+		                      "neighbors for grobs of type "
+						   << GrobTypeName (gi.grob_type ());
 
 	return NeighborIndices (gi, this);
 }

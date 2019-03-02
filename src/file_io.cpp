@@ -73,7 +73,7 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 //	build the correct filenames
 	string nodesFilename, facesFilename;
 	if (filename.find(".ele", filename.size() - 4) == string::npos)
-	    throw FileSuffixError (filename);
+	    throw FileSuffixError () << filename;
 
 //	the filename ends as we would expect
 	nodesFilename = facesFilename = filename.substr(0, filename.size() - 4);
@@ -86,7 +86,7 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
         TupleVector <real_t> coords (3);
 
 		ifstream in(nodesFilename);
-		if (!in) throw FileNotFoundError (nodesFilename);
+		if (!in) throw FileNotFoundError () << nodesFilename;
 
 		uint numNodes, dim, numAttribs, numBoundaryMarkers;
 		in >> numNodes;
@@ -177,14 +177,14 @@ std::shared_ptr <Mesh> CreateMeshFromELE(std::string filename)
 	{
 		ifstream in(filename);
 		if (!in)
-			throw FileNotFoundError (filename);
+			throw FileNotFoundError () << filename;
 		int numTets, numNodesPerTet, numAttribs;
 		in >> numTets;
 		in >> numNodesPerTet;
 		in >> numAttribs;
 
 		if (numNodesPerTet != GrobDesc (TET).num_corners ())
-			throw FileParseError (string ("Bad number of nodes in tetrahedron in ") + filename);
+			throw FileParseError () << "Bad number of nodes in tetrahedron in " + filename;
 		
         GrobArray grobArrayTets (TET);
         auto& tets = grobArrayTets.underlying_array ();
@@ -250,7 +250,8 @@ UGXGrobTypeArrayFromGrobSet (const GrobSet& gs)
 		case 1: return {EDGE};
 		case 2: return {TRI, QUAD};
 		case 3: return {TET, HEX, PRISM, PYRA};
-		default: throw LumeError ("UGXGrobTypeArrayFromGrobSet: Unsupported grob set dimension");
+		default: throw LumeError () << "UGXGrobTypeArrayFromGrobSet: Unsupported grob set dimension "
+                                    << gs.dim();
 	}
 }
 
@@ -310,7 +311,7 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 	{
 		ifstream in(filename, ios::binary);
 		if (!in)
-			throw FileNotFoundError (filename);
+			throw FileNotFoundError () << filename;
 
 	//	get the length of the file
 		streampos posStart = in.tellg();
@@ -332,7 +333,7 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 
 	xml_node<>* gridNode = doc.first_node("grid");
 	if (!gridNode)
-		throw FileParseError (string ("no grid found in ") + filename);
+		throw FileParseError () << "no grid found in " + filename;
 
 	auto mesh = make_shared <Mesh> ();
 
@@ -353,11 +354,11 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
     				numSrcCoords = atoi(attrib->value());
 
     			if (numSrcCoords < 1)
-    				throw FileParseError (string ("Not enough coordinates provided in ") + filename);
+    				throw FileParseError () << "Not enough coordinates provided in " << filename;
 
     			if (lastNumSrcCoords >= 0 && lastNumSrcCoords != numSrcCoords)
-    				throw FileParseError (string ("Can't read vertices with differing numbers "
-    			            "of coordinates from ") + filename);
+    				throw FileParseError () << "Can't read vertices with differing numbers "
+    			            "of coordinates from " << filename;
 
     			lastNumSrcCoords = numSrcCoords;
     			
@@ -468,7 +469,7 @@ std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
 		mesh = CreateMeshFromUGX (filename);
 
 	else {
-		throw FileSuffixError (filename);
+		throw FileSuffixError () << filename;
 	}
 	return mesh;
 }

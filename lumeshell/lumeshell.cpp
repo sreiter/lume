@@ -53,7 +53,7 @@ namespace commands {
             std::cout << "Mesh contents:" << std::endl;
             auto grobTypes = mesh->grob_types ();
             for (auto gt : grobTypes) {
-                std::cout << "  " << GrobTypeName (gt) << ": \t" << mesh->num (gt) << std::endl;
+                std::cout << "  " << GrobSet (gt).name () << ": \t" << mesh->num (gt) << std::endl;
             }
         }
     };

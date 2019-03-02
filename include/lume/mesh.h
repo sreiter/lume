@@ -273,20 +273,15 @@ public:
 
         if (annex == nullptr)
         {
-            throw NoSuchAnnexError (std::string ("no annex found for the given key '")
-                                    .append (key.name ())
-                                    .append ("'."));
+            throw NoSuchAnnexError () << "no annex found for the given key '" << key.name () << "'.";
         }
 
         const T* typedAnnex = dynamic_cast<const T*> (annex);
 
         if (typedAnnex == nullptr)
         {
-            throw AnnexTypeError (std::string ("incompatible type '")
-                                  .append (typeid (T).name ())
-                                  .append ("' requested for annex key '")
-                                  .append (key.name ())
-                                  .append ("'."));
+            throw AnnexTypeError () << "incompatible type '" << typeid (T).name ()
+                                    << "' requested for annex key '" << key.name () << "'.";
         }
         return *typedAnnex;
     }

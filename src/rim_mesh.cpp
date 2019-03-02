@@ -46,7 +46,7 @@ void CreateRimMesh (SPMesh rimMeshOut,
 		nbrhds = &localNbrhds;
 	}
 	else if (nbrhds->center_grob_set() != rimGrobSet || nbrhds->neighbor_grob_set() != grobSet)
-		throw LumeError ("CreateRimMesh can't operate on provided neighborhoods instance. ");
+		throw LumeError () << "CreateRimMesh can't operate on provided neighborhoods instance.";
 	
 	const Neighborhoods& neighborhoods = *nbrhds;
 

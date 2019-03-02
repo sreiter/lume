@@ -55,13 +55,13 @@ ComputeFaceVertexNormals3 (Mesh& mesh,
     auto const& coordsAnnex = mesh.annex (keys::vertexCoords);
 
     if (coordsAnnex.tuple_size() != 3)
-        throw BadTupleSizeError (std::to_string (coordsAnnex.tuple_size()));
+        throw BadTupleSizeError () << coordsAnnex.tuple_size();
     
     if (normalAnnex.tuple_size() != 3)
-        throw BadTupleSizeError (std::to_string (normalAnnex.tuple_size()));
+        throw BadTupleSizeError () << normalAnnex.tuple_size();
 
     if (normalAnnex.size () != coordsAnnex.size ())
-        throw AnnexError ("Provided coordinate and normal annexes have different size.");
+        throw AnnexError () << "Provided coordinate and normal annexes have different size.";
 
     VecSet (UNPACK_DS(normalAnnex), 0);
 
