@@ -30,7 +30,7 @@
 
 #include <string>
 #include <exception>
-#include "custom_exception.h"
+#include "lume_error.h"
 #include "mesh.h"
 
 namespace lume {

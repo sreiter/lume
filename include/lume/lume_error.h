@@ -25,8 +25,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#ifndef __H__lume_custom_exception
-#define __H__lume_custom_exception
+#ifndef __H__lume_lume_error
+#define __H__lume_lume_error
 
 #include <stdexcept>
 #include <string>
@@ -72,4 +72,4 @@ private:
         className (const char* derivedClassName) : baseClass (derivedClassName) {}\
 	}; 
 	
-#endif	//__H__lume_custom_exception
+#endif	//__H__lume_lume_error

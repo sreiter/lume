@@ -26,7 +26,7 @@
 #define __H__lume_commander
 
 #include <map>
-#include "lume/custom_exception.h"
+#include "lume/lume_error.h"
 #include "lume/commands/arguments.h"
 #include "lume/commands/command.h"
 
@@ -39,11 +39,14 @@ DECLARE_CUSTOM_EXCEPTION (CommandExecutionError, LumeError);
 class Commander
 {
 public:
-    // template <class T, class ... Args>
-    // void add (std::string name, Args&& args...)
-    // {
-    //     m_commands.emplace (std::move (name), std::make_unique <T> (std::forward <Args> (args)...));
-    // }
+    using CommandMap = std::map <std::string, std::unique_ptr <Command>>;
+
+    template <class T, class ... Args>
+    void add (Args&& ... args)
+    {
+        auto cmd = std::make_unique <T> (std::forward <Args> (args)...);
+        m_commands.emplace (cmd->name (), std::move (cmd));
+    }
 
     template <class T>
     void add ()
@@ -78,6 +81,16 @@ public:
         }
     }
 
+    CommandMap::const_iterator begin () const
+    {
+        return m_commands.begin ();
+    }
+
+    CommandMap::const_iterator end () const
+    {
+        return m_commands.end ();
+    }
+
 private:
     Command& get_command (const std::string& name)
     {
@@ -90,7 +103,7 @@ private:
         return *iter->second;
     }
 
-    std::map <std::string, std::unique_ptr <Command>> m_commands;
+    CommandMap m_commands;
 };
 
 }// end of namespace commands

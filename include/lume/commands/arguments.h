@@ -26,7 +26,7 @@
 #define __H__lume_arguments
 
 #include <vector>
-#include "lume/custom_exception.h"
+#include "lume/lume_error.h"
 #include "lume/commands/types.h"
 
 namespace lume {

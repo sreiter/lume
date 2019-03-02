@@ -58,6 +58,41 @@ namespace commands {
         }
     };
 
+    class Help : public Command
+    {
+    public:
+        Help (std::shared_ptr <const Commander> commander)
+            : Command ("Help", "Gives an overview over available commands and their parameters.")
+            , m_commander (commander)
+        {}
+
+    protected:
+        void run (const Arguments&) override
+        {
+            if (m_commander == nullptr)
+            {
+                cout << "No commands available.\n";
+                return;
+            }
+
+            for (const auto& entry : *m_commander) {
+                const auto& name = entry.first;
+                const auto& command = *entry.second;
+
+                cout << name << ":\t\t" << command.description () << endl;
+                const auto argDescs = command.argument_descs ();
+                for (const auto& argDesc : argDescs)
+                {
+                    cout << "    " << argDesc.name () << ":\t\t" << argDesc.description () << endl;
+                }
+                cout << endl;
+            }
+        }
+
+    private:
+        std::shared_ptr <const Commander> m_commander;
+    };
+
 }// end of namespace commands
 }// end of namespace lume
 
@@ -68,13 +103,14 @@ int main (int argc, char** argv)
     int retVal = 0;
 
     try {
-        lume::commands::Commander commander;
-        commander.add <lume::commands::PrintMeshContents> ();
+        auto commander = std::make_shared <lume::commands::Commander> ();
+        commander->add <lume::commands::Help> (commander);
+        commander->add <lume::commands::PrintMeshContents> ();
 
         bool printHelp = true;
         if (argc >= 2)
         {
-            commander.run (argv[1], argc - 2, argv + 2);
+            commander->run (argv[1], argc - 2, argv + 2);
         }
     }
     catch (std::runtime_error& err)

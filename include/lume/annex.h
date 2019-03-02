@@ -29,7 +29,7 @@
 #define __H__lume_annex
 
 #include <optional>
-#include "custom_exception.h"
+#include "lume_error.h"
 #include "grob.h"
 
 namespace lume {

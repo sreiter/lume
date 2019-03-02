@@ -51,7 +51,6 @@ set (headers
         include/lume/annex_key.h
      	include/lume/array_annex.h
      	include/lume/array_iterator.h
-     	include/lume/custom_exception.h
      	include/lume/file_io.h
      	include/lume/grob.h
      	include/lume/grob_array.h
@@ -61,6 +60,7 @@ set (headers
         include/lume/grob_set.h
         include/lume/grob_set_types.h
         include/lume/grob_types.h
+        include/lume/lume_error.h
      	include/lume/mesh.h
      	include/lume/neighborhoods.h
      	include/lume/neighborhoods_impl.hpp

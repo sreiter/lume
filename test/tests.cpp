@@ -25,7 +25,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "lume/custom_exception.h"
+#include "lume/lume_error.h"
 #include "lume/grob.h"
 #include "lume/file_io.h"
 #include "lume/parallel_for.h"

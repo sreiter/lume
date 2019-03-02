@@ -31,7 +31,7 @@
 #include "unpack.h"
 #include "types.h"
 #include "annex.h"
-#include "custom_exception.h"
+#include "lume_error.h"
 
 namespace lume {
 
