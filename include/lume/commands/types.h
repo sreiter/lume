@@ -25,6 +25,7 @@
 #ifndef __H__lume_types
 #define __H__lume_types
 
+#include <memory>
 #include <string>
 #include <variant>
 
