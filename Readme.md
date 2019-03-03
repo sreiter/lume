@@ -28,10 +28,8 @@ Of course you may also build lume as a stand-alone library. To this end create a
     cmake -DCMAKE_BUILD_TYPE=Release ..
     make -j
 
-When specifying the cmake option `-DBUILD_LUME_TESTS=ON`, an additional executable will be built which runs some tests on the lume library:
+In addition, an executable will be built which can be executed to run some tests on the lume library:
 
-    cmake -DBUILD_LUME_TESTS=ON ..
-    make -j
     ./lume_tests
 
 ## License
