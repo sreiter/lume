@@ -41,6 +41,14 @@ public:
         , m_description (std::move (description))
     {}
 
+    Command (std::string name,
+             std::string description,
+             std::initializer_list <ArgumentDesc> argDesc)
+        : m_name (std::move (name))
+        , m_description (std::move (description))
+        , m_argDesc (argDesc)
+    {}
+
     virtual ~Command () = default;
 
     const std::string& name () const            {return m_name;}
@@ -48,7 +56,7 @@ public:
 
     virtual int        version () const         {return 1;}
     
-    virtual std::vector <ArgumentDesc> argument_descs () const   {return {};}
+    virtual std::vector <ArgumentDesc> argument_descs () const   {return m_argDesc;}
 
     void execute (const Arguments& args)
     {
@@ -59,8 +67,9 @@ protected:
     virtual void run (const Arguments& args) = 0;
 
 private:
-    std::string m_name;
-    std::string m_description;
+    std::string                m_name;
+    std::string                m_description;
+    std::vector <ArgumentDesc> m_argDesc;
 };
 
 }// end of namespace commands

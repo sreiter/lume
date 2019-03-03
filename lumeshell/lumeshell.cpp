@@ -38,13 +38,9 @@ namespace commands {
     {
     public:
         PrintMeshContents ()
-            : Command ("PrintMeshContents", "Gives an overview over the elements contained in a mesh.")
+            : Command ("PrintMeshContents", "Gives an overview over the elements contained in a mesh.",
+                       {ArgumentDesc (Type::Mesh, "mesh", "The mesh whose contents will be printed.")})
         {}
-
-        virtual std::vector <ArgumentDesc> argument_descs () const
-        {
-            return {ArgumentDesc (Type::Mesh, "mesh", "The mesh whose contents will be printed.")};
-        }
 
     protected:
         void run (const Arguments& args) override
@@ -63,13 +59,9 @@ namespace commands {
     {
     public:
         IsManifoldMesh ()
-            : Command ("IsManifoldMesh", "Prints true if the specified mesh is a manifold mesh.")
+            : Command ("IsManifoldMesh", "Prints true if the specified mesh is a manifold mesh.",
+                       {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")})
         {}
-
-        virtual std::vector <ArgumentDesc> argument_descs () const
-        {
-            return {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")};
-        }
 
     protected:
         void run (const Arguments& args) override
@@ -85,13 +77,9 @@ namespace commands {
     {
     public:
         IsClosedManifoldMesh ()
-            : Command ("IsClosedManifoldMesh", "Prints true if the specified mesh is a closed manifold mesh.")
+            : Command ("IsClosedManifoldMesh", "Prints true if the specified mesh is a closed manifold mesh.",
+                       {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")})
         {}
-
-        virtual std::vector <ArgumentDesc> argument_descs () const
-        {
-            return {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")};
-        }
 
     protected:
         void run (const Arguments& args) override
