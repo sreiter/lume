@@ -37,6 +37,8 @@ namespace lume {
 
 class Mesh;
 
+/// Counts the number of 
+
 /// Maps consecutively indexed grid objects of different types to their respective grob indices
 /** While slimesh indices grid objects for each type starting from zero, other
  * indexing schemata are possible. E.g. first indexing all triangles and afterwards
@@ -89,12 +91,13 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
 /** \} */
 
 
-/// Computes the number of neighbors of type `nbrGrobs` for each grob in `grobs`
-/** The results are stored in the GrobHashMap `valencesOut`*/
-void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
-                          Mesh& mesh,
-                     	  GrobSet grobs,
-                     	  GrobSet nbrGrobs);
+/// Creates a hash map which stores the number of `nbrGrobs` for each `grob`.
+GrobHashMap <index_t> ComputeGrobValences (const Mesh& mesh,
+                     	                   GrobSet grobs,
+                     	                   GrobSet nbrGrobs);
+
+/// Returns a vector which stores at position `i` the number of `grobs` with `i` `nbrGrobs`.
+std::vector <index_t> ValenceHistogram (const Mesh& mesh, GrobSet grobs, GrobSet nbrGrobs);
 
 /// Collects all sides of the *grobs* specified by `cornerInds` and `grobType`.
 /** \note It is assumed, that `cornerInds` holds the corner indices of one or

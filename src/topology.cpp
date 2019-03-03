@@ -111,8 +111,8 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
 
 
 void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
-                       const Mesh& mesh,
-                       const GrobSet grobSet)
+                         const Mesh& mesh,
+                         const GrobSet grobSet)
 {
 	indexMapInOut.reserve (mesh.num (grobSet));
 	
@@ -129,12 +129,11 @@ void FillGrobToIndexMap (GrobHashMap <GrobIndex>& indexMapInOut,
 }
 
 
-void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
-                          Mesh& mesh,
-                     	  GrobSet grobs,
-                     	  GrobSet nbrGrobs)
+GrobHashMap <index_t> ComputeGrobValences (const Mesh& mesh,
+                     	                   GrobSet grobs,
+                     	                   GrobSet nbrGrobs)
 {
-	valencesOut.clear ();
+	GrobHashMap <index_t> valences;
 
 	const index_t grobDim = grobs.dim();
 	const index_t nbrGrobDim = nbrGrobs.dim();
@@ -143,14 +142,14 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 		// initialize all grob valences with 0
 		for(auto gt : grobs) {
 			for(auto grob : mesh.grobs (gt)) {
-				valencesOut [grob] = 0;
+				valences [grob] = 0;
 			}
 		}
 
 		for(auto nbrGT : nbrGrobs) {
 			for(auto nbrGrob : mesh.grobs (nbrGT)) {
 				for(index_t iside = 0; iside < nbrGrob.num_sides (grobDim); ++iside) {
-					++valencesOut [nbrGrob.side (grobDim, iside)];
+					++valences [nbrGrob.side (grobDim, iside)];
 				}
 			}
 		}
@@ -158,14 +157,36 @@ void ComputeGrobValences (GrobHashMap <index_t>& valencesOut,
 	else if (grobDim > nbrGrobDim) {
 		for(auto gt : grobs) {
 			for(auto grob : mesh.grobs (gt)) {
-				valencesOut [grob] = grob.num_sides (nbrGrobDim);
+				valences [grob] = grob.num_sides (nbrGrobDim);
 			}
 		}
 	}
 	else
 		throw LumeError () << "ComputeGrobValences is currently not implemented for grobs.dim() == nbrGrobs.dim(). Sorry.";
+    
+    return valences;
 }
 
+std::vector <index_t> ValenceHistogram (const Mesh& mesh, GrobSet grobs, GrobSet nbrGrobs)
+{
+    GrobHashMap <index_t> valences = ComputeGrobValences (mesh, grobs, nbrGrobs);
+
+    std::vector <index_t> histogram;
+
+    for (const auto& entry : valences)
+    {
+        const index_t valence = entry.second;
+
+        if (valence >= static_cast <index_t> (histogram.size ()))
+        {
+            histogram.resize (valence + 1, 0);
+        }
+
+        ++histogram [valence];
+    }
+    
+    return histogram;
+}
 
 index_t FindUniqueSides (GrobHash& sideHashInOut,
                          Mesh& mesh,

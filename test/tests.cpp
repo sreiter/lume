@@ -375,14 +375,13 @@ namespace impl {
 	                              const index_t numGrobsWithValence1,
 	                              const index_t numGrobsWithValence2)
 	{
-		GrobHashMap <index_t> valences;
 		GrobSet nbrGrobSet = mesh->grob_set_type_of_highest_dim ();
 		if (nbrGrobSet.dim() == 0)
 			return;
 
 		GrobSet grobSet = nbrGrobSet.side_set (nbrGrobSet.dim() - 1);
 
-		ComputeGrobValences (valences, *mesh, grobSet, nbrGrobSet);
+		GrobHashMap <index_t> valences = ComputeGrobValences (*mesh, grobSet, nbrGrobSet);
 
 		vector <index_t> numSidesWithValenceN;
 		for(auto gt : grobSet) {
@@ -437,8 +436,7 @@ namespace impl {
 	                                       GrobSet grobTypes,
 	                                       GrobSet nbrGrobTypes)
 	{
-		GrobHashMap <index_t> valences;
-		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobTypes);
+		GrobHashMap <index_t> valences = ComputeGrobValences (*mesh, grobTypes, nbrGrobTypes);
 
 		GrobHashMap <index_t> grobToIndexMap;
 		index_t baseInds[NUM_GROB_TYPES];
@@ -476,8 +474,7 @@ namespace impl {
 	                                       GrobSet grobTypes,
 	                                       GrobSet nbrGrobTypes)
 	{
-		GrobHashMap <index_t> valences;
-		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobTypes);
+		GrobHashMap <index_t> valences = ComputeGrobValences (*mesh, grobTypes, nbrGrobTypes);
 
 		vector <index_t> offsets;
 		lume::impl::FillLowerDimNeighborOffsetMap (offsets, *mesh, grobTypes, nbrGrobTypes);
@@ -538,8 +535,7 @@ namespace impl {
 	{
 	//	valences are used to check whether the individual neighborhoods have
 	//	correct size. Note that 'ComputeGrobValences' is tested in a different test.
-		GrobHashMap <index_t> valences;
-		ComputeGrobValences (valences, *mesh, grobTypes, nbrGrobs);
+		GrobHashMap <index_t> valences = ComputeGrobValences (*mesh, grobTypes, nbrGrobs);
 
 		Neighborhoods nbrhds (mesh, grobTypes, nbrGrobs);
 

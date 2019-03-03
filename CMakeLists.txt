@@ -42,6 +42,7 @@ set (sources
         src/normals.cpp
         src/rim_mesh.cpp
         src/subset_info_annex.cpp
+        src/surface_analytics.cpp
         src/topology.cpp
     )
 

@@ -25,6 +25,7 @@
 #include <iostream>
 #include "lume/mesh.h"
 #include "lume/file_io.h"
+#include "lume/surface_analytics.h"
 #include "lume/commands/commander.h"
 
 using std::cout;
@@ -58,6 +59,50 @@ namespace commands {
         }
     };
 
+    class IsManifoldMesh : public Command
+    {
+    public:
+        IsManifoldMesh ()
+            : Command ("IsManifoldMesh", "Prints true if the specified mesh is a manifold mesh.")
+        {}
+
+        virtual std::vector <ArgumentDesc> argument_descs () const
+        {
+            return {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")};
+        }
+
+    protected:
+        void run (const Arguments& args) override
+        {
+            if (lume::IsManifoldMesh (*args.get <SPMesh> ("mesh")))
+                cout << "Yes\n";
+            else
+                cout << "No\n";
+        }
+    };
+
+    class IsClosedManifoldMesh : public Command
+    {
+    public:
+        IsClosedManifoldMesh ()
+            : Command ("IsClosedManifoldMesh", "Prints true if the specified mesh is a closed manifold mesh.")
+        {}
+
+        virtual std::vector <ArgumentDesc> argument_descs () const
+        {
+            return {ArgumentDesc (Type::Mesh, "mesh", "The mesh which will be analyzed.")};
+        }
+
+    protected:
+        void run (const Arguments& args) override
+        {
+            if (lume::IsClosedManifoldMesh (*args.get <SPMesh> ("mesh")))
+                cout << "Yes\n";
+            else
+                cout << "No\n";
+        }
+    };
+
     class Help : public Command
     {
     public:
@@ -79,11 +124,11 @@ namespace commands {
                 const auto& name = entry.first;
                 const auto& command = *entry.second;
 
-                cout << name << ":\t\t" << command.description () << endl;
+                cout << name << ":\t" << command.description () << endl;
                 const auto argDescs = command.argument_descs ();
                 for (const auto& argDesc : argDescs)
                 {
-                    cout << "    " << argDesc.name () << ":\t\t" << argDesc.description () << endl;
+                    cout << "\t" << argDesc.name () << ":\t\t" << argDesc.description () << endl;
                 }
                 cout << endl;
             }
@@ -106,6 +151,8 @@ int main (int argc, char** argv)
         auto commander = std::make_shared <lume::commands::Commander> ();
         commander->add <lume::commands::Help> (commander);
         commander->add <lume::commands::PrintMeshContents> ();
+        commander->add <lume::commands::IsManifoldMesh> ();
+        commander->add <lume::commands::IsClosedManifoldMesh> ();
 
         bool printHelp = true;
         if (argc >= 2)
