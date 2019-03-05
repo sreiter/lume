@@ -45,14 +45,14 @@ public:
     void add (Args&& ... args)
     {
         auto cmd = std::make_unique <T> (std::forward <Args> (args)...);
-        m_commands.emplace (cmd->name (), std::move (cmd));
+        m_commands.emplace (tolower (cmd->name ()), std::move (cmd));
     }
 
     template <class T>
     void add ()
     {
         auto cmd = std::make_unique <T> ();
-        m_commands.emplace (cmd->name (), std::move (cmd));
+        m_commands.emplace (tolower (cmd->name ()), std::move (cmd));
     }
 
     void run (const std::string& name, Arguments& args)
@@ -94,13 +94,20 @@ public:
 private:
     Command& get_command (const std::string& name)
     {
-        auto iter = m_commands.find (name);
+        auto iter = m_commands.find (tolower (name));
 
         if (iter == m_commands.end () || iter->second == nullptr) {
             throw UnknownCommandError () << name;
         }
 
         return *iter->second;
+    }
+
+    std::string tolower (const std::string& str) const
+    {
+        std::string lowStr;
+        std::transform (str.begin (), str.end (), lowStr.begin (), std::tolower);
+        return lowStr;
     }
 
     CommandMap m_commands;
