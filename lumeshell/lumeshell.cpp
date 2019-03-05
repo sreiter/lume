@@ -155,7 +155,7 @@ int main (int argc, char** argv)
     }
     catch (...)
     {
-        cout << "ERROR: An unkonwn error occurred during execution...\n";
+        cout << "ERROR: An unknown error occurred during execution...\n";
         retVal = 1;
     }
 
