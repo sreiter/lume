@@ -25,7 +25,9 @@
 #ifndef __H__lume_commander
 #define __H__lume_commander
 
+#include <algorithm>
 #include <map>
+#include <string>
 #include "lume/lume_error.h"
 #include "lume/commands/arguments.h"
 #include "lume/commands/command.h"
