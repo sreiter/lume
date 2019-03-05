@@ -106,7 +106,8 @@ private:
     std::string tolower (const std::string& str) const
     {
         std::string lowStr;
-        std::transform (str.begin (), str.end (), lowStr.begin (), std::tolower);
+        lowStr.resize (str.size ());
+        std::transform (str.begin (), str.end (), lowStr.begin (), ::tolower);
         return lowStr;
     }
 

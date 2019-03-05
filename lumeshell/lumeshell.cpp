@@ -109,8 +109,8 @@ namespace commands {
             }
 
             for (const auto& entry : *m_commander) {
-                const auto& name = entry.first;
                 const auto& command = *entry.second;
+                const auto& name = command.name ();
 
                 cout << name << ":\t" << command.description () << endl;
                 const auto argDescs = command.argument_descs ();
