@@ -28,22 +28,22 @@ cmake_minimum_required(VERSION 3.1)
 project (lume LANGUAGES CXX)
 
 set (sources
-        src/commands/arguments.cpp
-        src/commands/types.cpp
-        src/file_io.cpp
-        src/grob.cpp
-        src/grob_desc.cpp
-        src/grob_set.cpp
-        src/grob_set_types.cpp
-        src/grob_types.cpp
-        src/mesh.cpp
-        src/neighborhoods.cpp
-        src/neighbors.cpp
-        src/normals.cpp
-        src/rim_mesh.cpp
-        src/subset_info_annex.cpp
-        src/surface_analytics.cpp
-        src/topology.cpp
+        src/lume/commands/arguments.cpp
+        src/lume/commands/types.cpp
+        src/lume/file_io.cpp
+        src/lume/grob.cpp
+        src/lume/grob_desc.cpp
+        src/lume/grob_set.cpp
+        src/lume/grob_set_types.cpp
+        src/lume/grob_types.cpp
+        src/lume/mesh.cpp
+        src/lume/neighborhoods.cpp
+        src/lume/neighbors.cpp
+        src/lume/normals.cpp
+        src/lume/rim_mesh.cpp
+        src/lume/subset_info_annex.cpp
+        src/lume/surface_analytics.cpp
+        src/lume/topology.cpp
     )
 
 set (headers
@@ -83,7 +83,7 @@ add_library (lume ${sources} ${headers} ${private_headers})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(lume Threads::Threads)
+target_link_libraries(lume PUBLIC Threads::Threads)
 
 target_include_directories(lume
     PUBLIC 
@@ -98,18 +98,18 @@ target_include_directories(lume
 target_compile_features(lume PUBLIC cxx_std_17)
 
 # lume_tests executable and test environment
-file(COPY "test/test_meshes" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "testdata/meshes" DESTINATION "${CMAKE_BINARY_DIR}")
 
 set (testSources
-     	test/tests.cpp
-     	test/tests_main.cpp)
+     src/lumetest/tests.cpp
+     src/lumetest/tests_main.cpp)
 
-add_executable (lume_tests ${testSources})
-target_link_libraries(lume_tests lume)
+add_executable (lumetests ${testSources})
+target_link_libraries(lumetests lume)
 
 #lumeshell
 set (lumeshellSources
-        lumeshell/lumeshell.cpp)
+     src/lumeshell/lumeshell.cpp)
 
 add_executable (lumeshell ${lumeshellSources})
 target_link_libraries(lumeshell lume)

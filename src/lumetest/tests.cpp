@@ -408,8 +408,8 @@ namespace impl {
 
 static void TestGrobValences ()
 {
-	vector<string> testMeshNames {"test_meshes/tris_and_quads.ugx",
-								  "test_meshes/tet_refined.ugx"};
+	vector<string> testMeshNames {"meshes/tris_and_quads.ugx",
+								  "meshes/tet_refined.ugx"};
 
     vector<index_t> numGrobsWithValence1 {10, 16};
     vector<index_t> numGrobsWithValence2 {9, 8};
@@ -615,7 +615,7 @@ namespace impl {
 
 	//	in this mesh all faces have the same valence.
 	//	11 for connections via vertices, 2 for connections via edges
-		auto mesh = CreateMeshFromFile ("test_meshes/circle_12.ugx");
+		auto mesh = CreateMeshFromFile ("meshes/circle_12.ugx");
 
 		index_t expectedValence;
 		if 		(linkGrobSet.dim() == 0)	expectedValence = 11;
@@ -678,11 +678,11 @@ namespace impl {
 
 static void TestCreateRimMesh ()
 {
-	impl::TestCreateRimMesh ("test_meshes/tet_refined.ugx",
-	                       	 "test_meshes/tet_refined_rim.ugx");
+	impl::TestCreateRimMesh ("meshes/tet_refined.ugx",
+	                       	 "meshes/tet_refined_rim.ugx");
 
-	impl::TestCreateRimMesh ("test_meshes/elems_refined.ugx",
-	                       	 "test_meshes/elems_refined_rim.ugx");
+	impl::TestCreateRimMesh ("meshes/elems_refined.ugx",
+	                       	 "meshes/elems_refined_rim.ugx");
 
 }
 
@@ -691,7 +691,7 @@ static void TestCreateRimMesh ()
 static void TestSubsets ()
 {
 	const string subsetInfoName = "defSH";
-	auto mesh = CreateMeshFromFile ("test_meshes/circle_with_subsets.ugx");
+	auto mesh = CreateMeshFromFile ("meshes/circle_with_subsets.ugx");
 
 	COND_FAIL (!mesh->has_annex (TypedAnnexKey <SubsetInfoAnnex> (subsetInfoName)),
 	           "'defSH' SubsetInfoAnnex missing");
@@ -825,9 +825,9 @@ namespace impl {
 	};
 
 	static void RunTestOnMeshes (void (*testFct)(SPMesh mesh),
-	                             const vector<TestMesh>& testMeshes)
+	                             const vector<TestMesh>& meshes)
 	{
-		for(auto testMesh : testMeshes) {
+		for(auto testMesh : meshes) {
 			try {
 				testFct (testMesh.mesh);
 				cout << "    ok: '" << testMesh.fileName << "'" << endl;
@@ -859,34 +859,34 @@ bool RunTests ()
 
 	RUN_TEST(testStats, TestGrobDescs);
 
-	vector<string> generalTestFiles {"test_meshes/quad.stl",
-									 "test_meshes/box_with_spheres.ele",
-								  	 "test_meshes/tris_and_quads.ugx",
-								  	 "test_meshes/elems_refined_rim.ugx",
-								  	 "test_meshes/tet_refined.ugx",
-								  	 "test_meshes/elems_refined.ugx",
-								  	 "test_meshes/circle_12.ugx"};
+	vector<string> generalTestFiles {"meshes/quad.stl",
+									 "meshes/box_with_spheres.ele",
+								  	 "meshes/tris_and_quads.ugx",
+								  	 "meshes/elems_refined_rim.ugx",
+								  	 "meshes/tet_refined.ugx",
+								  	 "meshes/elems_refined.ugx",
+								  	 "meshes/circle_12.ugx"};
 
-	vector<TestMesh> topologyTestMeshes {TestMesh ("test_meshes/tris_and_quads.ugx"),
-								  		 TestMesh ("test_meshes/elems_refined_rim.ugx"),
-								  		 TestMesh ("test_meshes/tet_refined.ugx"),
-								  		 TestMesh ("test_meshes/elems_refined.ugx")};
+	vector<TestMesh> topologymeshes {TestMesh ("meshes/tris_and_quads.ugx"),
+								  		 TestMesh ("meshes/elems_refined_rim.ugx"),
+								  		 TestMesh ("meshes/tet_refined.ugx"),
+								  		 TestMesh ("meshes/elems_refined.ugx")};
 
-	// vector<TestMesh> largeMeshes {TestMesh ("test_meshes/2-spheres-tets.ugx")};
+	// vector<TestMesh> largeMeshes {TestMesh ("meshes/2-spheres-tets.ugx")};
 
 
 	RUN_TEST_ON_FILES (testStats, TestCreateMeshFromFile, generalTestFiles);
 
-	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestGrobIndexAccess, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobArrays, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobIterator, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobIndexAccess, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestConsistentTopology, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillGrobToIndexMap, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestGrobToIndexMapSideLookup, topologymeshes);
 	RUN_TEST(testStats, TestGrobValences);
-	RUN_TEST_ON_MESHES(testStats, TestFillLowerDimNeighborOffsetMap, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologyTestMeshes);
-	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologyTestMeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillLowerDimNeighborOffsetMap, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologymeshes);
+	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologymeshes);
 	RUN_TEST(testStats, TestFaceNeighbors);
 	RUN_TEST(testStats, TestCreateRimMesh);
 	RUN_TEST(testStats, TestSubsets);
