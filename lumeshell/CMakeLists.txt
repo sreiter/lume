@@ -1,7 +1,6 @@
 # This file is part of lume, a C++ library for lightweight unstructured meshes
 #
-# Copyright (C) 2018 Sebastian Reiter
-# Copyright (C) 2018 G-CSC, Goethe University Frankfurt
+# Copyright (C) 2019 Sebastian Reiter
 # Author: Sebastian Reiter <s.b.reiter@gmail.com>
 # All rights reserved.
 #
@@ -25,11 +24,10 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 3.1)
+project (lumeshell LANGUAGES CXX)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set (sources
+     src/lumeshell.cpp)
 
-add_subdirectory (lume)
-add_subdirectory (lumetest)
-add_subdirectory (lumeshell)
+add_executable (lumeshell ${sources})
+target_link_libraries(lumeshell lume)

@@ -17,4 +17,5 @@ script:
     - cd build
     - cmake -DBUILD_LUME_TESTS=ON ..
     - make
+    - cd bin
     - ./lume_tests
