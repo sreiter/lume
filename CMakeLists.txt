@@ -30,6 +30,18 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+option (BUILD_LUMETESTS "Build the lumetests binary, which contains unit tests for lume." ON)
+option (BUILD_LUMESHELL "Build the lumeshell binary, which gives command-line access to lume algorithms." ON)
+
+message (STATUS "BUILD_LUMETESTS: " ${BUILD_LUMETESTS})
+message (STATUS "BUILD_LUMESHELL: " ${BUILD_LUMESHELL})
+
 add_subdirectory (lume)
-add_subdirectory (lumetest)
-add_subdirectory (lumeshell)
+
+if (${BUILD_LUMETESTS})
+    add_subdirectory (lumetests)
+endif ()
+
+if (${BUILD_LUMESHELL})
+    add_subdirectory (lumeshell)
+endif ()
