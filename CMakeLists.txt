@@ -32,9 +32,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 option (BUILD_LUMETESTS "Build the lumetests binary, which contains unit tests for lume." ON)
 option (BUILD_LUMESHELL "Build the lumeshell binary, which gives command-line access to lume algorithms." ON)
+option (BUILD_LUMEVIEW  "Build the lumeview binary, a cross platform viewer for unstructured meshes." ON)
 
 message (STATUS "BUILD_LUMETESTS: " ${BUILD_LUMETESTS})
 message (STATUS "BUILD_LUMESHELL: " ${BUILD_LUMESHELL})
+message (STATUS "BUILD_LUMESHELL: " ${BUILD_LUMEVIEW})
 
 add_subdirectory (lume)
 
@@ -44,4 +46,8 @@ endif ()
 
 if (${BUILD_LUMESHELL})
     add_subdirectory (lumeshell)
+endif ()
+
+if (${BUILD_LUMEVIEW})
+    add_subdirectory (lumeview)
 endif ()
