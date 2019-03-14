@@ -41,7 +41,6 @@ set (sources
         src/lumeview/gui/window_event_listener.cpp
 
         src/lumeview/rendering/camera.cpp
-        src/lumeview/rendering/view.cpp
     )
 
 set (headers)

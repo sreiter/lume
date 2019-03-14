@@ -28,9 +28,12 @@
 #define __H__CAMERA_
 
 #include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
+
+#include <lumeview/rendering/viewport.h>
 
 namespace lumeview {
 
@@ -38,6 +41,9 @@ class Camera {
   public:
     Camera ();
 
+    void set_viewport (const Viewport& vp);
+    const Viewport& viewport () const;
+    
     void set_scale (const glm::vec3& scale);
     void set_rotation (const glm::quat& rot);
     void set_translation (const glm::vec3& trans);
@@ -58,11 +64,24 @@ class Camera {
     glm::vec3 to () const;
 
     glm::mat4 view_matrix () const;
+    glm::mat4 projection_matrix () const;
+
+    glm::vec2 aspect_ratio () const;
+    
+    glm::vec3 unproject (const glm::vec3& c) const;
+    glm::vec3 project (const glm::vec3& c) const;
+    
+    float depth_at_screen_coord (const glm::vec2& c) const;
+    
+    void set_z_clip_dists (const glm::vec2& c);
+    glm::vec2 z_clip_dists () const;
 
   private:
     glm::vec3 m_scale;
     glm::quat m_rot;
     glm::vec3 m_trans;
+    Viewport  m_viewport;
+    glm::vec2 m_zClipDists;
 };
 
 }// end of namespace lumeview
