@@ -63,7 +63,7 @@ public:
   	void render ();
 
 private:
-	using base_t = WindowEventListener;
+    using base_t = WindowEventListener;
 
 	WindowEventListener* m_imguiListener;
 
@@ -75,6 +75,10 @@ private:
 	bool	m_guiShowScene;
 	bool	m_guiShowLog;
 	bool	m_guiShowDemo;
+
+    class ImGuiLifetimeManager;
+    std::shared_ptr <ImGuiLifetimeManager> m_imguiLifetimeManager;
+    std::weak_ptr <ImGuiLifetimeManager>   s_imguiLifetimeManager;
 };
 
 }//	end of namespace lumeview

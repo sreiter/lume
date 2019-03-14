@@ -54,6 +54,14 @@
 using namespace std;
 using namespace lume;
 
+// namespace
+// {
+// bool InitializeImGuiExecutors ()
+// {
+//     // SubsetInfoAnnex::set_imgui_executor (&SubsetInfoAnnex_ImGui)
+//     return true;
+// }
+// }// end of empty namespace
 
 namespace lumeview {
 
@@ -77,14 +85,22 @@ namespace lumeview {
 // 	ImGui_Shutdown ();
 // }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Lumeview
 
-void Lumeview::clear ()
+class Lumeview::ImGuiLifetimeManager
 {
-	m_scene.reset();
-}
+public:
+    ImGuiLifetimeManager ()
+    {
+        lumeview::ImGui_Init();
+    }
+
+    ~ImGuiLifetimeManager ()
+    {
+        lumeview::ImGui_Shutdown();
+    }
+};
 
 Lumeview::Lumeview () :
     m_view (std::make_shared <View> ()),
@@ -92,7 +108,24 @@ Lumeview::Lumeview () :
 	m_guiShowLog (true),
 	m_guiShowDemo (false)
 {
+    static bool gladInitialized = gladLoadGL ();
+    // static bool imguiExecutorsInitialized = InitializeImGuiExecutors ();
+
+    if (s_imguiLifetimeManager.expired ())
+    {
+        m_imguiLifetimeManager = std::make_shared <ImGuiLifetimeManager> ();
+        s_imguiLifetimeManager = m_imguiLifetimeManager;
+    }
+    else {
+        m_imguiLifetimeManager = std::shared_ptr <ImGuiLifetimeManager> (s_imguiLifetimeManager);
+    }
+
 	m_imguiListener = ImGui_GetEventListener ();
+}
+
+void Lumeview::clear ()
+{
+    m_scene.reset();
 }
 
 void Lumeview::mouse_button (int button, int action, int mods)
