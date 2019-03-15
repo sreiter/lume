@@ -35,25 +35,24 @@
 
 // #include "log.h"
 // #include "lumeview_error.h"
-// #include "lumeview.h"
+#include "lumeview.h"
 
 // #include "lume/file_io.h"
 // #include "scene_util.h"
 
-using namespace std;
-// using namespace lumeview;
-// using namespace lume;
+using namespace lumeview;
+using std::cout;
+using std::endl;
+using SPLumeview = std::shared_ptr <Lumeview>;
 
-// Lumeview g_lumeview;
-
-static glm::vec2            g_pixelScale (1);
+static glm::vec2                g_pixelScale (1);
+static std::weak_ptr <Lumeview> g_lumeview;
 
 void HandleGLFWError (int error, const char* description)
 {
     // THROW ("GLFW ERROR (code " << error << "):\n" <<
     //        description);
 }
-
 
 void FramebufferResized (GLFWwindow* window, int width, int height)
 {
@@ -63,22 +62,22 @@ void FramebufferResized (GLFWwindow* window, int width, int height)
         g_pixelScale = glm::vec2 ((float) width / (float) winWidth,
                                   (float) height / (float) winHeight);
 
-    // g_lumeview.set_viewport (glm::ivec4(0, 0, width, height));
+    SPLumeview (g_lumeview)->set_viewport (Viewport (0, 0, width, height));
 }
 
 void CursorPositionCallback(GLFWwindow* window, double x, double y)
 {
-    // g_lumeview.mouse_move (glm::vec2(x, y) * g_pixelScale);
+    SPLumeview (g_lumeview)->mouse_move (glm::vec2(x, y) * g_pixelScale);
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    // g_lumeview.mouse_button (button, action, mods);
+    SPLumeview (g_lumeview)->mouse_button (button, action, mods);
 }
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // g_lumeview.mouse_scroll (glm::vec2 (xoffset, yoffset));
+    SPLumeview (g_lumeview)->mouse_scroll (glm::vec2 (xoffset, yoffset));
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -133,8 +132,9 @@ int main (int argc, char** argv)
         glfwMakeContextCurrent (window);
         glfwSwapInterval(1);
 
-        // LumeviewInit ();
-        
+        auto lumeview = std::make_shared <Lumeview> ();
+        g_lumeview = lumeview;
+
     //  if a filename was specified, we'll load that, if not, we'll create a sample scene
         // if (argc == 2)
         //     g_lumeview.set_scene (CreateSceneForMesh (argv[1]));
@@ -157,13 +157,12 @@ int main (int argc, char** argv)
 
         while (!glfwWindowShouldClose (window))
         {
-            // g_lumeview.process_gui ();
-            // g_lumeview.render ();
+            lumeview->process_gui ();
+            lumeview->render ();
             
             glfwSwapBuffers (window);
             glfwPollEvents ();
         }
-
     }
     // catch (FileNotFoundError& e) {
     //     cout << "\nAn ERROR occurred during execution:\n";
@@ -176,8 +175,6 @@ int main (int argc, char** argv)
         retVal = 1;
     }
 
-    // g_lumeview.clear();
-    // lumeview::LumeviewShutdown ();
     glfwTerminate ();
     return retVal;
 }

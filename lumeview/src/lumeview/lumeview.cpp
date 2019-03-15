@@ -35,8 +35,8 @@
 
 // #include "log.h"
 #include "lumeview.h"
-// #include "imgui/imgui.h"
-// #include "imgui/imgui_binding.h"
+#include "imgui/imgui.h"
+#include "lumeview/gui/imgui_binding.h"
 
 // #include "shapes.h"
 // #include "plain_visualization.h"
@@ -51,9 +51,6 @@
 
 // #include "pettyprof/pettyprof.h"
 
-using namespace std;
-using namespace lume;
-
 // namespace
 // {
 // bool InitializeImGuiExecutors ()
@@ -63,69 +60,71 @@ using namespace lume;
 // }
 // }// end of empty namespace
 
+namespace
+{
+
+class StaticDependencies
+{
+public:
+    static void init ()
+    {
+        static bool gladInitialized = gladLoadGL ();
+        //throw_if <InitializationError> (!gladInitialized) << "StaticDependencies::init: Unable to initialize glad.";
+
+        if (inst ().m_refCount == 0) {
+            lumeview::ImGui_Init();
+        }
+        ++inst ().m_refCount;
+    }
+
+    static void shutdown ()
+    {
+        --inst ().m_refCount;
+        //throw_if <InitializationError> (inst ().m_refCount < 0) << "StaticDependencies::shutdown called too often.";
+
+        if (inst ().m_refCount == 0) {
+            lumeview::ImGui_Shutdown();
+        }
+    }
+
+private:
+    static StaticDependencies& inst ()
+    {
+        static StaticDependencies is;
+        return is;
+    }
+
+    StaticDependencies () = default;
+
+    int m_refCount {0};
+};
+
+}
+
 namespace lumeview {
-
-// void LumeviewInit ()
-// {
-// 	SubsetInfoAnnex::set_imgui_executor (&SubsetInfoAnnex_ImGui);
-
-// 	// if (!gladLoadGLLoader ((GLADloadproc)glfwGetProcAddress)) {
-// 	// 	THROW("GLAD::INITIALIZATION\n  Failed to initialize GLAD" << endl);
-// 	// }
-
-// 	if (!gladLoadGL ()) {
-// 		THROW("GLAD::INITIALIZATION\n  Failed to initialize GLAD" << endl);
-// 	}
-
-// 	lumeview::ImGui_Init();
-// }
-
-// void LumeviewShutdown ()
-// {
-// 	ImGui_Shutdown ();
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Lumeview
 
-class Lumeview::ImGuiLifetimeManager
-{
-public:
-    ImGuiLifetimeManager ()
-    {
-        lumeview::ImGui_Init();
-    }
-
-    ~ImGuiLifetimeManager ()
-    {
-        lumeview::ImGui_Shutdown();
-    }
-};
-
 Lumeview::Lumeview () :
-    m_view (std::make_shared <View> ()),
+    m_camera (std::make_shared <Camera> ()),
+    m_arcBallControl (m_camera),
 	m_guiShowScene (true),
 	m_guiShowLog (true),
 	m_guiShowDemo (false)
 {
-    static bool gladInitialized = gladLoadGL ();
-    // static bool imguiExecutorsInitialized = InitializeImGuiExecutors ();
-
-    if (s_imguiLifetimeManager.expired ())
-    {
-        m_imguiLifetimeManager = std::make_shared <ImGuiLifetimeManager> ();
-        s_imguiLifetimeManager = m_imguiLifetimeManager;
-    }
-    else {
-        m_imguiLifetimeManager = std::shared_ptr <ImGuiLifetimeManager> (s_imguiLifetimeManager);
-    }
-
+    StaticDependencies::init ();
 	m_imguiListener = ImGui_GetEventListener ();
+}
+
+Lumeview::~Lumeview ()
+{
+    StaticDependencies::shutdown ();
 }
 
 void Lumeview::clear ()
 {
-    m_scene.reset();
+    // m_scene.reset();
 }
 
 void Lumeview::mouse_button (int button, int action, int mods)
@@ -134,8 +133,9 @@ void Lumeview::mouse_button (int button, int action, int mods)
 
 	m_imguiListener->mouse_button (button, action, mods);
 
-	if(!ImGui::GetIO().WantCaptureMouse)
-		m_arcBallView.mouse_button (button, action, mods);
+	if(!ImGui::GetIO().WantCaptureMouse) {
+		m_arcBallControl.mouse_button (button, action, mods);
+    }
 }
 
 
@@ -145,8 +145,9 @@ void Lumeview::mouse_move (const glm::vec2& c)
 
 	m_imguiListener->mouse_move (c);
 
-	if(!ImGui::GetIO().WantCaptureMouse)
-		m_arcBallView.mouse_move (c);
+	if(!ImGui::GetIO().WantCaptureMouse) {
+		m_arcBallControl.mouse_move (c);
+    }
 }
 
 
@@ -156,18 +157,20 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
 
 	m_imguiListener->mouse_scroll (o);
 
-	if(!ImGui::GetIO().WantCaptureMouse)
-		m_arcBallView.mouse_scroll (o);
+	if(!ImGui::GetIO().WantCaptureMouse) {
+		m_arcBallControl.mouse_scroll (o);
+    }
 }
 
 
 
-void Lumeview::set_viewport (const glm::ivec4& vp)
+void Lumeview::set_viewport (const Viewport& vp)
 {
 	base_t::set_viewport (vp);
 
 	m_imguiListener->set_viewport (vp);
-	m_arcBallView.set_viewport (vp);
+	m_arcBallControl.set_viewport (vp);
+    m_camera->set_viewport (vp);
 }
 
 
@@ -178,8 +181,9 @@ void Lumeview::key (int key, int scancode, int action, int mods)
 
 	m_imguiListener->key (key, scancode, action, mods);
 
-	if(!ImGui::GetIO().WantCaptureKeyboard)
-		m_arcBallView.key (key, scancode, action, mods);
+	if(!ImGui::GetIO().WantCaptureKeyboard) {
+		m_arcBallControl.key (key, scancode, action, mods);
+    }
 }
 
 
@@ -189,14 +193,15 @@ void Lumeview::character (unsigned int c)
 
 	m_imguiListener->character (c);
 
-	if(!ImGui::GetIO().WantCaptureKeyboard)
-		m_arcBallView.character (c);
+	if(!ImGui::GetIO().WantCaptureKeyboard) {
+		m_arcBallControl.character (c);
+    }
 }
 
-void Lumeview::set_scene (const SPScene& scene)
-{
-	m_scene = scene;
-}
+// void Lumeview::set_scene (const SPScene& scene)
+// {
+// 	m_scene = scene;
+// }
 
 void Lumeview::process_gui ()
 {
@@ -214,18 +219,21 @@ void Lumeview::process_gui ()
         ImGui::EndMainMenuBar();
     }
 
-	if (m_guiShowLog)
-		DefLog().draw("log", &m_guiShowLog);
+	// if (m_guiShowLog) {
+	// 	DefLog().draw("log", &m_guiShowLog);
+ //    }
 
-	if (m_guiShowDemo)
+	if (m_guiShowDemo) {
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
+    }
 
-	if (m_guiShowScene && m_scene)
-		m_scene->do_imgui (&m_guiShowScene);
+	// if (m_guiShowScene && m_scene) {
+	// 	m_scene->do_imgui (&m_guiShowScene);
+ //    }
 
 	ImGui::Render();
 
-	MessageQueue::dispatch ();
+	// MessageQueue::dispatch ();
 }
 
 void Lumeview::render ()
@@ -235,10 +243,11 @@ void Lumeview::render ()
 	glClearColor (0.25f, 0.25f, 0.25f, 1.0f);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (m_scene) {
-		const glm::vec2 clipDists = m_scene->estimate_z_clip_dists(m_arcBallView.view());
-		m_arcBallView.view().set_z_clip_dists (clipDists);
-		m_scene->render (m_arcBallView.view());
+	//if (m_scene)
+    {
+		//const glm::vec2 clipDists = m_scene->estimate_z_clip_dists(m_arcBallControl.view());
+		//m_camera->set_z_clip_dists (clipDists);
+		//m_scene->render (*m_camera);
 	}
 
 	lumeview::ImGui_Display();

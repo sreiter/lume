@@ -29,20 +29,16 @@
 
 #include <memory>
 #include <lumeview/gui/arc_ball_control.h>
-//#include "scene.h"
 #include <lumeview/gui/window_event_listener.h>
+#include <lumeview/rendering/camera.h>
 
 namespace lumeview {
-
-// void LumeviewInit ();
-
-// void LumeviewShutdown ();
-
 
 class Lumeview : public WindowEventListener {
 public:
 
 	Lumeview ();
+    ~Lumeview ();
 
 	void clear();
 	
@@ -56,7 +52,7 @@ public:
   	void key (int key, int scancode, int action, int mods) override;
   	void character (unsigned int c) override;
 
-  	void set_scene (const SPScene& scene);
+  	// void set_scene (const SPScene& scene);
 
   	void process_gui ();
 
@@ -67,18 +63,12 @@ private:
 
 	WindowEventListener* m_imguiListener;
 
-    std::shared_ptr<View> m_view;
-	ArcBallControl		  m_arcBallControl;
-
-	// SPScene				 m_scene;
+    std::shared_ptr<Camera> m_camera;
+	ArcBallControl		    m_arcBallControl;
 
 	bool	m_guiShowScene;
 	bool	m_guiShowLog;
 	bool	m_guiShowDemo;
-
-    class ImGuiLifetimeManager;
-    std::shared_ptr <ImGuiLifetimeManager> m_imguiLifetimeManager;
-    std::weak_ptr <ImGuiLifetimeManager>   s_imguiLifetimeManager;
 };
 
 }//	end of namespace lumeview

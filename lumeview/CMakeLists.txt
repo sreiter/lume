@@ -32,7 +32,7 @@ set (GL_VERSION_MINOR "3")
 set (GLAD_PATH  "deps/glad-${GL_VERSION_MAJOR}.${GL_VERSION_MINOR}")
 
 set (sources
-        # src/lumeview/lumeview.cpp
+        src/lumeview/lumeview.cpp
         src/lumeview/main.cpp
 
         src/lumeview/gui/arc_ball.cpp
