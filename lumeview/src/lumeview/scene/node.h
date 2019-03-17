@@ -36,7 +36,12 @@ class Node
 {
 public:
     Node() = default;
-    ~Node() = default;
+    virtual ~Node();
+    
+    Node (const Node&) = delete;
+    Node& operator = (const Node&) = delete;
+
+    void clear ();
 
     void add_child (std::unique_ptr <Node> node);
 
@@ -44,8 +49,15 @@ public:
     
     virtual void render (const Camera& camera) {};
 
+protected:
+    virtual void on_clear () = 0;
+
 private:
+    void set_parent (Node* parent);
+    void remove_child (Node* child);
+
     std::vector <std::unique_ptr <Node>> m_children;
+    Node*                                m_parent;
 };
 
 }// end of namespace lumeview::scene

@@ -22,10 +22,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <lumeview/scene/node.h>
 
 namespace lumeview::scene
 {
+
+void Node::clear ()
+{
+    for (auto& child : m_children) {
+        child->set_parent (nullptr);
+        child->clear ();
+    }
+
+    m_children.clear ();
+
+    on_clear ();
+}
 
 void Node::add_child (std::unique_ptr <Node> node)
 {
@@ -35,8 +48,28 @@ void Node::add_child (std::unique_ptr <Node> node)
 void Node::traverse (const std::function <void (Node&)>& callback)
 {
     callback (*this);
-    for (auto& n : m_children) {
-        n->traverse (callback);
+    for (auto& child : m_children) {
+        child->traverse (callback);
+    }
+}
+
+void Node::set_parent (Node* parent)
+{
+    if (m_parent) {
+        m_parent->remove_child (this);
+    }
+
+    m_parent = parent;
+}
+
+void Node::remove_child (Node* child)
+{
+    auto i = std::find_if (m_children.begin (),
+                           m_children.end (),
+                           [=](const auto& n) {return n.get () == child;});
+    
+    if (i != m_children.end ()) {
+        m_children.erase (i);
     }
 }
 
