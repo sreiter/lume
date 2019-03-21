@@ -198,15 +198,17 @@ void Lumeview::character (unsigned int c)
     }
 }
 
-// void Lumeview::set_scene (const SPScene& scene)
-// {
-// 	m_scene = scene;
-// }
+scene::Node& Lumeview::scene ()
+{
+    return m_scene;
+}
 
 void Lumeview::process_gui ()
 {
+    ImGui::GetStyle().FrameRounding = 0;
 	lumeview::ImGui_NewFrame();
 
+    ImVec2 mainMenuSize (0, 0);
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Panels"))
@@ -216,6 +218,7 @@ void Lumeview::process_gui ()
             ImGui::MenuItem("Show ImGui Demo", NULL, &m_guiShowDemo);
             ImGui::EndMenu();
         }
+        mainMenuSize = ImGui::GetWindowSize ();
         ImGui::EndMainMenuBar();
     }
 
@@ -227,9 +230,19 @@ void Lumeview::process_gui ()
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
     }
 
-	// if (m_guiShowScene && m_scene) {
-	// 	m_scene->do_imgui (&m_guiShowScene);
- //    }
+    {
+        ImGui::SetNextWindowPos (ImVec2 (0, mainMenuSize.y));
+        ImGui::SetNextWindowSize (ImVec2 (300.f, m_camera->viewport ().height () - mainMenuSize.y));
+        
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove
+                                      | ImGuiWindowFlags_NoResize;
+                                      // | ImGuiWindowFlags_NoCollapse;
+
+        if (ImGui::Begin("Scene", nullptr, window_flags)) {
+            m_scene.do_imgui ();
+        }
+        ImGui::End();
+    }
 
 	ImGui::Render();
 

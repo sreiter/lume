@@ -25,7 +25,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 3.8)
-project (lumeview LANGUAGES CXX)
+project (lumeview LANGUAGES C CXX)
 
 set (GL_VERSION_MAJOR "3")
 set (GL_VERSION_MINOR "3")
@@ -42,6 +42,7 @@ set (sources
 
         src/lumeview/rendering/camera.cpp
 
+        src/lumeview/scene/mesh_content.cpp
         src/lumeview/scene/node.cpp
     )
 

@@ -24,48 +24,24 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <vector>
-#include <lumeview/rendering/camera.h>
+#include <lume/mesh.h>
 #include <lumeview/scene/content.h>
 
 namespace lumeview::scene
 {
 
-class Node
+class MeshContent : public Content
 {
 public:
-    Node () = default;
-    Node (std::unique_ptr <Content> content);
-    ~Node ();
+    MeshContent () = default;
+    MeshContent (std::string filename);
 
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
-
-    void clear ();
-
-    void add_child (std::unique_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
-
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    Content& content ();
-    const Content& content () const;
-
-    void do_imgui ();
+    const std::string& name () const override;
+    // void render (const Camera& camera) override;
 
 private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    std::unique_ptr <Content>            m_content;
-    std::vector <std::unique_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
+    std::shared_ptr <lume::Mesh> m_mesh;
+    std::string                  m_filename;
 };
 
 }// end of namespace lumeview::scene

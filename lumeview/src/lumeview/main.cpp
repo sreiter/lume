@@ -30,15 +30,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "imgui/imgui.h"
-// #include "imgui/imgui_binding.h"
-
-// #include "log.h"
-// #include "lumeview_error.h"
-#include "lumeview.h"
-
-// #include "lume/file_io.h"
-// #include "scene_util.h"
+#include <imgui/imgui.h>
+#include <lumeview/lumeview.h>
+#include <lumeview/scene/mesh_content.h>
 
 using namespace lumeview;
 using std::cout;
@@ -125,7 +119,7 @@ int main (int argc, char** argv)
         #endif
 
     //  Set up window
-        GLFWwindow* window = glfwCreateWindow (800, 600, "lumeview", NULL, NULL);
+        GLFWwindow* window = glfwCreateWindow (1200, 800, "lumeview", NULL, NULL);
         // COND_THROW (window == NULL, "GLFW::INIT\n" <<
         //             "Failed to create glfw window");
 
@@ -135,11 +129,10 @@ int main (int argc, char** argv)
         auto lumeview = std::make_shared <Lumeview> ();
         g_lumeview = lumeview;
 
-    //  if a filename was specified, we'll load that, if not, we'll create a sample scene
-        // if (argc == 2)
-        //     g_lumeview.set_scene (CreateSceneForMesh (argv[1]));
-        // else
-        //     g_lumeview.set_scene (CreateSampleScene ());
+    //  if a filename was specified, we'll load that file
+        if (argc == 2){
+            lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [1]));
+        }
 
         // InitImGui (window);
 
@@ -172,6 +165,11 @@ int main (int argc, char** argv)
     catch (std::exception& e) {
         cout << "\nAn ERROR occurred during execution:\n";
         cout << e.what() << endl << endl;
+        retVal = 1;
+    }
+    catch (...)
+    {
+        cout << "\nAn unknown error occurred during execution.\n";
         retVal = 1;
     }
 

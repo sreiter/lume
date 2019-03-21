@@ -22,50 +22,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-
-#include <functional>
-#include <memory>
-#include <vector>
-#include <lumeview/rendering/camera.h>
-#include <lumeview/scene/content.h>
+#include <lumeview/scene/mesh_content.h>
+#include <lume/file_io.h>
 
 namespace lumeview::scene
 {
 
-class Node
+MeshContent::MeshContent (std::string filename)
 {
-public:
-    Node () = default;
-    Node (std::unique_ptr <Content> content);
-    ~Node ();
+    m_mesh = lume::CreateMeshFromFile (filename);
+    m_filename = std::move (filename);
+}
 
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
-
-    void clear ();
-
-    void add_child (std::unique_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
-
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    Content& content ();
-    const Content& content () const;
-
-    void do_imgui ();
-
-private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    std::unique_ptr <Content>            m_content;
-    std::vector <std::unique_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
-};
+const std::string& MeshContent::name () const
+{
+    return m_filename;
+}
 
 }// end of namespace lumeview::scene

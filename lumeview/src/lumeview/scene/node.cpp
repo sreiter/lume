@@ -23,10 +23,24 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <imgui/imgui.h>
 #include <lumeview/scene/node.h>
 
 namespace lumeview::scene
 {
+
+Node::Node (std::unique_ptr <Content> content)
+    : m_content (std::move (content))
+{
+    // throw_if <ContentError> (m_content == nullptr) << "Invalid content provided to lumeview::scene::Node";
+}
+
+Node::~Node ()
+{
+    if (m_parent) {
+        m_parent->remove_child (this);
+    }
+}
 
 void Node::clear ()
 {
@@ -36,8 +50,6 @@ void Node::clear ()
     }
 
     m_children.clear ();
-
-    on_clear ();
 }
 
 void Node::add_child (std::unique_ptr <Node> node)
@@ -45,9 +57,19 @@ void Node::add_child (std::unique_ptr <Node> node)
     m_children.emplace_back (std::move (node));
 }
 
+void Node::add_child (std::unique_ptr <Content> content)
+{
+    m_children.emplace_back (std::make_unique <Node> (std::move (content)));
+}
+
 void Node::traverse (const std::function <void (Node&)>& callback)
 {
     callback (*this);
+    traverse_children (callback);
+}
+
+void Node::traverse_children (const std::function <void (Node&)>& callback)
+{
     for (auto& child : m_children) {
         child->traverse (callback);
     }
@@ -67,10 +89,42 @@ void Node::remove_child (Node* child)
     auto i = std::find_if (m_children.begin (),
                            m_children.end (),
                            [=](const auto& n) {return n.get () == child;});
-    
+
     if (i != m_children.end ()) {
         m_children.erase (i);
     }
+}
+
+Content& Node::content ()
+{
+    return *m_content;
+}
+
+const Content& Node::content () const
+{
+    return *m_content;
+}
+
+void Node::do_imgui ()
+{
+    if (m_content != nullptr
+        && !m_content->name (). empty ())
+    {
+        if (m_content->has_imgui ())
+        {
+            if (ImGui::TreeNode (m_content->name ().c_str ()))
+            {
+                m_content->do_imgui ();
+                ImGui::TreePop();
+            }
+        }
+        else
+        {
+            ImGui::Text(m_content->name ().c_str ());
+        }
+    }
+
+    traverse_children ([](auto& node) {node.do_imgui ();});
 }
 
 }//    end of namespace lumeview::scene
