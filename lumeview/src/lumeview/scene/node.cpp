@@ -110,17 +110,27 @@ void Node::do_imgui ()
     if (m_content != nullptr
         && !m_content->name (). empty ())
     {
-        if (m_content->has_imgui ())
-        {
-            if (ImGui::TreeNode (m_content->name ().c_str ()))
-            {
-                m_content->do_imgui ();
-                ImGui::TreePop();
-            }
+        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow
+                                     | ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                     | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
+                                     | (m_children.empty () ? ImGuiTreeNodeFlags_Leaf
+                                        | ImGuiTreeNodeFlags_NoTreePushOnOpen
+                                        | ImGuiTreeNodeFlags_Bullet
+                                        : 0);
+
+        bool nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
+        
+        if (ImGui::IsItemClicked()) {
+            m_isSelected = !m_isSelected;
         }
-        else
+
+        if (nodeOpen)
         {
-            ImGui::Text(m_content->name ().c_str ());
+            if (m_content->has_imgui ()) {
+                m_content->do_imgui ();
+            }
+
+            ImGui::TreePop();
         }
     }
 
