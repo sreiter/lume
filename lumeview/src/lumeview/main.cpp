@@ -134,8 +134,6 @@ int main (int argc, char** argv)
             lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [1]));
         }
 
-        // InitImGui (window);
-
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);
         glfwSetScrollCallback (window, ScrollCallback);
@@ -157,11 +155,6 @@ int main (int argc, char** argv)
             glfwPollEvents ();
         }
     }
-    // catch (FileNotFoundError& e) {
-    //     cout << "\nAn ERROR occurred during execution:\n";
-    //     cout << "File not found: " << e.what() << endl << endl;
-    //     retVal = 1;
-    // }
     catch (std::exception& e) {
         cout << "\nAn ERROR occurred during execution:\n";
         cout << e.what() << endl << endl;
