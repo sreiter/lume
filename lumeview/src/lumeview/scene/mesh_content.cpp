@@ -23,6 +23,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <lumeview/scene/mesh_content.h>
+#include <lumeview/widgets/mesh_contents.h>
 #include <lume/file_io.h>
 
 namespace lumeview::scene
@@ -37,6 +38,20 @@ MeshContent::MeshContent (std::string filename)
 const std::string& MeshContent::name () const
 {
     return m_filename;
+}
+
+bool MeshContent::has_imgui () const
+{
+    return m_mesh != nullptr;
+}
+
+void MeshContent::do_imgui ()
+{
+    if (!m_mesh) {
+        return;
+    }
+
+    widgets::MeshContents (*m_mesh);
 }
 
 }// end of namespace lumeview::scene

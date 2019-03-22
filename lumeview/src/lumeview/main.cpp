@@ -129,9 +129,11 @@ int main (int argc, char** argv)
         auto lumeview = std::make_shared <Lumeview> ();
         g_lumeview = lumeview;
 
-    //  if a filename was specified, we'll load that file
-        if (argc == 2){
-            lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [1]));
+    //  load specified meshes
+        if (argc >= 2) {
+            for (int i = 1; i < argc; ++i) {
+                lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [i]));
+            }
         }
 
         glfwSetCursorPosCallback (window, CursorPositionCallback);

@@ -110,21 +110,23 @@ void Node::do_imgui ()
     if (m_content != nullptr
         && !m_content->name (). empty ())
     {
+        const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow
                                      | ImGuiTreeNodeFlags_OpenOnDoubleClick
                                      | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
-                                     | (m_children.empty () ? ImGuiTreeNodeFlags_Leaf
-                                        | ImGuiTreeNodeFlags_NoTreePushOnOpen
-                                        | ImGuiTreeNodeFlags_Bullet
-                                        : 0);
+                                     | (isLeaf ? (ImGuiTreeNodeFlags_Leaf
+                                                  | ImGuiTreeNodeFlags_NoTreePushOnOpen
+                                                  | ImGuiTreeNodeFlags_Bullet)
+                                                : 0);
 
         bool nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
         
         if (ImGui::IsItemClicked()) {
-            m_isSelected = !m_isSelected;
+            // m_isSelected = !m_isSelected;
         }
 
-        if (nodeOpen)
+        if (! isLeaf
+            && nodeOpen)
         {
             if (m_content->has_imgui ()) {
                 m_content->do_imgui ();

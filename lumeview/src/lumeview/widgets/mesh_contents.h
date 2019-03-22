@@ -24,26 +24,27 @@
 
 #pragma once
 
+#include <imgui/imgui.h>
 #include <lume/mesh.h>
-#include <lumeview/scene/content.h>
 
-namespace lumeview::scene
+namespace lumeview::widgets
 {
 
-class MeshContent : public Content
+void MeshContents (lume::Mesh& mesh)
 {
-public:
-    MeshContent () = default;
-    MeshContent (std::string filename);
+    ImGui::Columns(2);
+    ImGui::Separator();
+    
+    auto grobTypes = mesh.grob_types ();
+    for (auto gt : grobTypes) {
+        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
+        ImGui::NextColumn ();
+        ImGui::Text (std::to_string (mesh.num (gt)).c_str ());
+        ImGui::NextColumn ();
+    }
 
-    const std::string& name () const override;
-    bool has_imgui () const override;
-    void do_imgui () override;
-    // void render (const Camera& camera) override;
+    ImGui::Columns(1);
+    ImGui::Separator();
+}
 
-private:
-    std::shared_ptr <lume::Mesh> m_mesh;
-    std::string                  m_filename;
-};
-
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::widgets
