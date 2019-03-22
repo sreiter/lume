@@ -33,7 +33,6 @@ namespace lumeview::widgets
 void MeshContents (lume::Mesh& mesh)
 {
     ImGui::Columns(2);
-    ImGui::Separator();
     
     auto grobTypes = mesh.grob_types ();
     for (auto gt : grobTypes) {
@@ -44,7 +43,6 @@ void MeshContents (lume::Mesh& mesh)
     }
 
     ImGui::Columns(1);
-    ImGui::Separator();
 }
 
 }// end of namespace lumeview::widgets

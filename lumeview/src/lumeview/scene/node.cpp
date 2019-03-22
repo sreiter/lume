@@ -111,10 +111,11 @@ void Node::do_imgui ()
         && !m_content->name (). empty ())
     {
         const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
-        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow
-                                     | ImGuiTreeNodeFlags_OpenOnDoubleClick
-                                     | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
-                                     | (isLeaf ? (ImGuiTreeNodeFlags_Leaf
+        ImGuiTreeNodeFlags nodeFlags = //ImGuiTreeNodeFlags_OpenOnArrow
+                                     //| ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                     //| (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
+                                     //|
+                                     (isLeaf ? (ImGuiTreeNodeFlags_Leaf
                                                   | ImGuiTreeNodeFlags_NoTreePushOnOpen
                                                   | ImGuiTreeNodeFlags_Bullet)
                                                 : 0);
@@ -136,7 +137,10 @@ void Node::do_imgui ()
         }
     }
 
-    traverse_children ([](auto& node) {node.do_imgui ();});
+    traverse_children ([](auto& node) {
+                            node.do_imgui ();
+                            ImGui::Separator ();
+                        });
 }
 
 }//    end of namespace lumeview::scene

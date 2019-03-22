@@ -51,7 +51,16 @@ void MeshContent::do_imgui ()
         return;
     }
 
-    widgets::MeshContents (*m_mesh);
+    ImGui::BeginTabBar (m_filename.c_str ());
+    if (ImGui::BeginTabItem ("Content"))
+    {
+        // ImGui::BeginChild ("ChildArea", ImVec2 (0, 100), true, 0);
+        widgets::MeshContents (*m_mesh);
+        // ImGui::EndChild ();
+        ImGui::EndTabItem();
+    }
+    ImGui::EndTabBar ();
+
 }
 
 }// end of namespace lumeview::scene
