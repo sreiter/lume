@@ -27,9 +27,10 @@
 #include <glad/glad.h>  // include before other OpenGL related includes
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <lumeview/rendering/camera.h>
+#include <lumeview/render/camera.h>
 
-namespace lumeview {
+namespace lumeview::render
+{
 
 Camera::Camera () :
 	m_scale (1.f, 1.f, 1.f),

@@ -24,8 +24,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __H__CAMERA_
-#define __H__CAMERA_
+#pragma once
 
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
@@ -33,9 +32,10 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <lumeview/rendering/viewport.h>
+#include <lumeview/render/viewport.h>
 
-namespace lumeview {
+namespace lumeview::render
+{
 
 class Camera {
   public:
@@ -85,5 +85,3 @@ class Camera {
 };
 
 }// end of namespace lumeview
-
-#endif  //__H__CAMERA_

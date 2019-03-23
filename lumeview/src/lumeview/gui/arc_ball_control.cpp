@@ -28,6 +28,8 @@
 namespace lumeview
 {
 
+using namespace render;
+
 ArcBallControl::ArcBallControl (std::shared_ptr <Camera> camera)
     : m_camera (std::move (camera))
 {

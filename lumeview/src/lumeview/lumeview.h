@@ -30,7 +30,7 @@
 #include <memory>
 #include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/gui/window_event_listener.h>
-#include <lumeview/rendering/camera.h>
+#include <lumeview/render/camera.h>
 #include <lumeview/scene/node.h>
 
 namespace lumeview {
@@ -48,7 +48,7 @@ public:
   	void mouse_move (const glm::vec2& c) override;
   	void mouse_scroll (const glm::vec2& o) override;
 
-  	void set_viewport (const Viewport& vp) override;
+  	void set_viewport (const render::Viewport& vp) override;
 
   	void key (int key, int scancode, int action, int mods) override;
   	void character (unsigned int c) override;
@@ -64,9 +64,9 @@ private:
 
 	WindowEventListener* m_imguiListener;
 
-    std::shared_ptr<Camera> m_camera;
-	ArcBallControl		    m_arcBallControl;
-    scene::Node             m_scene;
+    std::shared_ptr<render::Camera> m_camera;
+	ArcBallControl		            m_arcBallControl;
+    scene::Node                     m_scene;
 
 	bool	m_guiShowScene;
 	bool	m_guiShowLog;

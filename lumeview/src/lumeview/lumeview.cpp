@@ -101,8 +101,10 @@ private:
 
 }
 
-namespace lumeview {
+namespace lumeview
+{
 
+using namespace render;
 ////////////////////////////////////////////////////////////////////////////////
 // Lumeview
 

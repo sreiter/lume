@@ -27,7 +27,7 @@
 #include <memory>
 #include <lumeview/gui/arc_ball.h>
 #include <lumeview/gui/window_event_listener.h>
-#include <lumeview/rendering/camera.h>
+#include <lumeview/render/camera.h>
 
 namespace lumeview
 {
@@ -35,7 +35,7 @@ namespace lumeview
 class ArcBallControl : public WindowEventListener
 {
 public:
-    ArcBallControl (std::shared_ptr <Camera> camera);
+    ArcBallControl (std::shared_ptr <render::Camera> camera);
 
     void mouse_button (int button, int action, int mods) override;
     void mouse_move (const glm::vec2& c) override;
@@ -44,8 +44,8 @@ public:
 private:
     using base_t = WindowEventListener;
     
-    std::shared_ptr <Camera> m_camera;
-    ArcBall                  m_arcBall;
+    std::shared_ptr <render::Camera> m_camera;
+    ArcBall                          m_arcBall;
 };
 
 }//    end of namespace lumeview

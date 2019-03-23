@@ -40,7 +40,7 @@ set (sources
         src/lumeview/gui/imgui_binding.cpp
         src/lumeview/gui/window_event_listener.cpp
 
-        src/lumeview/rendering/camera.cpp
+        src/lumeview/render/camera.cpp
 
         src/lumeview/scene/mesh_content.cpp
         src/lumeview/scene/node.cpp

@@ -56,7 +56,7 @@ void FramebufferResized (GLFWwindow* window, int width, int height)
         g_pixelScale = glm::vec2 ((float) width / (float) winWidth,
                                   (float) height / (float) winHeight);
 
-    SPLumeview (g_lumeview)->set_viewport (Viewport (0, 0, width, height));
+    SPLumeview (g_lumeview)->set_viewport (render::Viewport (0, 0, width, height));
 }
 
 void CursorPositionCallback(GLFWwindow* window, double x, double y)

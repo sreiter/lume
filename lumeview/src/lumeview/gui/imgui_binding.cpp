@@ -352,7 +352,7 @@ void ImGui_NewFrame()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    const Viewport vp = g_eventListener.viewport();
+    const auto vp = g_eventListener.viewport();
     io.DisplaySize = ImVec2(float(vp.width ()), float(vp.height ()));
 	io.DisplayFramebufferScale = ImVec2(1.f, 1.f);
 

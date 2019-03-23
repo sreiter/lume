@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <lumeview/rendering/camera.h>
+#include <lumeview/render/camera.h>
 
 namespace lumeview::scene
 {
@@ -39,7 +39,7 @@ public:
     // virtual std::unique_ptr <Content> clone () = 0;
     virtual bool has_imgui () const            {return false;}
     virtual void do_imgui ()                   {};
-    virtual void render (const Camera& camera) {};
+    virtual void render (const render::Camera& camera) {};
     
 };
 

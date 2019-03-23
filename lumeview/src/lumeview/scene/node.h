@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <lumeview/rendering/camera.h>
+#include <lumeview/render/camera.h>
 #include <lumeview/scene/content.h>
 
 namespace lumeview::scene

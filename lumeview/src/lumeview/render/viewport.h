@@ -26,7 +26,7 @@
 
 #include <glm/vec4.hpp>
 
-namespace lumeview
+namespace lumeview::render
 {
 
 /** Rendering area in window coordinates.

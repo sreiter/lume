@@ -30,6 +30,8 @@
 
 namespace lumeview {
 
+using namespace render;
+
 ArcBall::ArcBall() :
 	m_rotQuat (1.f, 0.f, 0.f, 0.f), // w = 1, rest 0
 	m_radius (1.f),
