@@ -33,10 +33,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/io.hpp>
 
+#include <imgui/imgui.h>
+
 // #include "log.h"
-#include "lumeview.h"
-#include "imgui/imgui.h"
-#include "lumeview/gui/imgui_binding.h"
+#include <lumeview/lumeview.h>
+#include <lumeview/lumeview_error.h>
+#include <lumeview/gui/imgui_binding.h>
 
 // #include "shapes.h"
 // #include "plain_visualization.h"
@@ -69,7 +71,9 @@ public:
     static void init ()
     {
         static bool gladInitialized = gladLoadGL ();
-        //throw_if <InitializationError> (!gladInitialized) << "StaticDependencies::init: Unable to initialize glad.";
+        if (!gladInitialized) {
+            throw lumeview::InitializationError () << "Unable to initialize glad.";
+        }
 
         if (inst ().m_refCount == 0) {
             lumeview::ImGui_Init();
@@ -80,7 +84,13 @@ public:
     static void shutdown ()
     {
         --inst ().m_refCount;
-        //throw_if <InitializationError> (inst ().m_refCount < 0) << "StaticDependencies::shutdown called too often.";
+        
+        if (inst ().m_refCount < 0)
+        {
+            assert (false);
+            inst ().m_refCount = 0;
+            return;
+        }
 
         if (inst ().m_refCount == 0) {
             lumeview::ImGui_Shutdown();
@@ -152,7 +162,6 @@ void Lumeview::mouse_move (const glm::vec2& c)
     }
 }
 
-
 void Lumeview::mouse_scroll (const glm::vec2& o)
 {
 	base_t::mouse_scroll (o);
@@ -164,8 +173,6 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
     }
 }
 
-
-
 void Lumeview::set_viewport (const Viewport& vp)
 {
 	base_t::set_viewport (vp);
@@ -174,8 +181,6 @@ void Lumeview::set_viewport (const Viewport& vp)
 	m_arcBallControl.set_viewport (vp);
     m_camera->set_viewport (vp);
 }
-
-
 
 void Lumeview::key (int key, int scancode, int action, int mods)
 {
@@ -187,7 +192,6 @@ void Lumeview::key (int key, int scancode, int action, int mods)
 		m_arcBallControl.key (key, scancode, action, mods);
     }
 }
-
 
 void Lumeview::character (unsigned int c)
 {
@@ -263,11 +267,17 @@ void Lumeview::render ()
 		//const glm::vec2 clipDists = m_scene->estimate_z_clip_dists(m_arcBallControl.view());
 		//m_camera->set_z_clip_dists (clipDists);
 		//m_scene->render (*m_camera);
+        auto const& vp = m_camera->viewport ();
+        glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
+        m_scene.traverse ([&camera = *m_camera](auto& node)
+                          {
+                              if (node.has_content ())
+                                  node.content ().render (camera);
+                          });
 	}
 
 	lumeview::ImGui_Display();
 }
-
 
 // static void PrintMeshInfo (SPMesh mesh)
 // {

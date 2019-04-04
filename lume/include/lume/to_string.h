@@ -1,4 +1,4 @@
-// This file is part of lumeview, a lightweight viewer for unstructured meshes
+// This file is part of lume, a C++ library for lightweight unstructured meshes
 //
 // Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
@@ -24,36 +24,34 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-#include <lume/mesh.h>
-#include <lumeview/util/shapes.h>
-#include <lumeview/util/to_string.h>
+#include <string>
+#include <vector>
 
-namespace lumeview::widgets
+namespace lume
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
+template <class T>
+std::string to_string (const T& t)
 {
-    ImGui::Columns(2);
-    
-    auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
-    }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
-    ImGui::NextColumn ();
-
-    ImGui::Columns(1);
+    return std::to_string (t);
 }
 
-}// end of namespace lumeview::widgets
+inline const std::string& to_string (const std::string& s)
+{
+    return s;
+}
+
+template <class T>
+std::string to_string (const std::vector <T>& v) {
+    std::string s ("{");
+    for(size_t i = 0; i < v.size(); ++i) {
+        if (i > 0) {
+            s.append (", ");
+        }
+        s.append (to_string (v[i]));
+    }
+    s.append ("}");
+    return s;
+}
+
+}// end of namespace lume

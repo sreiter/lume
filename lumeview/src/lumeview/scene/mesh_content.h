@@ -25,7 +25,9 @@
 #pragma once
 
 #include <lume/mesh.h>
+#include <lumeview/render/triangle_renderer.h>
 #include <lumeview/scene/content.h>
+#include <lumeview/util/shapes.h>
 
 namespace lumeview::scene
 {
@@ -39,11 +41,13 @@ public:
     const std::string& name () const override;
     bool has_imgui () const override;
     void do_imgui () override;
-    // void render (const Camera& camera) override;
+    void render (const render::Camera& camera) override;
 
 private:
     std::shared_ptr <lume::Mesh> m_mesh;
+    util::FBox                   m_boundingBox;
     std::string                  m_filename;
+    render::TriangleRenderer     m_renderer;
 };
 
 }// end of namespace lumeview::scene

@@ -22,38 +22,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <fstream>
+#include <string>
+#include <lumeview/lumeview_error.h>
+#include <lumeview/util/file_util.h>
 
-#include <imgui/imgui.h>
-#include <lume/mesh.h>
-#include <lumeview/util/shapes.h>
-#include <lumeview/util/to_string.h>
-
-namespace lumeview::widgets
+namespace lumeview::util
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
+std::string LoadStringFromFile (const char* filename)
 {
-    ImGui::Columns(2);
-    
-    auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
+    using namespace std;
+    ifstream t(filename);
+
+    if (!t) {
+        throw IOError () << "Couldn't find file '" << filename << "'";
     }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
-    ImGui::NextColumn ();
 
-    ImGui::Columns(1);
+    t.seekg(0, ios::end);
+    size_t size = t.tellg();
+    string buffer(size, ' ');
+    t.seekg(0);
+    t.read(&buffer[0], size);
+    return buffer;
 }
 
-}// end of namespace lumeview::widgets
+std::string LoadStringFromFile (const std::string& filename)
+{
+    return LoadStringFromFile (filename.c_str());
+}
+
+}// end of namespace lumeview::util

@@ -22,6 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <lumeview/lumeview_error.h>
 #include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/math/vec_math.h>
 
@@ -33,7 +34,9 @@ using namespace render;
 ArcBallControl::ArcBallControl (std::shared_ptr <Camera> camera)
     : m_camera (std::move (camera))
 {
-//    throw_if <ControlError> (m_camera == nullptr) << "Invalid camera specified during ArcBallControl construction.";
+    if (m_camera == nullptr) {
+        throw ControlError () << "Invalid camera specified during ArcBallControl construction.";
+    }
     m_camera->set_rotation (m_arcBall.rotation_quaternion ());
     m_arcBall.set_rotation (m_camera->rotation());
     m_arcBall.set_viewport (m_camera->viewport ());
@@ -41,7 +44,9 @@ ArcBallControl::ArcBallControl (std::shared_ptr <Camera> camera)
 
 void ArcBallControl::mouse_button (int button, int action, int mods)
 {
-    // throw_if <ControlError> (m_camera == nullptr) << "Invalid associated camera.";
+    if (m_camera == nullptr) {
+        throw ControlError () << "Invalid associated camera.";
+    }
 
     base_t::mouse_button (button, action, mods);
 
@@ -76,7 +81,9 @@ void ArcBallControl::mouse_button (int button, int action, int mods)
 
 void ArcBallControl::mouse_move (const glm::vec2& c)
 {
-    // throw_if <ControlError> (m_camera == nullptr) << "Invalid associated camera.";
+    if (m_camera == nullptr) {
+        throw ControlError () << "Invalid associated camera.";
+    }
 
     glm::vec2 lastCursorPos = base_t::cursor_position();
     base_t::mouse_move (c);
@@ -110,7 +117,9 @@ void ArcBallControl::mouse_move (const glm::vec2& c)
 
 void ArcBallControl::mouse_scroll (const glm::vec2& o)
 {
-    // throw_if <ControlError> (m_camera == nullptr) << "Invalid associated camera.";
+    if (m_camera == nullptr) {
+        throw ControlError () << "Invalid associated camera.";
+    }
 
     base_t::mouse_scroll (o);
     float s = 1.f - o.y / 10.f;

@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <imgui/imgui.h>
+#include <lumeview/lumeview_error.h>
 #include <lumeview/scene/node.h>
 
 namespace lumeview::scene
@@ -32,7 +33,9 @@ namespace lumeview::scene
 Node::Node (std::unique_ptr <Content> content)
     : m_content (std::move (content))
 {
-    // throw_if <ContentError> (m_content == nullptr) << "Invalid content provided to lumeview::scene::Node";
+    if (m_content == nullptr) {
+        throw ContentError () << "Invalid content provided to lumeview::scene::Node";
+    }
 }
 
 Node::~Node ()
@@ -95,13 +98,19 @@ void Node::remove_child (Node* child)
     }
 }
 
+bool Node::has_content () const
+{
+    return m_content != nullptr;
+}
 Content& Node::content ()
 {
+    assert (has_content ());
     return *m_content;
 }
 
 const Content& Node::content () const
 {
+    assert (has_content ());
     return *m_content;
 }
 

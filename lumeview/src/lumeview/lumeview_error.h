@@ -24,36 +24,26 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-#include <lume/mesh.h>
-#include <lumeview/util/shapes.h>
+#include <lume/lume_error.h>
 #include <lumeview/util/to_string.h>
 
-namespace lumeview::widgets
+namespace lumeview
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
-{
-    ImGui::Columns(2);
-    
-    auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
-    }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
-    ImGui::NextColumn ();
+DECLARE_CUSTOM_EXCEPTION (LumeviewError, lume::LumeError);
 
-    ImGui::Columns(1);
-}
+DECLARE_CUSTOM_EXCEPTION (InitializationError, LumeviewError);
 
-}// end of namespace lumeview::widgets
+DECLARE_CUSTOM_EXCEPTION (OutOfBoundsError, LumeviewError);
+
+DECLARE_CUSTOM_EXCEPTION (ValueError, LumeviewError);
+
+DECLARE_CUSTOM_EXCEPTION (ControlError, LumeviewError);
+
+DECLARE_CUSTOM_EXCEPTION (IOError, LumeviewError);
+
+DECLARE_CUSTOM_EXCEPTION (ShaderError, LumeviewError);
+
+DECLARE_CUSTOM_EXCEPTION (ContentError, LumeviewError);
+
+}// end of namespace lumeview

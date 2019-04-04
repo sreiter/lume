@@ -28,48 +28,52 @@
 
 #include <glad/glad.h>  // include before other OpenGL related includes
 
+#include <lumeview/lumeview_error.h>
+#include <lumeview/render/bind_scope.h>
+
 namespace lumeview::render
 {
 
-class GLBuffer {
+class Buffer {
 public:
+    using BindScope = lumeview::render::BindScope <Buffer>;
+
     /** generates an OpenGL buffer object.
      *
      * \param type  Either 'GL_ARRAY_BUFFER' or 'GL_ELEMENT_ARRAY_BUFFER'
      *
      * \param memHint Either 'GL_STATIC_DRAW' (default) or 'GL_DYNAMIC_DRAW'
      */
-    GLBuffer (GLenum type, GLenum memHint = GL_STATIC_DRAW) :
-        m_id (0),
-        m_size (0),
-        m_capacity (0),
-        m_type (type),
+    Buffer (GLenum type, GLenum memHint = GL_STATIC_DRAW) :
+        m_bufferType (type),
         m_memHint (memHint)
     {
-        glGenBuffers (1, &m_id);
+        glGenBuffers (1, &m_bufferId);
     }
 
-    ~GLBuffer ()
+    ~Buffer ()
     {
-        glDeleteBuffers (1, &m_id);
+        glDeleteBuffers (1, &m_bufferId);
     }
 
-    void bind () {
-        glBindBuffer (m_type, m_id);
+    BindScope bind_scope () const
+    {
+        return BindScope (this);
     }
 
-    index_t size () const       {return m_size;}
-    index_t capacity () const   {return m_capacity;}
+    GLsizeiptr size () const       {return m_size;}
+    GLsizeiptr capacity () const   {return m_capacity;}
 
     /// makes sure that a buffer of the specified size is allocated.
     /** \note this also binds the buffer 
      * \warning this may clear the buffer contents!
      */
-    void set_size (const uint size) {
+    void set_size (const GLsizeiptr size)
+    {
         m_size = size;
-        if (size > m_capacity){
+        if (size > m_capacity) {
             bind ();
-            glBufferData (m_type, size, NULL, m_memHint);
+            glBufferData (m_bufferType, size, NULL, m_memHint);
             m_capacity = size;
         }
     }
@@ -78,38 +82,68 @@ public:
     /** \note this also binds the buffer
      * \{ */
     template <class Container>
-    void set_data (const Container& container)
+    void set_data (const Container& container, GLenum dataType, const GLint tupleSize = 1)
     {
-        set_data (container.data (), container.size () * sizeof (Container::value_type));
+        set_data (container.data (),
+                  container.size () * sizeof (Container::value_type),
+                  dataType,
+                  tupleSize);
     }
 
-    void set_data (const void* data, const uint size) {
+    void set_data (const void* data, const GLsizeiptr size, GLenum dataType, const GLint tupleSize = 1)
+    {
         m_size = size;
-        if (size > m_capacity) {
+        m_dataType = dataType,
+        m_tupleSize = tupleSize;
+        if (size > m_capacity)
+        {
             bind ();
-            glBufferData (m_type, size, data, m_memHint);
+            glBufferData (m_bufferType, size, data, m_memHint);
             m_capacity = size;
         }
-        else
+        else {
             set_sub_data (0, data, size);
+        }
     }
     /** \} */
 
     /// transfers the specified data to an existing buffer region
     /** \note this also binds the buffer */
-    void set_sub_data (const uint offset, const void* data, const uint size) {
-        COND_THROW (offset + size > m_size,
-                    "GLBuffer::set_sub_data: Specified buffer region expands over buffer boundary");
+    void set_sub_data (const GLintptr offset, const void* data, const GLsizeiptr size)
+    {
+        if (offset + size > m_size) {
+            throw OutOfBoundsError () << "Specified buffer region expands over buffer boundary";
+        }
+
         bind ();
-        glBufferSubData (m_type, offset, size, data);
+        glBufferSubData (m_bufferType, offset, size, data);
+    }
+
+    GLint  tuple_size () const  {return m_tupleSize;}
+    GLenum data_type () const   {return m_dataType;}
+    
+private:
+    friend class BindScope;
+
+    void bind () const
+    {
+        glBindBuffer (m_bufferType, m_bufferId);
+    }
+
+    void unbind () const
+    {
+        glBindBuffer (m_bufferType, 0);
     }
 
 private:
-    uint    m_id;
-    uint    m_size;
-    uint    m_capacity;
-    GLenum  m_type;
-    GLenum  m_memHint;
+    GLuint     m_bufferId {0};
+    GLsizeiptr m_size {0};
+    GLsizeiptr m_capacity {0};
+    GLint      m_tupleSize {0};
+    GLenum     m_dataType {0};
+    GLenum     m_bufferType;
+    GLenum     m_memHint;
+    int        m_boundStage {-1};
 };
 
-}// end of namespace lumeview
+}// end of namespace lumeview::render

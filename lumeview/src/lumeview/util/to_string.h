@@ -24,36 +24,24 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-#include <lume/mesh.h>
-#include <lumeview/util/shapes.h>
-#include <lumeview/util/to_string.h>
+#include <lume/to_string.h>
+#include <glm/detail/qualifier.hpp>
 
-namespace lumeview::widgets
+namespace lume
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
+template<glm::length_t L, typename T, glm::qualifier Q>
+std::string to_string (const glm::vec <L, T, Q>& v)
 {
-    ImGui::Columns(2);
-    
-    auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
+    std::string s ("(");
+    for (glm::length_t i = 0; i < L; ++i) {
+        if (i > 0) {
+            s.append (", ");
+        }
+        s.append (std::to_string (v[i]));
     }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
-    ImGui::NextColumn ();
-
-    ImGui::Columns(1);
+    s.append (")");
+    return s;
 }
 
-}// end of namespace lumeview::widgets
+}// end of namespace lumeview::util

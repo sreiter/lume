@@ -24,36 +24,10 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-#include <lume/mesh.h>
-#include <lumeview/util/shapes.h>
-#include <lumeview/util/to_string.h>
-
-namespace lumeview::widgets
+namespace lumeview::util
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
-{
-    ImGui::Columns(2);
-    
-    auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
-    }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
-    ImGui::NextColumn ();
+std::string LoadStringFromFile (const char* filename);
+std::string LoadStringFromFile (const std::string& filename);
 
-    ImGui::Columns(1);
-}
-
-}// end of namespace lumeview::widgets
+}// end of namespace lumeview::util

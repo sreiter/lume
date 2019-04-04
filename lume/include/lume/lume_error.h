@@ -30,6 +30,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <lume/to_string.h>
 
 namespace lume {
 
@@ -45,8 +46,7 @@ public:
     const char* what () const noexcept override {return m_what.c_str();}
 
     template <class T>
-    LumeError& operator << (const T& t) {m_what.append (std::to_string (t)); return *this;}
-    LumeError& operator << (const std::string& t) {m_what.append (t); return *this;}
+    LumeError& operator << (const T& t) {m_what.append (lume::to_string (t)); return *this;}
     LumeError& operator << (const char* t) {m_what.append (t); return *this;}
 
 protected:

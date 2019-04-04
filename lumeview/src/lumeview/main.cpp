@@ -42,10 +42,11 @@ using SPLumeview = std::shared_ptr <Lumeview>;
 static glm::vec2                g_pixelScale (1);
 static std::weak_ptr <Lumeview> g_lumeview;
 
+DECLARE_CUSTOM_EXCEPTION (GLFWError, LumeviewError);
+
 void HandleGLFWError (int error, const char* description)
 {
-    // THROW ("GLFW ERROR (code " << error << "):\n" <<
-    //        description);
+    throw GLFWError () << "(code " << error << "): " << description;
 }
 
 void FramebufferResized (GLFWwindow* window, int width, int height)
@@ -120,8 +121,9 @@ int main (int argc, char** argv)
 
     //  Set up window
         GLFWwindow* window = glfwCreateWindow (1200, 800, "lumeview", NULL, NULL);
-        // COND_THROW (window == NULL, "GLFW::INIT\n" <<
-        //             "Failed to create glfw window");
+        if (window == NULL) {
+            throw InitializationError () << "Failed to create glfw window.";
+        }
 
         glfwMakeContextCurrent (window);
         glfwSwapInterval(1);
@@ -158,7 +160,7 @@ int main (int argc, char** argv)
         }
     }
     catch (std::exception& e) {
-        cout << "\nAn ERROR occurred during execution:\n";
+        cout << "\nAn unhandled ERROR occurred during execution:\n";
         cout << e.what() << endl << endl;
         retVal = 1;
     }

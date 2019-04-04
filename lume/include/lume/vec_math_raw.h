@@ -35,90 +35,90 @@ namespace lume {
 
 
 template <class real_t>
-real_t* VecCopy (real_t* vOut, const index_t n, const real_t* v)
+real_t* VecCopy (real_t* vOut, const size_t n, const real_t* v)
 {
-	for (index_t i = 0; i < n; ++i, ++vOut, ++v)
+	for (size_t i = 0; i < n; ++i, ++vOut, ++v)
 		*vOut = *v;
 	return vOut;
 }
 
 template <class real_t, class value_t>
-real_t* VecSet (real_t* vOut, const index_t n, const value_t v)
+real_t* VecSet (real_t* vOut, const size_t n, const value_t v)
 {
 	const real_t tv = static_cast <real_t> (v);
-	for (index_t i = 0; i < n; ++i, ++vOut)
+	for (size_t i = 0; i < n; ++i, ++vOut)
 		*vOut = tv;
 	return vOut;
 }
 
 template <class real_t>
-real_t* VecAppend (real_t* vOut, const index_t n, const real_t* v)
+real_t* VecAppend (real_t* vOut, const size_t n, const real_t* v)
 {
-	for (index_t i = 0; i < n; ++i, ++vOut, ++v)
+	for (size_t i = 0; i < n; ++i, ++vOut, ++v)
 		*vOut += *v;
 	return vOut;
 }
 
 template <class real_t>
-real_t* VecAdd (real_t* vOut, const index_t n, const real_t* v0, const real_t* v1)
+real_t* VecAdd (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1)
 {
-	for (index_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)
+	for (size_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)
 		*vOut = *v0 + *v1;
 	return vOut;
 }
 
 template <class real_t>
-real_t* VecSub (real_t* vOut, const index_t n, const real_t* v0, const real_t* v1)
+real_t* VecSub (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1)
 {
-	for (index_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)
+	for (size_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)
 		*vOut = *v0 - *v1;
 	return vOut;
 }
 
 template <class real_t, class value_t>
-real_t* VecScale (real_t* vOut, const index_t n, const real_t* v, const value_t s)
+real_t* VecScale (real_t* vOut, const size_t n, const real_t* v, const value_t s)
 {
 	const real_t ts = static_cast <real_t> (s);
-	for (index_t i = 0; i < n; ++i, ++vOut, ++v)
+	for (size_t i = 0; i < n; ++i, ++vOut, ++v)
 		*vOut = *v * ts;
 	return vOut;
 }
 
 template <class real_t, class value_t>
-real_t* VecScale (real_t* vInOut, const index_t n, const value_t s)
+real_t* VecScale (real_t* vInOut, const size_t n, const value_t s)
 {
 	const real_t ts = static_cast <real_t> (s);
-	for (index_t i = 0; i < n; ++i, ++vInOut)
+	for (size_t i = 0; i < n; ++i, ++vInOut)
 		*vInOut *= ts;
 	return vInOut;
 }
 
 template <class real_t>
-real_t VecDot (const real_t* v0, const index_t n, const real_t* v1)
+real_t VecDot (const real_t* v0, const size_t n, const real_t* v1)
 {
 	real_t d = 0;
-	for (index_t i = 0; i < n; ++i, ++v0, ++v1)
+	for (size_t i = 0; i < n; ++i, ++v0, ++v1)
 		d += *v0 * *v1;
 	return d;
 }
 
 template <class real_t>
-real_t VecLenSq (const real_t* v, const index_t n)
+real_t VecLenSq (const real_t* v, const size_t n)
 {
 	return VecDot (v, n, v);
 }
 
 template <class real_t>
-real_t VecLen (const real_t* v, const index_t n)
+real_t VecLen (const real_t* v, const size_t n)
 {
 	return static_cast<real_t> (sqrt(VecDot (v, n, v)));
 }
 
 template <class real_t>
-real_t VecDistSq (const real_t* v0, const index_t n, const real_t* v1)
+real_t VecDistSq (const real_t* v0, const size_t n, const real_t* v1)
 {
 	real_t d = 0;
-	for (index_t i = 0; i < n; ++i, ++v0, ++v1){
+	for (size_t i = 0; i < n; ++i, ++v0, ++v1){
 		const real_t dif = *v0 - *v1;
 		d += dif*dif;
 	}
@@ -126,18 +126,18 @@ real_t VecDistSq (const real_t* v0, const index_t n, const real_t* v1)
 }
 
 template <class real_t>
-real_t VecDist (const real_t* v0, const index_t n, const real_t* v1)
+real_t VecDist (const real_t* v0, const size_t n, const real_t* v1)
 {
 	return static_cast<real_t> (VecDistSq (v0, n, v1));
 }
 
 
 template <class real_t>
-real_t* VecNormalize (real_t* vOut, const index_t n, const real_t* v)
+real_t* VecNormalize (real_t* vOut, const size_t n, const real_t* v)
 {
 	const real_t l = VecLen (v, n);
 	if (l != 0) {
-		for (index_t i = 0; i < n; ++i, ++vOut, ++v)
+		for (size_t i = 0; i < n; ++i, ++vOut, ++v)
 			*vOut = *v / l;
 	}
 	else
@@ -146,11 +146,11 @@ real_t* VecNormalize (real_t* vOut, const index_t n, const real_t* v)
 }
 
 template <class real_t>
-real_t* VecNormalize (real_t* v, const index_t n)
+real_t* VecNormalize (real_t* v, const size_t n)
 {
 	const real_t l = VecLen (v, n);
 	if (l != 0) {
-		for (index_t i = 0; i < n; ++i, ++v)
+		for (size_t i = 0; i < n; ++i, ++v)
 			*v /= l;
 	}
 	return v;
@@ -164,9 +164,9 @@ real_t* VecNormalize (real_t* v, const index_t n)
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupAppend (real_t* vInOut, const index_t n, const index_t ntup, const real_t* vtup)
+real_t* VecTupAppend (real_t* vInOut, const size_t n, const size_t ntup, const real_t* vtup)
 {
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecAppend (vInOut + i, ntup, vtup);
 	return vInOut;
 }
@@ -180,9 +180,9 @@ real_t* VecTupAppend (real_t* vInOut, const index_t n, const index_t ntup, const
  * \param vtup		vector of size `ntup`
  */
 template <class real_t>
-real_t* VecTupAdd (real_t* vOut, const real_t* v, const index_t n, const index_t ntup, const real_t* vtup)
+real_t* VecTupAdd (real_t* vOut, const real_t* v, const size_t n, const size_t ntup, const real_t* vtup)
 {
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecAdd (vOut + i, ntup, v + i, vtup);
 	return vOut;
 }
@@ -196,9 +196,9 @@ real_t* VecTupAdd (real_t* vOut, const real_t* v, const index_t n, const index_t
  * \param vtup		vector of size `ntup`
  */
 template <class real_t>
-real_t* VecTupSub (real_t* vOut, const real_t* v, const index_t n, const index_t ntup, const real_t* vtup)
+real_t* VecTupSub (real_t* vOut, const real_t* v, const size_t n, const size_t ntup, const real_t* vtup)
 {
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecSub (vOut + i, ntup, v + i, vtup);
 	return vOut;
 }
@@ -211,9 +211,9 @@ real_t* VecTupSub (real_t* vOut, const real_t* v, const index_t n, const index_t
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupNormalize (real_t* vOut, const index_t n, const index_t ntup, const real_t* v)
+real_t* VecTupNormalize (real_t* vOut, const size_t n, const size_t ntup, const real_t* v)
 {
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecNormalize (vOut + i, ntup, v + i);
 	return vOut;
 }
@@ -225,9 +225,9 @@ real_t* VecTupNormalize (real_t* vOut, const index_t n, const index_t ntup, cons
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupNormalize (real_t* vInOut, const index_t n, const index_t ntup)
+real_t* VecTupNormalize (real_t* vInOut, const size_t n, const size_t ntup)
 {
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecNormalize (vInOut + i, ntup);
 	return vInOut;
 }
@@ -240,10 +240,10 @@ real_t* VecTupNormalize (real_t* vInOut, const index_t n, const index_t ntup)
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupSum (real_t* tupOut, const real_t* v, const index_t n, const index_t ntup)
+real_t* VecTupSum (real_t* tupOut, const real_t* v, const size_t n, const size_t ntup)
 {
 	VecSet (tupOut, ntup, 0);
-	for(index_t i = 0; i < n; i += ntup)
+	for(size_t i = 0; i < n; i += ntup)
 		VecAppend (tupOut, ntup, v + i);
 	return tupOut;
 }
@@ -256,7 +256,7 @@ real_t* VecTupSum (real_t* tupOut, const real_t* v, const index_t n, const index
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupAverage (real_t* tupOut, const real_t* v, const index_t n, const index_t ntup)
+real_t* VecTupAverage (real_t* tupOut, const real_t* v, const size_t n, const size_t ntup)
 {
 	VecTupSum (tupOut, v, n, ntup);
 	if (ntup > 0 && n >= ntup)

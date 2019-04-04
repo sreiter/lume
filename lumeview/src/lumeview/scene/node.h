@@ -51,6 +51,7 @@ public:
     void traverse (const std::function <void (Node&)>& callback);
     void traverse_children (const std::function <void (Node&)>& callback);
     
+    bool has_content () const;
     Content& content ();
     const Content& content () const;
 

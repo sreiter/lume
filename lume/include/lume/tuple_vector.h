@@ -73,7 +73,7 @@ public:
         , m_tupleSize (tupleSize)
     {
         assert (tupleSize != 0);
-        const size_t numTuples = vec.size () / m_tupleSize;
+        const size_t numTuples = m_vector.size () / m_tupleSize;
         if (m_vector.size () != m_tupleSize * numTuples)
             m_vector.resize (m_tupleSize * numTuples);
     }

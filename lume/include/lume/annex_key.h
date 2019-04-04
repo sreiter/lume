@@ -85,12 +85,11 @@ namespace keys
     const TypedAnnexKey <ArrayAnnex <real_t>> vertexNormals ("normal", VERTEX);
 }
 
+inline std::string to_string (const AnnexKey& v) {
+    return v.name ();
+}
+
 }//    end of namespace lume
 
-namespace std {
-    inline string to_string (const lume::AnnexKey& v) {
-        return v.name ();
-    }
-}
 
 #endif    //__H__lume_mesh_annex_key

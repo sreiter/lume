@@ -148,7 +148,7 @@ int main (int argc, char** argv)
             commander->run (argv[1], argc - 2, argv + 2);
         }
     }
-    catch (std::runtime_error& err)
+    catch (std::exception& err)
     {
         cout << err.what () << std::endl;
         retVal = 1;

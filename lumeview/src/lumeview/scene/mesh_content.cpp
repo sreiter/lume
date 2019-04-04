@@ -22,9 +22,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <lume/file_io.h>
 #include <lumeview/scene/mesh_content.h>
 #include <lumeview/widgets/mesh_contents.h>
-#include <lume/file_io.h>
 
 namespace lumeview::scene
 {
@@ -32,7 +32,9 @@ namespace lumeview::scene
 MeshContent::MeshContent (std::string filename)
 {
     m_mesh = lume::CreateMeshFromFile (filename);
+    m_boundingBox = util::BoxFromCoords (UNPACK_DST (m_mesh->annex (lume::keys::vertexCoords)));
     m_filename = std::move (filename);
+    m_renderer.set_mesh_data (*m_mesh);
 }
 
 const std::string& MeshContent::name () const
@@ -55,12 +57,16 @@ void MeshContent::do_imgui ()
     if (ImGui::BeginTabItem ("Content"))
     {
         // ImGui::BeginChild ("ChildArea", ImVec2 (0, 100), true, 0);
-        widgets::MeshContents (*m_mesh);
+        widgets::MeshContents (*m_mesh, m_boundingBox);
         // ImGui::EndChild ();
         ImGui::EndTabItem();
     }
     ImGui::EndTabBar ();
+}
 
+void MeshContent::render (const render::Camera& camera)
+{
+    m_renderer.render (camera);
 }
 
 }// end of namespace lumeview::scene

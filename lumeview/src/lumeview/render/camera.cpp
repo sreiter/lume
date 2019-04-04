@@ -27,6 +27,8 @@
 #include <glad/glad.h>  // include before other OpenGL related includes
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <lumeview/lumeview_error.h>
 #include <lumeview/render/camera.h>
 
 namespace lumeview::render
@@ -43,8 +45,10 @@ Camera::Camera () :
 
 void Camera::set_viewport (const Viewport& vp)
 {
-    // COND_THROW((vp.x == vp.z) || (vp.y == vp.w),
-    //            "Bad vp spefified: " << vp);
+    if ((vp.width () <= 0) || (vp.height () <= 0)) {
+        throw ValueError () << "Bad viewport specified: " << vp.to_ivec4 ();
+    }
+
     m_viewport = vp;
 }
 

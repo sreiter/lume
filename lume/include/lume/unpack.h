@@ -52,7 +52,7 @@ struct buf_traits {
 	using value_t			= typename buf_t::value_type;
 	using value_ptr_t		= typename buf_t::value_type*;
 	using const_value_ptr_t	= const typename buf_t::value_type*;
-	using size_t			= index_t;//typename buf_t::size_type;
+	using size_t			= typename buf_t::size_type;
 };
 
 // buf_data_ptr

@@ -341,7 +341,7 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
         int lastNumSrcCoords = -1;
         std::vector <real_t> coords;
 
-        // forst read vertices
+        // first read vertices
     	for(xml_node<>* curNode = gridNode->first_node(); curNode; curNode = curNode->next_sibling())
         {
     		const char* name = curNode->name();

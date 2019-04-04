@@ -44,6 +44,9 @@ set (sources
 
         src/lumeview/scene/mesh_content.cpp
         src/lumeview/scene/node.cpp
+
+        src/lumeview/util/file_util.cpp
+        src/lumeview/util/shapes.cpp
     )
 
 set (headers)
@@ -84,3 +87,6 @@ target_include_directories(lumeview
 add_definitions (-DGLM_ENABLE_EXPERIMENTAL)
 add_definitions (-DUSE_GL_VERSION_MAJOR=${GL_VERSION_MAJOR})
 add_definitions (-DUSE_GL_VERSION_MINOR=${GL_VERSION_MINOR})
+
+# lumeview shaders
+file(COPY "shaders" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")

@@ -45,6 +45,7 @@ public:
 	using iterator = GrobIterator;
 	using const_iterator = GrobIterator;
     using size_type = TupleVector<index_t>::size_type;
+    using value_type = index_t;
 
     GrobArray (GrobArray&& grobArray)
         : m_grobDesc (std::move (grobArray.m_grobDesc))
