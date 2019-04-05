@@ -39,9 +39,11 @@ public:
     MeshContent (std::string filename);
 
     const std::string& name () const override;
+
     bool has_imgui () const override;
     void do_imgui () override;
     void render (const render::Camera& camera) override;
+    std::optional <util::FBox> bounding_box () const override;
 
 private:
     std::shared_ptr <lume::Mesh> m_mesh;

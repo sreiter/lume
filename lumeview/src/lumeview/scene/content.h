@@ -25,6 +25,7 @@
 #pragma once
 
 #include <lumeview/render/camera.h>
+#include <lumeview/util/shapes.h>
 
 namespace lumeview::scene
 {
@@ -35,11 +36,13 @@ public:
     Content () = default;
     virtual ~Content () = default;
 
-    virtual const std::string& name () const = 0;
     // virtual std::unique_ptr <Content> clone () = 0;
-    virtual bool has_imgui () const            {return false;}
-    virtual void do_imgui ()                   {};
+    virtual const std::string& name () const = 0;
+
+    virtual bool has_imgui () const                    {return false;}
+    virtual void do_imgui ()                           {};
     virtual void render (const render::Camera& camera) {};
+    virtual std::optional <util::FBox> bounding_box () const {return {};}
     
 };
 

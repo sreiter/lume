@@ -46,11 +46,11 @@ void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
     
     ImGui::Text ("box min");
     ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.minCorner).c_str ());
+    ImGui::Text (lume::to_string (box.min ()).c_str ());
     ImGui::NextColumn ();
     ImGui::Text ("box max");
     ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.maxCorner).c_str ());
+    ImGui::Text (lume::to_string (box.max ()).c_str ());
     ImGui::NextColumn ();
 
     ImGui::Columns(1);

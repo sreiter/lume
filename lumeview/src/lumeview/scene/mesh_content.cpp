@@ -69,4 +69,9 @@ void MeshContent::render (const render::Camera& camera)
     m_renderer.render (camera);
 }
 
+std::optional <util::FBox> MeshContent::bounding_box () const
+{
+    return m_boundingBox;
+}
+
 }// end of namespace lumeview::scene

@@ -28,6 +28,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <lumeview/math/vec_math.h>
 #include <lumeview/lumeview_error.h>
 #include <lumeview/render/camera.h>
 
@@ -190,6 +191,29 @@ void Camera::set_z_clip_dists (const glm::vec2& c)
 glm::vec2 Camera::z_clip_dists () const
 {
     return m_zClipDists;
+}
+
+void Camera::adjust_z_clip_dists (const util::FBox& box)
+{
+    adjust_z_clip_dists (util::FSphere::from_box (box));
+}
+
+void Camera::adjust_z_clip_dists (const util::FSphere& sphere)
+{
+    using namespace glm;
+    const vec3  n = normalize (forward ());
+    const vec3  p = from ();
+    const float o = offsetPointToPlane (sphere.center (), p, n);
+
+    vec2 zDist (o - sphere.radius (), o + sphere.radius ());
+
+    if (zDist.y <= 0)
+        zDist.y = 1.f;
+
+    if (zDist.x < zDist.y * 1.e-5f || zDist.x >= zDist.y)
+        zDist.x = zDist.y * 1.e-5f;
+
+    set_z_clip_dists (zDist * glm::vec2(0.9f, 1.1f));
 }
 
 }// end of namespace lumeview

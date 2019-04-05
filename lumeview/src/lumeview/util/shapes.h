@@ -31,18 +31,32 @@
 namespace lumeview::util {
 
 template <class real_t>
-struct Box {
+class Box {
+public:
+    using vec_t = glm::tvec3 <real_t>;
+
     Box ();
     Box (real_t min, real_t max);
-    Box (const glm::tvec3<real_t>& min, const glm::tvec3<real_t>& max);
-    Box (glm::tvec3<real_t>&& min, glm::tvec3<real_t>&& max);
+    Box (const vec_t& min, const vec_t& max);
+    Box (vec_t&& min, vec_t&& max);
     Box (const Box& box);
     Box (Box&& box);
 
+    static Box <real_t> from_boxes (const Box <real_t>& a, const Box <real_t>& b);
+
     Box& operator = (const Box& box);
 
-    glm::tvec3<real_t>  minCorner;
-    glm::tvec3<real_t>  maxCorner;
+    vec_t& min ();
+    vec_t& max ();
+
+    const vec_t& min () const;
+    const vec_t& max () const;
+
+    vec_t diagonal () const;
+
+private:
+    vec_t  m_min;
+    vec_t  m_max;
 };
 
 using FBox = Box <float>;
@@ -51,16 +65,25 @@ using DBox = Box <double>;
 
 template <class real_t>
 struct Sphere {
+public:
+    using vec_t = glm::tvec3 <real_t>;
+
     Sphere ();
-    Sphere (const glm::tvec3<real_t>& center, const real_t radius);
-    Sphere (glm::tvec3<real_t>&& center, const real_t radius);
+    Sphere (const vec_t& center, const real_t radius);
+    Sphere (vec_t&& center, const real_t radius);
     Sphere (const Sphere& sphere);
     Sphere (Sphere&& sphere);
 
+    static Sphere <real_t> from_box (const Box <real_t>& box);
+
     Sphere& operator = (const Sphere& sphere);
 
-    glm::tvec3<real_t>  center;
-    real_t              radius;
+    const vec_t& center () const;
+    real_t       radius () const;
+
+private:
+    vec_t  m_center;
+    real_t m_radius;
 };
 
 using FSphere = Sphere <float>;
@@ -81,7 +104,7 @@ using DSphere = Sphere <double>;
  *                  coordinate-tuple.
  */
 template <class real_t>
-Box <real_t> BoxFromCoords (const real_t* coords, size_t size, size_t tupleSize);
+Box <real_t> BoxFromCoords (const real_t* coords, glm::length_t size, glm::length_t tupleSize);
 
 /// Calcualtes a bounding sphere to an array of coordinates
 /**
@@ -99,6 +122,6 @@ Box <real_t> BoxFromCoords (const real_t* coords, size_t size, size_t tupleSize)
  *          However, it is guaranteed that the sphere contains all points and that at least one
  *          point lies on the rim of the sphere.*/
 template <class real_t>
-Sphere <real_t> SphereFromCoords (const real_t* coords, size_t size, size_t tupleSize);
+Sphere <real_t> SphereFromCoords (const real_t* coords, glm::length_t size, glm::length_t tupleSize);
 
 }// end of namespace lumeview

@@ -51,7 +51,8 @@ public:
         return BindScope (this);
     }
 
-    void bind (const Buffer& buffer, GLuint stage)
+    /// Binds the given vertex buffer to the specified stage and enables the stage.
+    void bind_to_stage (const Buffer& buffer, GLuint stage)
     {
         int boundVao;
         glGetIntegerv (GL_VERTEX_ARRAY_BINDING, &boundVao);

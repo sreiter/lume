@@ -262,37 +262,20 @@ void Lumeview::render ()
 	glClearColor (0.25f, 0.25f, 0.25f, 1.0f);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//if (m_scene)
-    {
-		//const glm::vec2 clipDists = m_scene->estimate_z_clip_dists(m_arcBallControl.view());
-		//m_camera->set_z_clip_dists (clipDists);
-		//m_scene->render (*m_camera);
-        auto const& vp = m_camera->viewport ();
-        glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
-        m_scene.traverse ([&camera = *m_camera](auto& node)
-                          {
-                              if (node.has_content ())
-                                  node.content ().render (camera);
-                          });
-	}
+	auto const bbox = m_scene.bounding_box ();
+    if (bbox) {
+        m_camera->adjust_z_clip_dists (*bbox);
+    }
+    else {
+        m_camera->set_z_clip_dists (glm::vec2 (0.001, 2));
+    }
+
+    auto const& vp = m_camera->viewport ();
+    glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
+
+    m_scene.render (*m_camera);
 
 	lumeview::ImGui_Display();
 }
-
-// static void PrintMeshInfo (SPMesh mesh)
-// {
-// 	Box box = BoxFromCoords (UNPACK_DST(*mesh->coords()));
-
-// 	LOGT(mesh, "  #vertices:    " << mesh->coords()->num_tuples() << std::endl);
-// 	LOGT(mesh, "  #edges:       " << mesh->grobs(EDGE).size() << std::endl);
-// 	LOGT(mesh, "  #triangles:   " << mesh->grobs(TRI).size() << std::endl);
-// 	LOGT(mesh, "  #quads:       " << mesh->grobs(QUAD).size() << std::endl);
-// 	LOGT(mesh, "  #tetrahedra:  " << mesh->grobs(TET).size() << std::endl);
-// 	LOGT(mesh, "  #hexahedra:   " << mesh->grobs(HEX).size() << std::endl);
-// 	LOGT(mesh, "  #pyramids:    " << mesh->grobs(PYRA).size() << std::endl);
-// 	LOGT(mesh, "  #prisms:      " << mesh->grobs(PRISM).size() << std::endl);
-// 	LOGT(mesh, "  Bounding box -> min: " << box.minCorner << std::endl);
-// 	LOGT(mesh, "               -> max: " << box.maxCorner << std::endl);
-// }
 
 }//	end of namespace lumeview

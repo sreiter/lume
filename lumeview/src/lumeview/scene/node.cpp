@@ -114,6 +114,37 @@ const Content& Node::content () const
     return *m_content;
 }
 
+void Node::render (const render::Camera& camera)
+{
+    traverse ([&camera](auto& node)
+              {
+                  if (node.has_content ())
+                      node.content ().render (camera);
+              });
+}
+
+std::optional <util::FBox> Node::bounding_box ()
+{
+    std::optional <util::FBox> box {};
+    if (has_content ()) {
+        box = content ().bounding_box ();
+    }
+
+    traverse_children ([&box] (auto& node)
+                       {
+                         auto const nodeBox = node.bounding_box ();
+                         if (nodeBox) {
+                            if (box) {
+                                box = util::FBox::from_boxes (*box, *nodeBox);
+                            }
+                            else {
+                                box = nodeBox;
+                            }
+                         }
+                       });
+    return box;
+}
+
 void Node::do_imgui ()
 {
     if (m_content != nullptr

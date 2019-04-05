@@ -43,115 +43,182 @@ Box <real_t>::Box ()
 
 template <class real_t>
 Box <real_t>::Box (real_t min, real_t max) :
-    minCorner (min),
-    maxCorner (max)
+    m_min (min),
+    m_max (max)
 {}
 
 template <class real_t>
-Box <real_t>::Box (const glm::tvec3<real_t>& min, const glm::tvec3<real_t>& max) :
-    minCorner (min),
-    maxCorner (max)
+Box <real_t>::Box (const vec_t& min, const vec_t& max) :
+    m_min (min),
+    m_max (max)
 {}
 
 template <class real_t>
-Box <real_t>::Box (glm::tvec3<real_t>&& min, glm::tvec3<real_t>&& max) :
-    minCorner (std::move (min)),
-    maxCorner (std::move (max))
+Box <real_t>::Box (vec_t&& min, vec_t&& max) :
+    m_min (std::move (min)),
+    m_max (std::move (max))
 {}
 
 template <class real_t>
 Box <real_t>::Box (const Box& box) :
-    minCorner (box.minCorner),
-    maxCorner (box.maxCorner)
+    m_min (box.m_min),
+    m_max (box.m_max)
 {}
 
 template <class real_t>
 Box <real_t>::Box (Box&& box) :
-    minCorner (std::move(box.minCorner)),
-    maxCorner (std::move(box.maxCorner))
+    m_min (std::move(box.m_min)),
+    m_max (std::move(box.m_max))
 {}
+
+template <class real_t>
+Box <real_t> Box <real_t>::from_boxes (const Box <real_t>& a, const Box <real_t>& b)
+{
+    Box <real_t> box;
+    for (glm::length_t i = 0; i < 3; ++i)
+    {
+        box.m_min [i] = std::min (a.m_min [i], b.m_min [i]);
+        box.m_max [i] = std::max (a.m_max [i], b.m_max [i]);
+    }
+    return box;
+}
 
 template <class real_t>
 Box <real_t>& Box <real_t>::
 operator = (const Box& box)
 {
-    minCorner = box.minCorner;
-    maxCorner = box.maxCorner;
+    m_min = box.m_min;
+    m_max = box.m_max;
 
     return *this;
 }
 
-template struct Box <float>;
-template struct Box <double>;
+template <class real_t>
+typename Box <real_t>::vec_t&
+Box <real_t>::min ()
+{
+    return m_min;
+}
 
 template <class real_t>
-Box <real_t> BoxFromCoords (const real_t* coords, size_t size, size_t tupleSize)
+typename Box <real_t>::vec_t&
+Box <real_t>::max ()
 {
-    const size_t cmps = std::min<size_t> (tupleSize, 3);
+    return m_max;
+}
+
+template <class real_t>
+const typename Box <real_t>::vec_t&
+Box <real_t>::min () const
+{
+    return m_min;
+}
+
+template <class real_t>
+const typename Box <real_t>::vec_t&
+Box <real_t>::max () const
+{
+    return m_max;
+}
+
+template <class real_t>
+typename Box <real_t>::vec_t
+Box <real_t>::diagonal () const
+{
+    return m_max - m_min;
+}
+
+template class Box <float>;
+template class Box <double>;
+
+template <class real_t>
+Box <real_t> BoxFromCoords (const real_t* coords, glm::length_t size, glm::length_t tupleSize)
+{
+    const glm::length_t cmps = std::min<glm::length_t> (tupleSize, 3);
 
     Box <real_t> b (numeric_limits<real_t>::max(), numeric_limits<real_t>::lowest());
-    for(size_t i = 0; i < size; i+=tupleSize){
-        for(size_t j = 0; j < cmps; ++j){
-            if (coords [i+j] < b.minCorner[j])
-                b.minCorner[j] = coords [i+j];
-            if (coords [i+j] > b.maxCorner[j])
-                b.maxCorner[j] = coords [i+j];
+    for(glm::length_t i = 0; i < size; i+= tupleSize){
+        for(glm::length_t j = 0; j < cmps; ++j){
+            if (coords [i+j] < b.min ()[j])
+                b.min ()[j] = coords [i+j];
+            if (coords [i+j] > b.max ()[j])
+                b.max ()[j] = coords [i+j];
         }
     }
 
-    for(size_t i = tupleSize; i < 3; ++i){
-        b.minCorner[i] = 0;
-        b.maxCorner[i] = 0;
+    for(glm::length_t i = tupleSize; i < 3; ++i){
+        b.min ()[i] = 0;
+        b.max ()[i] = 0;
     }
 
     return b;
 }
 
-template Box <float>  BoxFromCoords <float>  (const float*,  size_t, size_t);
-template Box <double> BoxFromCoords <double> (const double*, size_t, size_t);
+template Box <float>  BoxFromCoords <float>  (const float*,  glm::length_t, glm::length_t);
+template Box <double> BoxFromCoords <double> (const double*, glm::length_t, glm::length_t);
 
 template <class real_t>
 Sphere <real_t>::Sphere ()
 {}
 
 template <class real_t>
-Sphere <real_t>::Sphere (const glm::tvec3<real_t>& _center, const real_t _radius) :
-    center (_center),
-    radius (_radius)
+Sphere <real_t>::Sphere (const vec_t& center, const real_t radius) :
+    m_center (center),
+    m_radius (radius)
 {}
 
 template <class real_t>
-Sphere <real_t>::Sphere (glm::tvec3<real_t>&& _center, const real_t _radius) :
-    center (std::move (_center)),
-    radius (_radius)
+Sphere <real_t>::Sphere (vec_t&& center, const real_t radius) :
+    m_center (std::move (center)),
+    m_radius (radius)
 {}
 
 template <class real_t>
 Sphere <real_t>::Sphere (const Sphere& sphere) :
-    center (sphere.center),
-    radius (sphere.radius)
+    m_center (sphere.m_center),
+    m_radius (sphere.m_radius)
 {}
 
 template <class real_t>
 Sphere <real_t>::Sphere (Sphere&& sphere) :
-    center (std::move (sphere.center)),
-    radius (sphere.radius)
+    m_center (std::move (sphere.m_center)),
+    m_radius (sphere.m_radius)
 {}
+
+template <class real_t>
+Sphere <real_t> Sphere <real_t>::from_box (const Box <real_t>& box)
+{
+    return Sphere <real_t> {(box.min () + box.max ()) * real_t (0.5), real_t (0.5) * glm::length (box.diagonal ())};
+}
 
 template <class real_t>
 Sphere <real_t>& Sphere <real_t>::
 operator = (const Sphere& sphere)
 {
-    center = sphere.center;
-    radius = sphere.radius;
+    m_center = sphere.m_center;
+    m_radius = sphere.m_radius;
     return *this;
+}
+
+template <class real_t>
+const typename Sphere <real_t>::vec_t&
+Sphere <real_t>::center () const
+{
+    return m_center;
+}
+
+template <class real_t>
+real_t
+Sphere <real_t>::radius () const
+{
+    return m_radius;
 }
 
 template struct Sphere <float>;
 template struct Sphere <double>;
 
 template <class real_t>
-Sphere <real_t> SphereFromCoords (const real_t* coords, size_t size, size_t tupleSize)
+Sphere <real_t> SphereFromCoords (const real_t* coords, glm::length_t size, glm::length_t tupleSize)
 {
     if (tupleSize > 3) throw ValueError () << "SphereFromCoords: Max tuple size of 3 supported. Given: " << tupleSize;
     if (tupleSize == 0 || size < tupleSize) throw ValueError () << "SphereFromCoords: At least one coordinate is required";
@@ -162,10 +229,10 @@ Sphere <real_t> SphereFromCoords (const real_t* coords, size_t size, size_t tupl
     VecTupAverage (pcenter, coords, size, tupleSize);
 
 //  find the coordinate with the largest index
-    const size_t cmps = std::min<size_t> (tupleSize, 3);
+    const glm::length_t cmps = std::min<glm::length_t> (tupleSize, 3);
 
     real_t maxRadSq = 0;
-    for(size_t i = 0; i < size; i+=tupleSize) {
+    for(glm::length_t i = 0; i < size; i+=tupleSize) {
         const real_t d = VecDistSq (pcenter, tupleSize, coords + i);
         if (d > maxRadSq)
             maxRadSq = d;
@@ -174,7 +241,7 @@ Sphere <real_t> SphereFromCoords (const real_t* coords, size_t size, size_t tupl
     return Sphere <real_t> (center, sqrt(maxRadSq));
 }
 
-template Sphere <float>  SphereFromCoords <float>  (const float*,  size_t, size_t);
-template Sphere <double> SphereFromCoords <double> (const double*, size_t, size_t);
+template Sphere <float>  SphereFromCoords <float>  (const float*,  glm::length_t, glm::length_t);
+template Sphere <double> SphereFromCoords <double> (const double*, glm::length_t, glm::length_t);
 
 }// end of namespace lumeview::util

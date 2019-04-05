@@ -26,9 +26,11 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 #include <lumeview/render/camera.h>
 #include <lumeview/scene/content.h>
+#include <lumeview/util/shapes.h>
 
 namespace lumeview::scene
 {
@@ -55,6 +57,8 @@ public:
     Content& content ();
     const Content& content () const;
 
+    void render (const render::Camera& camera);
+    std::optional <util::FBox> bounding_box ();
     void do_imgui ();
 
 private:

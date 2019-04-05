@@ -67,7 +67,7 @@ public:
         m_indices.set_data (triInds, GL_UNSIGNED_INT);
         m_numElements = static_cast <GLsizei> (m_indices.size ());
 
-        m_vertexArrayObject.bind (m_vertices, 0);
+        m_vertexArrayObject.bind_to_stage (m_vertices, 0);
     }
 
     void render (const Camera& camera)
@@ -82,6 +82,7 @@ public:
 
         auto vaoScope = m_vertexArrayObject.bind_scope ();
         auto indScope = m_indices.bind_scope ();
+        
         glDrawElements (GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, nullptr);
     }
 

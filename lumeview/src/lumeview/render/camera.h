@@ -33,6 +33,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <lumeview/render/viewport.h>
+#include <lumeview/util/shapes.h>
 
 namespace lumeview::render
 {
@@ -75,6 +76,12 @@ class Camera {
     
     void set_z_clip_dists (const glm::vec2& c);
     glm::vec2 z_clip_dists () const;
+
+    /** Computes the z clip distances so that no clipping will occur inside the given box/sphere.
+        \{ */
+    void adjust_z_clip_dists (const util::FBox& box);
+    void adjust_z_clip_dists (const util::FSphere& sphere);
+    /** \} */
 
   private:
     glm::vec3 m_scale;
