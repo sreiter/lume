@@ -57,7 +57,7 @@ public:
             return;
         }
 
-        set_data (mesh.annex (coordinatesKey), mesh.grobs (lume::TRI));
+        set_data (mesh.annex (coordinatesKey), mesh.grobs (lume::TRI).underlying_array ());
     }
 
     template <class CoordinatesContainer, class IndexContainer>
@@ -65,7 +65,7 @@ public:
     {
         m_vertices.set_data (coords, GL_FLOAT, static_cast <GLint> (coords.tuple_size ()));
         m_indices.set_data (triInds, GL_UNSIGNED_INT);
-        m_numElements = static_cast <GLsizei> (m_indices.size ());
+        m_numIndices = static_cast <GLsizei> (m_indices.size ());
 
         m_vertexArrayObject.bind_to_stage (m_vertices, 0);
     }
@@ -83,7 +83,7 @@ public:
         auto vaoScope = m_vertexArrayObject.bind_scope ();
         auto indScope = m_indices.bind_scope ();
         
-        glDrawElements (GL_TRIANGLES, m_numElements, GL_UNSIGNED_INT, nullptr);
+        glDrawElements (GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, nullptr);
     }
 
 private:
@@ -100,7 +100,7 @@ private:
     Buffer            m_indices;
     Shader            m_shader;
     VertexArrayObject m_vertexArrayObject;
-    GLsizei           m_numElements {0};
+    GLsizei           m_numIndices {0};
 };
 
 }// end of namespace lumeview::render
