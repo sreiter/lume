@@ -46,4 +46,6 @@ DECLARE_CUSTOM_EXCEPTION (ShaderError, LumeviewError);
 
 DECLARE_CUSTOM_EXCEPTION (ContentError, LumeviewError);
 
+DECLARE_CUSTOM_EXCEPTION (CommandError, LumeviewError);
+
 }// end of namespace lumeview

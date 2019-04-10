@@ -216,5 +216,11 @@ void Camera::adjust_z_clip_dists (const util::FSphere& sphere)
     set_z_clip_dists (zDist * glm::vec2(0.9f, 1.1f));
 }
 
+void Camera::center_sphere (const util::FSphere& sphere)
+{
+    m_trans = sphere.center ();
+    m_scale = glm::vec3 (3.f * sphere.radius ());
+}
+
 }// end of namespace lumeview
 

@@ -32,12 +32,13 @@
 #include <lumeview/gui/window_event_listener.h>
 #include <lumeview/render/camera.h>
 #include <lumeview/scene/node.h>
+// #include <lumeview/commands/commands.h>
 
 namespace lumeview {
 
-class Lumeview : public WindowEventListener {
+class Lumeview : public WindowEventListener
+{
 public:
-
 	Lumeview ();
     ~Lumeview ();
 
@@ -59,6 +60,11 @@ public:
 
   	void render ();
 
+    void center_scene ();
+
+private:
+    void update_scene_viewport ();
+
 private:
     using base_t = WindowEventListener;
 
@@ -68,9 +74,20 @@ private:
 	ArcBallControl		            m_arcBallControl;
     scene::Node                     m_scene;
 
-	bool	m_guiShowScene;
-	bool	m_guiShowLog;
-	bool	m_guiShowDemo;
+    struct ViewportOffsets {
+        bool operator == (const ViewportOffsets& vo) const;
+        bool operator != (const ViewportOffsets& vo) const;
+        float m_left   {0};
+        float m_top    {0};
+        float m_right  {0};
+        float m_bottom {0};
+    };
+
+    ViewportOffsets m_sceneViewportOffsets;
+
+	bool  m_guiShowScene;
+	bool  m_guiShowLog;
+	bool  m_guiShowDemo;
 };
 
 }//	end of namespace lumeview

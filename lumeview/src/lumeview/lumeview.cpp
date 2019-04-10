@@ -40,28 +40,6 @@
 #include <lumeview/lumeview_error.h>
 #include <lumeview/gui/imgui_binding.h>
 
-// #include "shapes.h"
-// #include "plain_visualization.h"
-// #include "subset_visualization.h"
-// #include "subset_info_annex_imgui.h"
-
-// #include "lume/normals.h"
-// #include "lume/mesh.h"
-// #include "lume/topology.h"
-// #include "lume/vec_math_raw.h"
-// #include "lume/file_io.h"
-
-// #include "pettyprof/pettyprof.h"
-
-// namespace
-// {
-// bool InitializeImGuiExecutors ()
-// {
-//     // SubsetInfoAnnex::set_imgui_executor (&SubsetInfoAnnex_ImGui)
-//     return true;
-// }
-// }// end of empty namespace
-
 namespace
 {
 
@@ -114,12 +92,22 @@ private:
 namespace lumeview
 {
 
-using namespace render;
-////////////////////////////////////////////////////////////////////////////////
-// Lumeview
+bool Lumeview::ViewportOffsets::operator == (const ViewportOffsets& vo) const
+{
+    return m_left   == vo.m_left  &&
+           m_top    == vo.m_top   &&
+           m_right  == vo.m_right &&
+           m_bottom == vo.m_bottom;
+
+}
+
+bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
+{
+    return ! operator == (vo);
+}
 
 Lumeview::Lumeview () :
-    m_camera (std::make_shared <Camera> ()),
+    m_camera (std::make_shared <render::Camera> ()),
     m_arcBallControl (m_camera),
 	m_guiShowScene (true),
 	m_guiShowLog (true),
@@ -173,13 +161,12 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
     }
 }
 
-void Lumeview::set_viewport (const Viewport& vp)
+void Lumeview::set_viewport (const render::Viewport& vp)
 {
 	base_t::set_viewport (vp);
 
-	m_imguiListener->set_viewport (vp);
-	m_arcBallControl.set_viewport (vp);
-    m_camera->set_viewport (vp);
+    m_imguiListener->set_viewport (vp);
+    update_scene_viewport ();
 }
 
 void Lumeview::key (int key, int scancode, int action, int mods)
@@ -214,6 +201,8 @@ void Lumeview::process_gui ()
     ImGui::GetStyle().FrameRounding = 0;
 	lumeview::ImGui_NewFrame();
 
+    ViewportOffsets newSceneViewportOffsets;
+
     ImVec2 mainMenuSize (0, 0);
     if (ImGui::BeginMainMenuBar())
     {
@@ -228,23 +217,26 @@ void Lumeview::process_gui ()
         ImGui::EndMainMenuBar();
     }
 
-	// if (m_guiShowLog) {
-	// 	DefLog().draw("log", &m_guiShowLog);
- //    }
+    // if (m_guiShowLog) {
+    //     DefLog().draw("log", &m_guiShowLog);
+    // }
 
 	if (m_guiShowDemo) {
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
     }
 
     {
+
+        const float sceneWidgetWidth = 300.f;
         ImGui::SetNextWindowPos (ImVec2 (0, mainMenuSize.y));
-        ImGui::SetNextWindowSize (ImVec2 (300.f, m_camera->viewport ().height () - mainMenuSize.y));
+        ImGui::SetNextWindowSize (ImVec2 (sceneWidgetWidth, m_camera->viewport ().height () - mainMenuSize.y));
         
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove
                                       | ImGuiWindowFlags_NoResize;
                                       // | ImGuiWindowFlags_NoCollapse;
 
         if (ImGui::Begin("Scene", nullptr, window_flags)) {
+            newSceneViewportOffsets.m_left = sceneWidgetWidth;
             m_scene.do_imgui ();
         }
         ImGui::End();
@@ -252,7 +244,11 @@ void Lumeview::process_gui ()
 
 	ImGui::Render();
 
-	// MessageQueue::dispatch ();
+    if (!(newSceneViewportOffsets == m_sceneViewportOffsets))
+    {
+        m_sceneViewportOffsets = newSceneViewportOffsets;
+        update_scene_viewport ();
+    }
 }
 
 void Lumeview::render ()
@@ -276,6 +272,34 @@ void Lumeview::render ()
     m_scene.render (*m_camera);
 
 	lumeview::ImGui_Display();
+}
+
+void Lumeview::center_scene ()
+{
+    auto const bbox = m_scene.bounding_box ();
+    if (bbox) {
+        m_camera->center_sphere (util::FSphere::from_box (*bbox));
+    }
+}
+
+void Lumeview::update_scene_viewport ()
+{
+    const auto vp       = viewport ();
+    const auto& offsets = m_sceneViewportOffsets;
+
+    render::Viewport sceneVP (static_cast <int> (vp.x ()       + offsets.m_left),
+                              static_cast <int> (vp.y ()       + offsets.m_top),
+                              static_cast <int> (vp.width ()   - (offsets.m_left + offsets.m_right)),
+                              static_cast <int> (vp.height ()  - (offsets.m_top  + offsets.m_bottom)));
+
+    if (sceneVP.width  () <= 0 ||
+        sceneVP.height () <= 0)
+    {
+        sceneVP = render::Viewport (0, 0, 1, 1);
+    }
+    
+    m_arcBallControl.set_viewport (sceneVP);
+    m_camera->set_viewport (sceneVP);
 }
 
 }//	end of namespace lumeview

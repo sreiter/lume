@@ -83,6 +83,9 @@ class Camera {
     void adjust_z_clip_dists (const util::FSphere& sphere);
     /** \} */
 
+    /// adjusts internal parameters so that the specified sphere is in the center of the camera
+    void center_sphere (const util::FSphere& sphere);
+
   private:
     glm::vec3 m_scale;
     glm::quat m_rot;

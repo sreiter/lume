@@ -138,6 +138,8 @@ int main (int argc, char** argv)
             }
         }
 
+        lumeview->center_scene ();
+
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);
         glfwSetScrollCallback (window, ScrollCallback);
