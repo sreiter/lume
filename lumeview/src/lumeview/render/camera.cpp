@@ -25,6 +25,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <glad/glad.h>  // include before other OpenGL related includes
+#include <glm/gtx/compatibility.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -34,6 +35,21 @@
 
 namespace lumeview::render
 {
+
+Camera Camera::lerp (const Camera& from, const Camera& to, float ia)
+{
+    Camera camera;
+    camera.m_scale      = glm::lerp (from.m_scale, to.m_scale, ia);
+    camera.m_rot        = glm::lerp (from.m_rot, to.m_rot, ia);
+    camera.m_trans      = glm::lerp (from.m_trans, to.m_trans, ia);
+    camera.m_zClipDists = glm::lerp (from.m_zClipDists, to.m_zClipDists, ia);
+    
+    const glm::vec4 vpFrom (from.m_viewport.to_ivec4 ());
+    const glm::vec4 vpTo   (to.m_viewport.to_ivec4 ());
+    
+    camera.m_viewport.from_ivec4 (glm::lerp (vpFrom, vpTo, ia));
+    return camera;
+}
 
 Camera::Camera () :
 	m_scale (1.f, 1.f, 1.f),

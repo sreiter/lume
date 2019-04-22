@@ -24,46 +24,46 @@
 
 #pragma once
 
-#include <glm/vec4.hpp>
+#include <lumeview/actors/active_actors.h>
+#include <lumeview/cmd/command_queue.h>
 
-namespace lumeview::render
+namespace lumeview::actors
 {
 
-/** Rendering area in window coordinates.
-    - x, y: lower left corner of the viewport rectangle.
-    - width, height: width and height of the viewport rectangle.
-*/
-class Viewport
+class Actor
 {
 public:
-    Viewport()
-        : m_x (0), m_y (0), m_width (0), m_height (0)
-    {}
-
-    Viewport(int x, int y, int width, int height)
-        : m_x (x), m_y (y), m_width (width), m_height (height)
-    {}
-
-    int x () const       {return m_x;}
-    int y () const       {return m_y;}
-    int width () const   {return m_width;}
-    int height () const  {return m_height;}
-
-    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
-    
-    void from_ivec4 (const glm::ivec4& v) 
+    Actor ()
     {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
+        ActiveActors::add_actor (this);
     }
-    
+    virtual ~Actor ()
+    {
+        if (!m_commandQueue.empty ()) {
+            ActiveActors::remove_actor (this);
+        }
+    }
+
+    void enqueue (std::shared_ptr <cmd::Command> command)
+    {
+        m_commandQueue.enqueue(std::move (command));
+    }
+
+    void tick ()
+    {
+        if (m_commandQueue.empty ()) {
+            return;
+        }
+
+        m_commandQueue.tick ();
+
+        if (m_commandQueue.empty ()) {
+            ActiveActors::remove_actor (this);
+        }
+    }
+
 private:
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
+    cmd::CommandQueue m_commandQueue;
 };
 
-}//    end of namespace lumeview
+}// end of namespace lumeview::actors

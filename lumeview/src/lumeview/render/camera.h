@@ -40,6 +40,9 @@ namespace lumeview::render
 
 class Camera {
   public:
+    static Camera lerp (const Camera& from, const Camera& to, float ia);
+    
+  public:
     Camera ();
 
     void set_viewport (const Viewport& vp);

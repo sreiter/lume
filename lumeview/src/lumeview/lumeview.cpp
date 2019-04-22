@@ -72,6 +72,7 @@ public:
 
         if (inst ().m_refCount == 0) {
             lumeview::ImGui_Shutdown();
+            lumeview::ArcBall arcBall;
         }
     }
 

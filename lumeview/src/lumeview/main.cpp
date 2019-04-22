@@ -132,11 +132,25 @@ int main (int argc, char** argv)
         g_lumeview = lumeview;
 
     //  load specified meshes
+
+        // scheduling a command executes the 'scheduled' callback.
+        // The blocker increases its 'scheduled' counter with each schedule and decreases it
+        // with each run.
+        // auto blocker = std::make_shared <cmd::Blocker> ();
         if (argc >= 2) {
             for (int i = 1; i < argc; ++i) {
                 lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [i]));
+                // auto meshContent = std::make_unique <scene::MeshContent> ();
+                // meshContent->run (std::make_shared <cmd::mesh::LoadFile> (argv [i]));
+                // meshContent->run (blocker);
+                // lumeview->scene ().add_child (std::move (meshContent));
             }
         }
+
+        // schedule and run are executed directly after each other. So unless a blocker is still
+        // scheduled, the next command can be started immediately.
+        // lumeview->camera ().run (blocker);
+        // lumeview->camera ().run (std::make_shared <cmd::camera::CenterNode> (lumeview->scene ()));
 
         lumeview->center_scene ();
 

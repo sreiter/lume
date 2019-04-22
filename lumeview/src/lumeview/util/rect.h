@@ -24,46 +24,47 @@
 
 #pragma once
 
-#include <glm/vec4.hpp>
+#include <glm/vec2.hpp>
 
-namespace lumeview::render
+namespace lumeview::util
 {
 
-/** Rendering area in window coordinates.
-    - x, y: lower left corner of the viewport rectangle.
-    - width, height: width and height of the viewport rectangle.
-*/
-class Viewport
+class Rect
 {
 public:
-    Viewport()
-        : m_x (0), m_y (0), m_width (0), m_height (0)
-    {}
+    using vec2 = glm::vec2;
 
-    Viewport(int x, int y, int width, int height)
-        : m_x (x), m_y (y), m_width (width), m_height (height)
-    {}
+public:
+    Rect ()  {}
 
-    int x () const       {return m_x;}
-    int y () const       {return m_y;}
-    int width () const   {return m_width;}
-    int height () const  {return m_height;}
+    Rect (float xMin, float yMin, float xMax, float yMax) :
+        m_min (xMin, yMin), m_max (xMax, yMax)    {}
 
-    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
-    
-    void from_ivec4 (const glm::ivec4& v) 
+    Rect (const vec2& min, const vec2& max) :
+        m_min (min), m_max (max)  {}
+
+    float width () const        {return m_max.x - m_min.x;}
+    float height () const       {return m_max.y - m_min.y;}
+
+    vec2& min ()             {return m_min;}
+    const vec2& min () const {return m_min;}
+
+    vec2& max ()             {return m_max;}
+    const vec2& max () const {return m_max;}
+
+    /// returns true if the p.xy lies inside or on the bounds of the rectangle
+    template <class vec_t>
+    bool contains_point (const vec_t& p) const
     {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
+        return (p.x >= m_min.x) && 
+               (p.y >= m_min.y) && 
+               (p.x <= m_max.x) && 
+               (p.y <= m_max.y);
     }
-    
+
 private:
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
+    vec2 m_min;
+    vec2 m_max;
 };
 
-}//    end of namespace lumeview
+}// end of namespace lumeview::util

@@ -22,48 +22,33 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <set>
+#include <lumeview/actors/active_actors.h>
+#include <lumeview/actors/actor.h>
 
-#include <glm/vec4.hpp>
+namespace
+{
+    std::set <lumeview::actors::Actor*> s_activeActors;
+}
 
-namespace lumeview::render
+namespace lumeview::actors
 {
 
-/** Rendering area in window coordinates.
-    - x, y: lower left corner of the viewport rectangle.
-    - width, height: width and height of the viewport rectangle.
-*/
-class Viewport
+void ActiveActors::tick ()
 {
-public:
-    Viewport()
-        : m_x (0), m_y (0), m_width (0), m_height (0)
-    {}
-
-    Viewport(int x, int y, int width, int height)
-        : m_x (x), m_y (y), m_width (width), m_height (height)
-    {}
-
-    int x () const       {return m_x;}
-    int y () const       {return m_y;}
-    int width () const   {return m_width;}
-    int height () const  {return m_height;}
-
-    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
-    
-    void from_ivec4 (const glm::ivec4& v) 
-    {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
+    for (auto actor : s_activeActors) {
+        actor->tick ();
     }
-    
-private:
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
-};
+}
 
-}//    end of namespace lumeview
+void ActiveActors::add_actor (Actor* actor)
+{
+    s_activeActors.insert (actor);
+}
+
+void ActiveActors::remove_actor (Actor* actor)
+{
+    s_activeActors.erase (actor);
+}
+
+}// end of namespace lumeview::actors

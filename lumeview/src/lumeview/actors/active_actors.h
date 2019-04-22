@@ -24,46 +24,20 @@
 
 #pragma once
 
-#include <glm/vec4.hpp>
-
-namespace lumeview::render
+namespace lumeview::actors
 {
 
-/** Rendering area in window coordinates.
-    - x, y: lower left corner of the viewport rectangle.
-    - width, height: width and height of the viewport rectangle.
-*/
-class Viewport
+class Actor;
+
+class ActiveActors
 {
+friend class Actor;
 public:
-    Viewport()
-        : m_x (0), m_y (0), m_width (0), m_height (0)
-    {}
+    static void tick ();
 
-    Viewport(int x, int y, int width, int height)
-        : m_x (x), m_y (y), m_width (width), m_height (height)
-    {}
-
-    int x () const       {return m_x;}
-    int y () const       {return m_y;}
-    int width () const   {return m_width;}
-    int height () const  {return m_height;}
-
-    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
-    
-    void from_ivec4 (const glm::ivec4& v) 
-    {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
-    }
-    
 private:
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
+    static void add_actor    (Actor* actor);
+    static void remove_actor (Actor* actor);
 };
 
-}//    end of namespace lumeview
+}// end of namespace lumeview::actors

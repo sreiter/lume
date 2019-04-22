@@ -35,6 +35,8 @@ set (sources
         src/lumeview/lumeview.cpp
         src/lumeview/main.cpp
 
+        src/lumeview/actors/active_actors.cpp
+
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp
         src/lumeview/gui/imgui_binding.cpp
@@ -71,9 +73,8 @@ add_subdirectory(${GLFW_PATH})
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 add_executable (lumeview ${sources} ${headers} ${depSources})
+target_compile_features(lumeview PUBLIC cxx_std_17)
 add_dependencies(lumeview glfw)
-
-target_link_libraries(lumeview glfw3 ${OPENGL_LIBRARIES} lume )
 
 target_include_directories(lumeview
     PRIVATE
@@ -84,9 +85,11 @@ target_include_directories(lumeview
         deps
     )
 
+target_link_libraries(lumeview glfw3 ${OPENGL_LIBRARIES} lume )
+
 add_definitions (-DGLM_ENABLE_EXPERIMENTAL)
 add_definitions (-DUSE_GL_VERSION_MAJOR=${GL_VERSION_MAJOR})
 add_definitions (-DUSE_GL_VERSION_MINOR=${GL_VERSION_MINOR})
 
 # lumeview shaders
-file(COPY "shaders" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+file(COPY "shaders" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
