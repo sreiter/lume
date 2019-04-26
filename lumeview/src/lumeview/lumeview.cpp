@@ -283,6 +283,11 @@ void Lumeview::center_scene ()
     }
 }
 
+void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> cmd)
+{
+    m_cameraCommandQueue.enqueue (cmd);
+}
+
 void Lumeview::update_scene_viewport ()
 {
     const auto vp       = viewport ();

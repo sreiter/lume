@@ -67,9 +67,15 @@ public:
         : m_executionMode (executionMode)
     {}
 
+    Command (const Command& cmd)
+        : m_executionMode (cmd.m_executionMode)
+    {
+        set_status (cmd.status ());
+    }
+
     void run ()
     {
-        Status const currentStatus = status ();
+        Status currentStatus = status ();
 
         if (currentStatus == Status::Canceled) {
             return;
@@ -80,7 +86,7 @@ public:
                 currentStatus == Status::Yield);
 
         if (currentStatus == Status::Ready) {
-            set_status (Status::Preparing);
+            currentStatus = set_status (Status::Preparing);
         }
         
         if (currentStatus == Status::Preparing) {
@@ -89,7 +95,6 @@ public:
                 // It may be shared between multiple command queues.
                 return;
             }
-            return;
         }
         else if (currentStatus != Status::Yield) {
             assert (!"Invalid status encountered in 'Command::run' method");
@@ -109,9 +114,12 @@ public:
         return m_status.load ();
     }
 
+    virtual void scheduled ()       {}
+    virtual void canceled  ()       {}
+
 protected:
-    virtual PrepareResult on_prepare   ()       {return PrepareResult::Done;}
-    virtual RunResult     on_run       ()       = 0;
+    virtual PrepareResult on_prepare ()       {return PrepareResult::Done;}
+    virtual RunResult     on_run     ()       = 0;
 
 private:
     void runner  ()
@@ -134,13 +142,14 @@ private:
         }
     }
 
-    void set_status (Status const status)
+    Status set_status (Status const status)
     {
         m_status.store (status);
+        return status;
     }
 
 private:
-    std::atomic <Status> m_status       {Status::Preparing};
+    std::atomic <Status> m_status       {Status::Ready};
     ExecutionMode        m_executionMode;
 };
 

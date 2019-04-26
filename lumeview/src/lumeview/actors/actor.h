@@ -37,6 +37,7 @@ public:
     {
         ActiveActors::add_actor (this);
     }
+    
     virtual ~Actor ()
     {
         if (!m_commandQueue.empty ()) {

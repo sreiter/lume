@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <queue>
+#include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/cmd/command.h>
 
 namespace lumeview::cmd
@@ -37,14 +38,28 @@ public:
     using command_ptr_t = std::shared_ptr <Command>;
 
 public:
+
+    ~CommandQueue ()
+    {
+        if (!empty ()) {
+            ActiveCommandQueues::remove (this);
+        }
+    }
+
     void enqueue (command_ptr_t const& command)
     {
+        if (empty ()) {
+            ActiveCommandQueues::add (this);
+        }
+
         m_commandQueue.push (command);
+        m_commandQueue.back ()->scheduled ();
     }
 
     bool empty () const
     {
-        return m_commandQueue.empty ();
+        return m_commandQueue.empty () &&
+               m_runningCommand == nullptr;
     }
 
     /** If no command is currently running, the next valid command from the queue will be run.
@@ -53,6 +68,10 @@ public:
     */
     void tick ()
     {
+        if (empty ()) {
+            return;
+        }
+
         if (m_runningCommand)
         {
             const auto status = m_runningCommand->status ();
@@ -79,6 +98,10 @@ public:
         }
 
         run_next_command ();
+        
+        if (empty ()) {
+            ActiveCommandQueues::remove (this);
+        }
     }
 
 private:

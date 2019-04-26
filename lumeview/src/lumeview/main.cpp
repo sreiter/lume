@@ -33,6 +33,8 @@
 #include <imgui/imgui.h>
 #include <lumeview/lumeview.h>
 #include <lumeview/scene/mesh_content.h>
+#include <lumeview/cmd/active_command_queues.h>
+#include <lumeview/cmd/camera/focus_nodes.h>
 
 using namespace lumeview;
 using std::cout;
@@ -137,9 +139,13 @@ int main (int argc, char** argv)
         // The blocker increases its 'scheduled' counter with each schedule and decreases it
         // with each run.
         // auto blocker = std::make_shared <cmd::Blocker> ();
+        std::vector <std::shared_ptr <scene::Node>> nodes;
+
         if (argc >= 2) {
             for (int i = 1; i < argc; ++i) {
-                lumeview->scene ().add_child (std::make_unique <scene::MeshContent> (argv [i]));
+                auto node = std::make_shared <scene::Node> (std::make_unique <scene::MeshContent> (argv [i]));
+                lumeview->scene ().add_child (node);
+                nodes.emplace_back (std::move (node));
                 // auto meshContent = std::make_unique <scene::MeshContent> ();
                 // meshContent->run (std::make_shared <cmd::mesh::LoadFile> (argv [i]));
                 // meshContent->run (blocker);
@@ -152,7 +158,10 @@ int main (int argc, char** argv)
         // lumeview->camera ().run (blocker);
         // lumeview->camera ().run (std::make_shared <cmd::camera::CenterNode> (lumeview->scene ()));
 
-        lumeview->center_scene ();
+        lumeview->schedule_camera_command (
+            std::make_shared <cmd::camera::FocusNodes> (lumeview->camera (), nodes, 0.5));
+
+        // lumeview->center_scene ();
 
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);
@@ -168,6 +177,7 @@ int main (int argc, char** argv)
 
         while (!glfwWindowShouldClose (window))
         {
+            cmd::ActiveCommandQueues::tick ();
             lumeview->process_gui ();
             lumeview->render ();
             

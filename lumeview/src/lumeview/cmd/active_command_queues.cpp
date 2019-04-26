@@ -22,55 +22,33 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <set>
+#include <lumeview/cmd/active_command_queues.h>
+#include <lumeview/cmd/command_queue.h>
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-#include <lumeview/render/camera.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
+namespace
+{
+    std::set <lumeview::cmd::CommandQueue*> s_activeQueues;
+}
 
-namespace lumeview::scene
+namespace lumeview::cmd
 {
 
-class Node
+void ActiveCommandQueues::tick ()
 {
-public:
-    Node () = default;
-    Node (std::unique_ptr <Content> content);
-    ~Node ();
+    for (auto queue : s_activeQueues) {
+        queue->tick ();
+    }
+}
 
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
+void ActiveCommandQueues::add (CommandQueue* queue)
+{
+    s_activeQueues.insert (queue);
+}
 
-    void clear ();
+void ActiveCommandQueues::remove (CommandQueue* queue)
+{
+    s_activeQueues.erase (queue);
+}
 
-    void add_child (std::shared_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
-
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    bool has_content () const;
-    Content& content ();
-    const Content& content () const;
-
-    void render (const render::Camera& camera);
-    std::optional <util::FBox> bounding_box ();
-    void do_imgui ();
-
-private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    std::unique_ptr <Content>            m_content;
-    std::vector <std::shared_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
-};
-
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::cmd

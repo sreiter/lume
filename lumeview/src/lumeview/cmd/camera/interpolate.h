@@ -38,6 +38,9 @@ public:
     using camera_t = render::Camera;
 
 public:
+    Interpolate ()
+    {}
+    
     Interpolate (std::weak_ptr <camera_t> camera,
                  const camera_t& sourceState,
                  const camera_t& targetState,
@@ -49,8 +52,19 @@ public:
     {
     }
 
+    void set_parameters (std::weak_ptr <camera_t> camera,
+                         const camera_t& sourceState,
+                         const camera_t& targetState,
+                         double duration)
+    {
+        m_camera      = camera;
+        m_sourceState = sourceState;
+        m_targetState = targetState;
+        m_duration    = seconds_t (duration);
+    }
+
 protected:
-    PrepareResult on_prepare   () override
+    PrepareResult on_prepare () override
     {
         m_startTime = clock_t::now ();
         return PrepareResult::Done;
@@ -63,17 +77,23 @@ protected:
             return RunResult::Done;
         }
 
+        // we don't want to alter the viewport...
+        auto const vp = camera->viewport ();
+
         auto const timeEllapsed = std::chrono::duration_cast<seconds_t>(clock_t::now () - m_startTime);
         
         if (m_duration.count () == 0 ||
             timeEllapsed > m_duration)
         {
             *camera = m_targetState;
+            camera->set_viewport (vp);
             return RunResult::Done;
         }
 
-        auto const ia = timeEllapsed.count () / m_duration.count ();
+        float const ia = static_cast <float> (timeEllapsed.count () / m_duration.count ());
+
         *camera = camera_t::lerp (m_sourceState, m_targetState, ia);
+        camera->set_viewport (vp);
         return RunResult::Yield;
     }
 
@@ -84,8 +104,8 @@ private:
 
 private:
     std::weak_ptr <camera_t> m_camera;
-    const camera_t           m_sourceState;
-    const camera_t           m_targetState;
+    camera_t                 m_sourceState;
+    camera_t                 m_targetState;
     timepoint_t              m_startTime;
     seconds_t                m_duration;
 

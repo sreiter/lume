@@ -35,7 +35,7 @@ set (sources
         src/lumeview/lumeview.cpp
         src/lumeview/main.cpp
 
-        src/lumeview/actors/active_actors.cpp
+        src/lumeview/cmd/active_command_queues.cpp
 
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp

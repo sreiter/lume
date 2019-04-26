@@ -24,53 +24,20 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-#include <lumeview/render/camera.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
-
-namespace lumeview::scene
+namespace lumeview::cmd
 {
 
-class Node
+class CommandQueue;
+
+class ActiveCommandQueues
 {
+friend class CommandQueue;
 public:
-    Node () = default;
-    Node (std::unique_ptr <Content> content);
-    ~Node ();
-
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
-
-    void clear ();
-
-    void add_child (std::shared_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
-
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    bool has_content () const;
-    Content& content ();
-    const Content& content () const;
-
-    void render (const render::Camera& camera);
-    std::optional <util::FBox> bounding_box ();
-    void do_imgui ();
+    static void tick ();
 
 private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    std::unique_ptr <Content>            m_content;
-    std::vector <std::shared_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
+    static void add    (CommandQueue* queue);
+    static void remove (CommandQueue* queue);
 };
 
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::cmd

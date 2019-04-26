@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <optional>
+#include <string>
 #include <lumeview/render/camera.h>
 #include <lumeview/util/shapes.h>
 

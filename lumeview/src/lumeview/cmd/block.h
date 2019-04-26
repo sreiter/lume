@@ -24,53 +24,44 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-#include <lumeview/render/camera.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
+#include <lumeview/cmd/command.h>
 
-namespace lumeview::scene
+namespace lumeview::cmd
 {
 
-class Node
+class Block : SynchronousCommand
 {
 public:
-    Node () = default;
-    Node (std::unique_ptr <Content> content);
-    ~Node ();
+    Block  () = default;
 
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
+    void scheduled () override
+    {
+        ++m_unpreparedInstances;
+    }
 
-    void clear ();
+    void canceled  () override
+    {
+        --m_unpreparedInstances;
+        assert (m_unpreparedInstances >= 0);
+    }
 
-    void add_child (std::shared_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
+protected:
+    PrepareResult on_prepare () override
+    {
+        --m_unpreparedInstances;
+        assert (m_unpreparedInstances >= 0);
+        return PrepareResult::Done;
+    }
 
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    bool has_content () const;
-    Content& content ();
-    const Content& content () const;
-
-    void render (const render::Camera& camera);
-    std::optional <util::FBox> bounding_box ();
-    void do_imgui ();
+    RunResult on_run () override
+    {
+        if (m_unpreparedInstances == 0) {
+            return RunResult::Done;
+        }
+        return RunResult::Yield;
+    }
 
 private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    std::unique_ptr <Content>            m_content;
-    std::vector <std::shared_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
+    int m_unpreparedInstances {0};
 };
-
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::cmd

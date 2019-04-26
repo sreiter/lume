@@ -55,14 +55,14 @@ void Node::clear ()
     m_children.clear ();
 }
 
-void Node::add_child (std::unique_ptr <Node> node)
+void Node::add_child (std::shared_ptr <Node> node)
 {
     m_children.emplace_back (std::move (node));
 }
 
 void Node::add_child (std::unique_ptr <Content> content)
 {
-    m_children.emplace_back (std::make_unique <Node> (std::move (content)));
+    m_children.emplace_back (std::make_shared <Node> (std::move (content)));
 }
 
 void Node::traverse (const std::function <void (Node&)>& callback)
@@ -102,6 +102,7 @@ bool Node::has_content () const
 {
     return m_content != nullptr;
 }
+
 Content& Node::content ()
 {
     assert (has_content ());

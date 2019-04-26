@@ -32,7 +32,8 @@
 #include <lumeview/gui/window_event_listener.h>
 #include <lumeview/render/camera.h>
 #include <lumeview/scene/node.h>
-// #include <lumeview/commands/commands.h>
+#include <lumeview/cmd/command.h>
+#include <lumeview/cmd/command_queue.h>
 
 namespace lumeview {
 
@@ -62,6 +63,13 @@ public:
 
     void center_scene ();
 
+    std::shared_ptr<render::Camera> camera ()
+    {
+        return m_camera;
+    }
+    
+    void schedule_camera_command (std::shared_ptr <cmd::Command> cmd);
+
 private:
     void update_scene_viewport ();
 
@@ -88,6 +96,8 @@ private:
 	bool  m_guiShowScene;
 	bool  m_guiShowLog;
 	bool  m_guiShowDemo;
+
+    cmd::CommandQueue m_cameraCommandQueue;
 };
 
 }//	end of namespace lumeview
