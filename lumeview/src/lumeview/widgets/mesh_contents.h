@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
 #include <lume/mesh.h>
+#include <lumeview/gui/imgui.h>
 #include <lumeview/util/shapes.h>
 #include <lumeview/util/to_string.h>
 
@@ -34,26 +34,45 @@ namespace lumeview::widgets
 
 void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
 {
-    ImGui::Columns(2);
-    
     auto grobTypes = mesh.grob_types ();
-    for (auto gt : grobTypes) {
-        ImGui::Text (lume::GrobSet (gt).name ().c_str ());
-        ImGui::NextColumn ();
-        ImGui::Text (lume::to_string (mesh.num (gt)).c_str ());
-        ImGui::NextColumn ();
-    }
-    
-    ImGui::Text ("box min");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.min ()).c_str ());
-    ImGui::NextColumn ();
-    ImGui::Text ("box max");
-    ImGui::NextColumn ();
-    ImGui::Text (lume::to_string (box.max ()).c_str ());
-    ImGui::NextColumn ();
 
-    ImGui::Columns(1);
+    ImGui::BeginGroup ();
+    for (auto gt : grobTypes) {
+        ImGui::Text ((lume::GrobSet (gt).name () + (":")).c_str ());
+    }
+    // ImGui::AlignTextToFramePadding();
+    ImGui::Text ("box min:");
+    // ImGui::AlignTextToFramePadding();
+    ImGui::Text ("box max:");
+    // ImGui::AlignTextToFramePadding();
+    ImGui::Text ("box size:");
+    ImGui::EndGroup ();
+
+    ImGui::SameLine ();
+
+    ImGui::BeginGroup ();
+    ImGui::PushStyleVar (ImGuiStyleVar_FramePadding, ImVec2 (2, 0));
+    for (auto gt : grobTypes) {
+        auto value = lume::to_string (mesh.num (gt));
+        ImGui::PushID (static_cast <int> (gt));
+        ImGui::InputText ("", &value, ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopID ();
+    }
+
+    // ImGuiContext& imgui = *ImGui::GImGui;
+    // float backupPadding = imgui.Style.FramePadding.y;
+    // imgui.Style.FramePadding.y = 0.f;
+
+    auto v = box.min ();
+    ImGui::InputFloat3("box.min", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+    v = box.max ();
+    ImGui::InputFloat3("box.max", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+    v = box.max () - box.min ();
+    ImGui::InputFloat3("box.size", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::PopStyleVar (1);
+    // imgui.Style.FramePadding.y = backupPadding;
+
+    ImGui::EndGroup ();
 }
 
 }// end of namespace lumeview::widgets

@@ -1,6 +1,6 @@
 #version 330 core
 
-uniform vec4 color = vec4 (1.f, 1.f, 1.f, 1.f);
+uniform vec4 color = vec4 (1.f, 1.f, 0.8f, 1.f);
 
 in float elemLightIntensity;
 

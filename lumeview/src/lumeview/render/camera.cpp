@@ -46,8 +46,8 @@ Camera Camera::lerp (const Camera& from, const Camera& to, float ia)
     
     const glm::vec4 vpFrom (from.m_viewport.to_ivec4 ());
     const glm::vec4 vpTo   (to.m_viewport.to_ivec4 ());
-    
     camera.m_viewport.from_ivec4 (glm::lerp (vpFrom, vpTo, ia));
+
     return camera;
 }
 
