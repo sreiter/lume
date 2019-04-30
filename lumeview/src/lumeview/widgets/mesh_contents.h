@@ -34,43 +34,30 @@ namespace lumeview::widgets
 
 void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
 {
+    ImGui::SlimScope slimScope {};
+
     auto grobTypes = mesh.grob_types ();
 
     ImGui::BeginGroup ();
     for (auto gt : grobTypes) {
-        ImGui::Text ((lume::GrobSet (gt).name () + (":")).c_str ());
+        ImGui::Text ((lume::GrobSet (gt).name () + ":").c_str ());
     }
-    // ImGui::AlignTextToFramePadding();
     ImGui::Text ("box min:");
-    // ImGui::AlignTextToFramePadding();
     ImGui::Text ("box max:");
-    // ImGui::AlignTextToFramePadding();
     ImGui::Text ("box size:");
     ImGui::EndGroup ();
 
     ImGui::SameLine ();
 
     ImGui::BeginGroup ();
-    ImGui::PushStyleVar (ImGuiStyleVar_FramePadding, ImVec2 (2, 0));
     for (auto gt : grobTypes) {
-        auto value = lume::to_string (mesh.num (gt));
-        ImGui::PushID (static_cast <int> (gt));
-        ImGui::InputText ("", &value, ImGuiInputTextFlags_ReadOnly);
-        ImGui::PopID ();
+        ImGui::IDScope idScope (static_cast <int> (gt));
+        ImGui::ReadOnly ("", static_cast <int> (mesh.num (gt)));
     }
 
-    // ImGuiContext& imgui = *ImGui::GImGui;
-    // float backupPadding = imgui.Style.FramePadding.y;
-    // imgui.Style.FramePadding.y = 0.f;
-
-    auto v = box.min ();
-    ImGui::InputFloat3("box.min", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
-    v = box.max ();
-    ImGui::InputFloat3("box.max", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
-    v = box.max () - box.min ();
-    ImGui::InputFloat3("box.size", &v.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
-    ImGui::PopStyleVar (1);
-    // imgui.Style.FramePadding.y = backupPadding;
+    ImGui::ReadOnly ("box.min", box.min ());
+    ImGui::ReadOnly ("box.max", box.max ());
+    ImGui::ReadOnly ("box.size", box.max () - box.min ());
 
     ImGui::EndGroup ();
 }
