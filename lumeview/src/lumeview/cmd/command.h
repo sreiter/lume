@@ -109,17 +109,26 @@ public:
         }
     }
 
+    void cancel ()
+    {
+        if (status () != Status::Canceled)
+        {
+            set_status (Status::Canceled);
+            on_cancel ();
+        }
+    }
+
     Status status () const
     {
         return m_status.load ();
     }
 
     virtual void scheduled ()       {}
-    virtual void canceled  ()       {}
 
 protected:
     virtual PrepareResult on_prepare ()       {return PrepareResult::Done;}
     virtual RunResult     on_run     ()       = 0;
+    virtual void          on_cancel  ()       {}
 
 private:
     void runner  ()

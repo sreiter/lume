@@ -61,14 +61,9 @@ public:
 
   	void render ();
 
-    void center_scene ();
+    std::shared_ptr<render::Camera> camera ();
 
-    std::shared_ptr<render::Camera> camera ()
-    {
-        return m_camera;
-    }
-    
-    void schedule_camera_command (std::shared_ptr <cmd::Command> cmd);
+    void move_camera (const render::Camera& to, const double duration);
 
 private:
     void update_scene_viewport ();
@@ -79,6 +74,7 @@ private:
 	WindowEventListener* m_imguiListener;
 
     std::shared_ptr<render::Camera> m_camera;
+    render::Camera                  m_lastCameraMoveTarget;
 	ArcBallControl		            m_arcBallControl;
     scene::Node                     m_scene;
 

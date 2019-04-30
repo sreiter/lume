@@ -31,41 +31,31 @@ namespace lumeview
 
 using namespace render;
 
-ArcBallControl::ArcBallControl (std::shared_ptr <Camera> camera)
-    : m_camera (std::move (camera))
+std::optional <Camera> ArcBallControl::mouse_button (const Camera& currentCamera, int button, int action, int mods)
 {
-    if (m_camera == nullptr) {
-        throw ControlError () << "Invalid camera specified during ArcBallControl construction.";
-    }
-    m_camera->set_rotation (m_arcBall.rotation_quaternion ());
-    m_arcBall.set_rotation (m_camera->rotation());
-    m_arcBall.set_viewport (m_camera->viewport ());
-}
-
-void ArcBallControl::mouse_button (int button, int action, int mods)
-{
-    if (m_camera == nullptr) {
-        throw ControlError () << "Invalid associated camera.";
-    }
-
-    base_t::mouse_button (button, action, mods);
+    m_eventListener.set_viewport (currentCamera.viewport ());
+    m_eventListener.mouse_button (button, action, mods);
+    m_arcBall.set_rotation (currentCamera.rotation ());
+    m_arcBall.set_viewport (currentCamera.viewport ());
 
     if(button == MouseButton::LEFT){
         switch(action) {
             case MouseButtonAction::DOWN: {
-                const glm::vec2& cursorPos = base_t::cursor_position ();
-                if (base_t::was_double_click (button)) {
+                const glm::vec2& cursorPos = m_eventListener.cursor_position ();
+                if (m_eventListener.was_double_click (button)) {
                     m_arcBall.end_drag ();
-                    float z = m_camera->depth_at_screen_coord (cursorPos);
+                    float z = currentCamera.depth_at_screen_coord (cursorPos);
                     if (z < 1.f) {
-                        glm::vec3 p = m_camera->unproject (glm::vec3(cursorPos.x, cursorPos.y, z));
-                        m_camera->set_translation (p);
+                        Camera camera = currentCamera;
+                        glm::vec3 p = camera.unproject (glm::vec3(cursorPos.x, cursorPos.y, z));
+                        camera.set_translation (p);
+                        return camera;
                     }
                 }
                 else
                 {
-                    m_arcBall.set_rotation (m_camera->rotation());
-                    m_arcBall.set_viewport (m_camera->viewport ());
+                    m_arcBall.set_rotation (currentCamera.rotation());
+                    m_arcBall.set_viewport (currentCamera.viewport ());
                     m_arcBall.begin_drag (glm::vec2(cursorPos.x, cursorPos.y));
                 }
             } break;
@@ -76,53 +66,56 @@ void ArcBallControl::mouse_button (int button, int action, int mods)
             } break;
         }
     }
+    return {};
 }
 
 
-void ArcBallControl::mouse_move (const glm::vec2& c)
+std::optional <Camera> ArcBallControl::mouse_move (const Camera& currentCamera, const glm::vec2& c)
 {
-    if (m_camera == nullptr) {
-        throw ControlError () << "Invalid associated camera.";
-    }
-
-    glm::vec2 lastCursorPos = base_t::cursor_position();
-    base_t::mouse_move (c);
+    glm::vec2 lastCursorPos = m_eventListener.cursor_position();
+    m_eventListener.set_viewport (currentCamera.viewport ());
+    m_eventListener.mouse_move (c);
 
     if(m_arcBall.dragging()){
+        Camera camera = currentCamera;
         m_arcBall.drag_to (c);
-        m_camera->set_rotation (m_arcBall.rotation_quaternion());
+        camera.set_rotation (m_arcBall.rotation_quaternion());
+        return camera;
     }
     else {
-        if(base_t::mouse_button_is_down (MouseButton::RIGHT)) {
-            glm::vec2 d = base_t::cursor_position() - lastCursorPos;
-            glm::vec3 fp = m_camera->project (m_camera->to());
+        if(m_eventListener.mouse_button_is_down (MouseButton::RIGHT)) {
+            Camera camera = currentCamera;
+            glm::vec2 d = m_eventListener.cursor_position() - lastCursorPos;
+            glm::vec3 fp = camera.project (camera.to());
             fp += glm::vec3(d.x, d.y, 0);
-            glm::vec3 nf = m_camera->unproject (fp);
+            glm::vec3 nf = camera.unproject (fp);
 
             //  due to rounding issues, we have to make sure that the resulting direction
             //  is parallel to the camera plane.
-            glm::vec3 nfDir = nf - m_camera->from();
+            glm::vec3 nfDir = nf - camera.from();
             if (rayPlaneIntersection (nf,
-                                      m_camera->from(),
+                                      camera.from(),
                                       nfDir,
-                                      m_camera->to(),
-                                      m_camera->forward()))
+                                      camera.to(),
+                                      camera.forward()))
             {
-                m_camera->translate (m_camera->to() - nf);
+                camera.translate (camera.to() - nf);
+                return camera;
             }
         }
     }
+    return {};
 }
 
 
-void ArcBallControl::mouse_scroll (const glm::vec2& o)
+std::optional <Camera> ArcBallControl::mouse_scroll (const Camera& currentCamera, const glm::vec2& o)
 {
-    if (m_camera == nullptr) {
-        throw ControlError () << "Invalid associated camera.";
-    }
-
-    base_t::mouse_scroll (o);
+    Camera camera = currentCamera;
+    m_eventListener.set_viewport (camera.viewport ());
+    m_eventListener.mouse_scroll (o);
     float s = 1.f - o.y / 10.f;
-    m_camera->scale (glm::vec3(s));
+    camera.scale (glm::vec3(s));
+
+    return camera;
 }
 }//    end of namespace lumeview

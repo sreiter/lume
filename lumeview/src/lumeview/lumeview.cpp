@@ -37,8 +37,8 @@
 
 #include <lumeview/lumeview.h>
 #include <lumeview/lumeview_error.h>
+#include <lumeview/cmd/camera/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
-
 namespace
 {
 
@@ -108,7 +108,6 @@ bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
 
 Lumeview::Lumeview () :
     m_camera (std::make_shared <render::Camera> ()),
-    m_arcBallControl (m_camera),
 	m_guiShowScene (true),
 	m_guiShowLog (true),
 	m_guiShowDemo (false)
@@ -134,7 +133,10 @@ void Lumeview::mouse_button (int button, int action, int mods)
 	m_imguiListener->mouse_button (button, action, mods);
 
 	if(!ImGui::GetIO().WantCaptureMouse) {
-		m_arcBallControl.mouse_button (button, action, mods);
+		auto newCamera = m_arcBallControl.mouse_button (*m_camera, button, action, mods);
+        if (newCamera) {
+            move_camera (*newCamera, 0.2);
+        }
     }
 }
 
@@ -146,7 +148,10 @@ void Lumeview::mouse_move (const glm::vec2& c)
 	m_imguiListener->mouse_move (c);
 
 	if(!ImGui::GetIO().WantCaptureMouse) {
-		m_arcBallControl.mouse_move (c);
+		auto newCamera = m_arcBallControl.mouse_move (m_lastCameraMoveTarget, c);
+        if (newCamera) {
+            move_camera (*newCamera, 0.0);
+        }
     }
 }
 
@@ -157,7 +162,10 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
 	m_imguiListener->mouse_scroll (o);
 
 	if(!ImGui::GetIO().WantCaptureMouse) {
-		m_arcBallControl.mouse_scroll (o);
+		auto newCamera = m_arcBallControl.mouse_scroll (m_lastCameraMoveTarget, o);
+        if (newCamera) {
+            move_camera (*newCamera, 0.1);
+        }
     }
 }
 
@@ -175,9 +183,9 @@ void Lumeview::key (int key, int scancode, int action, int mods)
 
 	m_imguiListener->key (key, scancode, action, mods);
 
-	if(!ImGui::GetIO().WantCaptureKeyboard) {
-		m_arcBallControl.key (key, scancode, action, mods);
-    }
+	// if(!ImGui::GetIO().WantCaptureKeyboard) {
+	// 	m_arcBallControl.key (key, scancode, action, mods);
+ //    }
 }
 
 void Lumeview::character (unsigned int c)
@@ -186,9 +194,9 @@ void Lumeview::character (unsigned int c)
 
 	m_imguiListener->character (c);
 
-	if(!ImGui::GetIO().WantCaptureKeyboard) {
-		m_arcBallControl.character (c);
-    }
+	// if(!ImGui::GetIO().WantCaptureKeyboard) {
+	// 	m_arcBallControl.character (c);
+ //    }
 }
 
 scene::Node& Lumeview::scene ()
@@ -274,17 +282,24 @@ void Lumeview::render ()
 	lumeview::ImGui_Display();
 }
 
-void Lumeview::center_scene ()
+std::shared_ptr<render::Camera> Lumeview::camera ()
 {
-    auto const bbox = m_scene.bounding_box ();
-    if (bbox) {
-        m_camera->center_sphere (util::FSphere::from_box (*bbox));
-    }
+    return m_camera;
 }
 
-void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> cmd)
+void Lumeview::move_camera (const render::Camera& to, const double duration)
 {
-    m_cameraCommandQueue.enqueue (cmd);
+    m_cameraCommandQueue.cancel_all ();
+    if (duration <= 0) {
+        *m_camera = to;
+    }
+    else
+    {
+        m_cameraCommandQueue.enqueue (
+            std::make_shared <cmd::camera::Interpolate> (
+                m_camera, *m_camera, to, duration));
+    }
+    m_lastCameraMoveTarget = to;
 }
 
 void Lumeview::update_scene_viewport ()
@@ -303,8 +318,8 @@ void Lumeview::update_scene_viewport ()
         sceneVP = render::Viewport (0, 0, 1, 1);
     }
     
-    m_arcBallControl.set_viewport (sceneVP);
     m_camera->set_viewport (sceneVP);
+    m_lastCameraMoveTarget.set_viewport (sceneVP);
 }
 
 }//	end of namespace lumeview

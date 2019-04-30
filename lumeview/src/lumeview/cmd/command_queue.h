@@ -62,6 +62,19 @@ public:
                m_runningCommand == nullptr;
     }
 
+    void cancel_all ()
+    {
+        if (m_runningCommand != nullptr) {
+            m_runningCommand->cancel ();
+        }
+        m_runningCommand = nullptr;
+        while (!m_commandQueue.empty ())
+        {
+            m_commandQueue.front ()->cancel ();
+            m_commandQueue.pop ();
+        }
+    }
+
     /** If no command is currently running, the next valid command from the queue will be run.
         Canceled or invalid commands will be removed from the top of the queue until a
         command is found which is ready.
