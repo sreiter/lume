@@ -35,7 +35,6 @@
 
 #include <imgui/imgui.h>
 
-// #include "log.h"
 #include <lumeview/lumeview.h>
 #include <lumeview/lumeview_error.h>
 #include <lumeview/gui/imgui_binding.h>
