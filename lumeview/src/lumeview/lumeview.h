@@ -34,6 +34,7 @@
 #include <lumeview/scene/node.h>
 #include <lumeview/cmd/command.h>
 #include <lumeview/cmd/command_queue.h>
+#include <lumeview/cmd/camera/interpolate.h>
 
 namespace lumeview {
 
@@ -63,6 +64,8 @@ public:
 
     std::shared_ptr<render::Camera> camera ();
 
+    void schedule_camera_command (std::shared_ptr <cmd::Command> command);
+
     void move_camera (const render::Camera& to, const double duration);
 
 private:
@@ -73,8 +76,8 @@ private:
 
 	WindowEventListener* m_imguiListener;
 
-    std::shared_ptr<render::Camera> m_camera;
-    render::Camera                  m_lastCameraMoveTarget;
+    std::shared_ptr <render::Camera>           m_camera;
+    std::shared_ptr <cmd::camera::Interpolate> m_cameraInterpolateCommand;
 	ArcBallControl		            m_arcBallControl;
     scene::Node                     m_scene;
 

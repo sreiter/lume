@@ -65,12 +65,12 @@ public:
     void cancel_all ()
     {
         if (m_runningCommand != nullptr) {
-            m_runningCommand->cancel ();
+            m_runningCommand->canceled ();
         }
         m_runningCommand = nullptr;
         while (!m_commandQueue.empty ())
         {
-            m_commandQueue.front ()->cancel ();
+            m_commandQueue.front ()->canceled ();
             m_commandQueue.pop ();
         }
     }
@@ -145,7 +145,7 @@ private:
         m_commandQueue.pop ();
 
         const auto status = m_runningCommand->status ();
-        if (status != Command::Status::Ready &&
+        if (status != Command::Status::Scheduled &&
             status != Command::Status::Preparing)
         {
             assert (!"Command in invalid state encountered on front of the command queue.");

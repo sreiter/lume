@@ -31,6 +31,8 @@
 namespace lumeview::cmd
 {
 
+class CommandQueue;
+
 class Command
 {
 public:
@@ -42,7 +44,8 @@ public:
 
     enum class Status
     {
-        Ready,
+        None,
+        Scheduled,
         Preparing,
         Running,
         Yield,
@@ -77,21 +80,23 @@ public:
     {
         Status currentStatus = status ();
 
-        if (currentStatus == Status::Canceled) {
+        if (currentStatus == Status::None ||
+            currentStatus == Status::Canceled)
+        {
             return;
         }
 
-        assert (currentStatus == Status::Ready ||
+        assert (currentStatus == Status::Scheduled ||
                 currentStatus == Status::Preparing ||
                 currentStatus == Status::Yield);
 
-        if (currentStatus == Status::Ready) {
+        if (currentStatus == Status::Scheduled) {
             currentStatus = set_status (Status::Preparing);
         }
         
         if (currentStatus == Status::Preparing) {
             if (on_prepare () != PrepareResult::Done) {
-                // the command is not ready to execute yet.
+                // the command is not Scheduled to execute yet.
                 // It may be shared between multiple command queues.
                 return;
             }
@@ -109,28 +114,27 @@ public:
         }
     }
 
-    void cancel ()
-    {
-        if (status () != Status::Canceled)
-        {
-            set_status (Status::Canceled);
-            on_cancel ();
-        }
-    }
-
     Status status () const
     {
         return m_status.load ();
     }
 
-    virtual void scheduled ()       {}
+    inline bool is_executing ()
+    {
+        auto const currentStatus = status ();
+        return currentStatus == Status::Running ||
+               currentStatus == Status::Yield;
+    }
 
 protected:
-    virtual PrepareResult on_prepare ()       {return PrepareResult::Done;}
-    virtual RunResult     on_run     ()       = 0;
-    virtual void          on_cancel  ()       {}
+    virtual void          on_scheduled ()     {}
+    virtual PrepareResult on_prepare   ()     {return PrepareResult::Done;}
+    virtual RunResult     on_run       ()     = 0;
+    virtual void          on_cancel    ()     {}
 
 private:
+    friend class CommandQueue;
+
     void runner  ()
     {
         assert (status () == Status::Preparing ||
@@ -157,8 +161,31 @@ private:
         return status;
     }
 
+    void canceled ()
+    {
+        if (status () != Status::Canceled)
+        {
+            set_status (Status::Canceled);
+            on_cancel ();
+        }
+    }
+
+    void scheduled ()
+    {
+        auto const currentStatus = status ();
+
+        if (currentStatus == Status::Running ||
+            currentStatus == Status::Yield)
+        {
+            canceled ();
+        }
+
+        set_status (Status::Scheduled);
+        on_scheduled ();
+    }
+
 private:
-    std::atomic <Status> m_status       {Status::Ready};
+    std::atomic <Status> m_status       {Status::None};
     ExecutionMode        m_executionMode;
 };
 

@@ -39,6 +39,9 @@
 #include <lumeview/lumeview_error.h>
 #include <lumeview/cmd/camera/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
+
+#include <iostream> // debugging
+
 namespace
 {
 
@@ -108,6 +111,7 @@ bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
 
 Lumeview::Lumeview () :
     m_camera (std::make_shared <render::Camera> ()),
+    m_cameraInterpolateCommand (std::make_shared<cmd::camera::Interpolate> ()),
 	m_guiShowScene (true),
 	m_guiShowLog (true),
 	m_guiShowDemo (false)
@@ -140,7 +144,6 @@ void Lumeview::mouse_button (int button, int action, int mods)
     }
 }
 
-
 void Lumeview::mouse_move (const glm::vec2& c)
 {
 	base_t::mouse_move (c);
@@ -148,7 +151,7 @@ void Lumeview::mouse_move (const glm::vec2& c)
 	m_imguiListener->mouse_move (c);
 
 	if(!ImGui::GetIO().WantCaptureMouse) {
-		auto newCamera = m_arcBallControl.mouse_move (m_lastCameraMoveTarget, c);
+		auto newCamera = m_arcBallControl.mouse_move (*m_camera, c);
         if (newCamera) {
             move_camera (*newCamera, 0.0);
         }
@@ -162,7 +165,12 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
 	m_imguiListener->mouse_scroll (o);
 
 	if(!ImGui::GetIO().WantCaptureMouse) {
-		auto newCamera = m_arcBallControl.mouse_scroll (m_lastCameraMoveTarget, o);
+        auto const& sourceState = m_cameraInterpolateCommand->is_executing ()
+                                ? m_cameraInterpolateCommand->target_state ()
+                                : *m_camera;
+                                
+		auto newCamera = m_arcBallControl.mouse_scroll (sourceState, o);
+
         if (newCamera) {
             move_camera (*newCamera, 0.1);
         }
@@ -287,6 +295,11 @@ std::shared_ptr<render::Camera> Lumeview::camera ()
     return m_camera;
 }
 
+void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> command)
+{
+    m_cameraCommandQueue.enqueue (std::move (command));
+}
+
 void Lumeview::move_camera (const render::Camera& to, const double duration)
 {
     m_cameraCommandQueue.cancel_all ();
@@ -295,11 +308,9 @@ void Lumeview::move_camera (const render::Camera& to, const double duration)
     }
     else
     {
-        m_cameraCommandQueue.enqueue (
-            std::make_shared <cmd::camera::Interpolate> (
-                m_camera, *m_camera, to, duration));
+        m_cameraInterpolateCommand->set_parameters (m_camera, *m_camera, to, duration);
+        schedule_camera_command (m_cameraInterpolateCommand);
     }
-    m_lastCameraMoveTarget = to;
 }
 
 void Lumeview::update_scene_viewport ()
@@ -319,7 +330,6 @@ void Lumeview::update_scene_viewport ()
     }
     
     m_camera->set_viewport (sceneVP);
-    m_lastCameraMoveTarget.set_viewport (sceneVP);
 }
 
 }//	end of namespace lumeview

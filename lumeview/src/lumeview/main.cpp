@@ -158,8 +158,8 @@ int main (int argc, char** argv)
         // lumeview->camera ().run (blocker);
         // lumeview->camera ().run (std::make_shared <cmd::camera::CenterNode> (lumeview->scene ()));
 
-        // lumeview->schedule_camera_command (
-        //     std::make_shared <cmd::camera::FocusNodes> (lumeview->camera (), nodes, 0.5));
+        lumeview->schedule_camera_command (
+            std::make_shared <cmd::camera::FocusNodes> (lumeview->camera (), nodes, 0.5));
 
         // lumeview->center_scene ();
 

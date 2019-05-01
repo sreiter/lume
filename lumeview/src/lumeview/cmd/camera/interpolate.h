@@ -63,6 +63,9 @@ public:
         m_duration    = seconds_t (duration);
     }
 
+    const camera_t& source_state () const   {return m_sourceState;}
+    const camera_t& target_state () const   {return m_targetState;}
+
 protected:
     PrepareResult on_prepare () override
     {
