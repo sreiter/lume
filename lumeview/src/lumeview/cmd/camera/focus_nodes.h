@@ -49,14 +49,14 @@ public:
     {
     }
 
-    PrepareResult on_prepare   () override
+    void on_prepare () override
     {
         std::shared_ptr <camera_t> camera (m_camera);
 
         if (camera == nullptr ||
             m_nodes.empty ())
         {
-            return PrepareResult::Done;
+            return;
         }
 
         auto targetState = *camera;
@@ -71,7 +71,7 @@ public:
 
         base_t::set_parameters (camera, *camera, targetState, m_duration);
 
-        return base_t::on_prepare ();
+        base_t::on_prepare ();
     }
 
 private:

@@ -67,10 +67,9 @@ public:
     const camera_t& target_state () const   {return m_targetState;}
 
 protected:
-    PrepareResult on_prepare () override
+    void on_prepare () override
     {
         m_startTime = clock_t::now ();
-        return PrepareResult::Done;
     }
 
     RunResult on_run () override

@@ -29,28 +29,27 @@
 namespace lumeview::cmd
 {
 
-class Block : SynchronousCommand
+class Barrier : SynchronousCommand
 {
 public:
-    Block  () = default;
+    Barrier  () = default;
 
-    void scheduled () override
+    void on_scheduled () override
     {
         ++m_unpreparedInstances;
     }
 
-    void canceled  () override
+    void on_canceled  () override
     {
         --m_unpreparedInstances;
         assert (m_unpreparedInstances >= 0);
     }
 
 protected:
-    PrepareResult on_prepare () override
+    void on_prepare () override
     {
         --m_unpreparedInstances;
         assert (m_unpreparedInstances >= 0);
-        return PrepareResult::Done;
     }
 
     RunResult on_run () override

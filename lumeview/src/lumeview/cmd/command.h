@@ -53,12 +53,6 @@ public:
         Canceled
     };
 
-    enum class PrepareResult
-    {
-        InProgress,
-        Done
-    };
-
     enum class RunResult
     {
         Done,
@@ -92,14 +86,7 @@ public:
 
         if (currentStatus == Status::Scheduled) {
             currentStatus = set_status (Status::Preparing);
-        }
-        
-        if (currentStatus == Status::Preparing) {
-            if (on_prepare () != PrepareResult::Done) {
-                // the command is not Scheduled to execute yet.
-                // It may be shared between multiple command queues.
-                return;
-            }
+            on_prepare ();
         }
         else if (currentStatus != Status::Yield) {
             assert (!"Invalid status encountered in 'Command::run' method");
@@ -127,10 +114,10 @@ public:
     }
 
 protected:
-    virtual void          on_scheduled ()     {}
-    virtual PrepareResult on_prepare   ()     {return PrepareResult::Done;}
-    virtual RunResult     on_run       ()     = 0;
-    virtual void          on_cancel    ()     {}
+    virtual void      on_scheduled ()     {}
+    virtual void      on_prepare   ()     {}
+    virtual RunResult on_run       ()     = 0;
+    virtual void      on_canceled  ()     {}
 
 private:
     friend class CommandQueue;
@@ -166,7 +153,7 @@ private:
         if (status () != Status::Canceled)
         {
             set_status (Status::Canceled);
-            on_cancel ();
+            on_canceled ();
         }
     }
 
