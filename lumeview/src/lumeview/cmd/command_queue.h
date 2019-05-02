@@ -105,7 +105,8 @@ public:
                 // todo: call 'apply_results' on m_runningCommand
             }
 
-            assert (status != Command::Status::Ready);
+            assert (status != Command::Status::None &&
+                    status != Command::Status::Scheduled);
 
             m_runningCommand = nullptr;
         }
