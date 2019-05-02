@@ -175,6 +175,35 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
     }
 }
 
+std::shared_ptr<render::Camera> Lumeview::camera ()
+{
+    return m_camera;
+}
+
+void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> command)
+{
+    m_cameraCommandQueue.enqueue (std::move (command));
+}
+
+void Lumeview::move_camera (const render::Camera& to, const double duration)
+{
+    // if the interpolation command is currently running, we will tick it once more, so that
+    // the camera is actually moving before the interpolation is cancelled again.
+    if (m_cameraInterpolateCommand->is_executing ()) {
+        m_cameraCommandQueue.tick ();
+    }
+    
+    m_cameraCommandQueue.cancel_all ();
+    if (duration <= 0) {
+        *m_camera = to;
+    }
+    else
+    {
+        m_cameraInterpolateCommand->set_parameters (m_camera, *m_camera, to, duration);
+        schedule_camera_command (m_cameraInterpolateCommand);
+    }
+}
+
 void Lumeview::set_viewport (const render::Viewport& vp)
 {
 	base_t::set_viewport (vp);
@@ -286,29 +315,6 @@ void Lumeview::render ()
     m_scene.render (*m_camera);
 
 	lumeview::ImGui_Display();
-}
-
-std::shared_ptr<render::Camera> Lumeview::camera ()
-{
-    return m_camera;
-}
-
-void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> command)
-{
-    m_cameraCommandQueue.enqueue (std::move (command));
-}
-
-void Lumeview::move_camera (const render::Camera& to, const double duration)
-{
-    m_cameraCommandQueue.cancel_all ();
-    if (duration <= 0) {
-        *m_camera = to;
-    }
-    else
-    {
-        m_cameraInterpolateCommand->set_parameters (m_camera, *m_camera, to, duration);
-        schedule_camera_command (m_cameraInterpolateCommand);
-    }
 }
 
 void Lumeview::update_scene_viewport ()
