@@ -70,14 +70,14 @@ public:
         set_status (cmd.status ());
     }
 
-    void run ()
+    std::future <void> run ()
     {
         Status currentStatus = status ();
 
         if (currentStatus == Status::None ||
             currentStatus == Status::Canceled)
         {
-            return;
+            return {};
         }
 
         assert (currentStatus == Status::Scheduled ||
@@ -94,11 +94,13 @@ public:
 
 
         if (m_executionMode == ExecutionMode::Async) {
-          std::async (std::launch::async, &Command::runner, this);
+          return std::async (std::launch::async, &Command::runner, this);
         }
         else {
           runner ();
         }
+
+        return {};
     }
 
     Status status () const

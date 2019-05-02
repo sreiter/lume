@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <queue>
+#include <future>
 #include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/cmd/command.h>
 
@@ -91,7 +92,7 @@ public:
 
             if (status == Command::Status::Yield)
             {
-                m_runningCommand->run ();
+                m_runningCommandFuture = m_runningCommand->run ();
                 return;
             }
 
@@ -136,6 +137,12 @@ private:
 
     void run_next_command ()
     {
+        assert (m_runningCommand == nullptr ||
+                m_runningCommand->executing () == false);
+
+        assert (m_runningCommandFuture.valid () == false ||
+                m_runningCommandFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+
         pop_invalid_commands ();
 
         if (empty ()) {
@@ -154,12 +161,13 @@ private:
             return;
         }
 
-        m_runningCommand->run ();
+        m_runningCommandFuture = m_runningCommand->run ();
     }
 
 private:
     std::queue <command_ptr_t> m_commandQueue;
     command_ptr_t              m_runningCommand;
+    std::future <void>         m_runningCommandFuture;
 };
 
 }// end of namespace lumeview::cmd

@@ -29,6 +29,7 @@
 
 namespace
 {
+    // We use a map here so that we can set the value to nullptr without affecting an ongoing iteration.
     std::map <lumeview::cmd::CommandQueue*, lumeview::cmd::CommandQueue*> s_activeQueues;
     std::vector <lumeview::cmd::CommandQueue*>                            s_addedQueues;
     std::vector <lumeview::cmd::CommandQueue*>                            s_removedQueues;
@@ -67,9 +68,9 @@ void ActiveCommandQueues::add (CommandQueue* queue)
 
 void ActiveCommandQueues::remove (CommandQueue* queue)
 {
-    auto const i = s_activeQueues.find (queue);
-    if (i != s_activeQueues.end ()) {
-        i->second = nullptr;
+    auto const iter = s_activeQueues.find (queue);
+    if (iter != s_activeQueues.end ()) {
+        iter->second = nullptr;
     }
 
     s_removedQueues.push_back (queue);

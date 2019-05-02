@@ -134,11 +134,7 @@ int main (int argc, char** argv)
         g_lumeview = lumeview;
 
     //  load specified meshes
-
-        // scheduling a command executes the 'scheduled' callback.
-        // The blocker increases its 'scheduled' counter with each schedule and decreases it
-        // with each run.
-        // auto blocker = std::make_shared <cmd::Blocker> ();
+        // auto barrier = std::make_shared <cmd::Barrier> ();
         std::vector <std::shared_ptr <scene::Node>> nodes;
 
         if (argc >= 2) {
@@ -146,22 +142,13 @@ int main (int argc, char** argv)
                 auto node = std::make_shared <scene::Node> (std::make_unique <scene::MeshContent> (argv [i]));
                 lumeview->scene ().add_child (node);
                 nodes.emplace_back (std::move (node));
-                // auto meshContent = std::make_unique <scene::MeshContent> ();
-                // meshContent->run (std::make_shared <cmd::mesh::LoadFile> (argv [i]));
-                // meshContent->run (blocker);
-                // lumeview->scene ().add_child (std::move (meshContent));
+                // meshContent->schedule (barrier);
             }
         }
 
-        // schedule and run are executed directly after each other. So unless a blocker is still
-        // scheduled, the next command can be started immediately.
-        // lumeview->camera ().run (blocker);
-        // lumeview->camera ().run (std::make_shared <cmd::camera::CenterNode> (lumeview->scene ()));
-
+        // lumeview->schedule_camera_command (barrier);
         lumeview->schedule_camera_command (
             std::make_shared <cmd::camera::FocusNodes> (lumeview->camera (), nodes, 0.5));
-
-        // lumeview->center_scene ();
 
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);

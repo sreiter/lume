@@ -40,8 +40,6 @@
 #include <lumeview/cmd/camera/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
 
-#include <iostream> // debugging
-
 namespace
 {
 
