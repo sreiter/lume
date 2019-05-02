@@ -22,13 +22,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <set>
+#include <map>
+#include <vector>
 #include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/cmd/command_queue.h>
 
 namespace
 {
-    std::set <lumeview::cmd::CommandQueue*> s_activeQueues;
+    std::map <lumeview::cmd::CommandQueue*, lumeview::cmd::CommandQueue*> s_activeQueues;
+    std::vector <lumeview::cmd::CommandQueue*>                            s_addedQueues;
+    std::vector <lumeview::cmd::CommandQueue*>                            s_removedQueues;
 }
 
 namespace lumeview::cmd
@@ -36,19 +39,40 @@ namespace lumeview::cmd
 
 void ActiveCommandQueues::tick ()
 {
-    for (auto queue : s_activeQueues) {
-        queue->tick ();
+    for (auto queue : s_removedQueues) {
+        s_activeQueues.erase (queue);
+    }
+    s_removedQueues.clear ();
+
+    for (auto queue : s_addedQueues) {
+        s_activeQueues.insert (std::make_pair (queue, queue));
+    }
+    s_addedQueues.clear ();
+
+    if (s_activeQueues.empty ()) {
+        return;
+    }
+    
+    for (auto entry : s_activeQueues) {
+        if (entry.second != nullptr) {
+            entry.second->tick ();
+        }
     }
 }
 
 void ActiveCommandQueues::add (CommandQueue* queue)
 {
-    s_activeQueues.insert (queue);
+    s_addedQueues.push_back (queue);
 }
 
 void ActiveCommandQueues::remove (CommandQueue* queue)
 {
-    s_activeQueues.erase (queue);
+    auto const i = s_activeQueues.find (queue);
+    if (i != s_activeQueues.end ()) {
+        i->second = nullptr;
+    }
+
+    s_removedQueues.push_back (queue);
 }
 
 }// end of namespace lumeview::cmd
