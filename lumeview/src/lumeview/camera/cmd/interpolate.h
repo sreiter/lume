@@ -26,16 +26,16 @@
 
 #include <chrono>
 #include <lumeview/cmd/command.h>
-#include <lumeview/render/camera.h>
+#include <lumeview/camera/camera.h>
 #include <lumeview/util/shapes.h>
 
-namespace lumeview::cmd::camera
+namespace lumeview::camera::cmd
 {
 
-class Interpolate : public SynchronousCommand
+class Interpolate : public lumeview::cmd::SynchronousCommand
 {
 public:
-    using camera_t = render::Camera;
+    using camera_t = camera::Camera;
 
 public:
     Interpolate ()

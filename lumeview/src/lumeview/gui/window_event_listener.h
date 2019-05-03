@@ -32,7 +32,7 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-#include <lumeview/render/viewport.h>
+#include <lumeview/camera/viewport.h>
 
 namespace lumeview {
 
@@ -80,8 +80,8 @@ public:
   	glm::vec2 mouse_button_down_pos (int button) const;
 
 //	window
-  	virtual void set_viewport (const render::Viewport& vp);
-  	virtual const render::Viewport& viewport () const;
+  	virtual void set_viewport (const camera::Viewport& vp);
+  	virtual const camera::Viewport& viewport () const;
 
 //	keyboard
   	virtual void key (int key, int scancode, int action, int mods);
@@ -99,7 +99,7 @@ private:
 	};
 
 	glm::vec2					m_cursorPos;
-	render::Viewport  			m_viewport;
+	camera::Viewport  			m_viewport;
 	std::vector<MouseBtnInfo>	m_mouseBtnInfo;
 };
 

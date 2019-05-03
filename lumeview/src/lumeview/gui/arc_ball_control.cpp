@@ -29,7 +29,7 @@
 namespace lumeview
 {
 
-using namespace render;
+using namespace camera;
 
 std::optional <Camera> ArcBallControl::mouse_button (const Camera& currentCamera, int button, int action, int mods)
 {

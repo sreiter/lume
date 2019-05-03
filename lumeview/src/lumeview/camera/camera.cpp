@@ -29,11 +29,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <lumeview/camera/camera.h>
 #include <lumeview/math/vec_math.h>
 #include <lumeview/lumeview_error.h>
-#include <lumeview/render/camera.h>
 
-namespace lumeview::render
+namespace lumeview::camera
 {
 
 Camera Camera::lerp (const Camera& from, const Camera& to, float ia)
@@ -238,5 +238,5 @@ void Camera::center_sphere (const util::FSphere& sphere)
     m_scale = glm::vec3 (3.f * sphere.radius ());
 }
 
-}// end of namespace lumeview
+}// end of namespace lumeview::camera
 

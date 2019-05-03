@@ -115,7 +115,7 @@ const Content& Node::content () const
     return *m_content;
 }
 
-void Node::render (const render::Camera& camera)
+void Node::render (const camera::Camera& camera)
 {
     traverse ([&camera](auto& node)
               {

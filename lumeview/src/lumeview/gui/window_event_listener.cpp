@@ -31,7 +31,7 @@ using namespace std;
 namespace lumeview
 {
 
-using namespace render;
+using namespace camera;
 
 WindowEventListener::MouseBtnInfo::MouseBtnInfo () :
 		downPos (0),

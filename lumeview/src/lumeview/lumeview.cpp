@@ -37,7 +37,7 @@
 
 #include <lumeview/lumeview.h>
 #include <lumeview/lumeview_error.h>
-#include <lumeview/cmd/camera/interpolate.h>
+#include <lumeview/camera/cmd/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
 
 namespace
@@ -108,8 +108,8 @@ bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
 }
 
 Lumeview::Lumeview () :
-    m_camera (std::make_shared <render::Camera> ()),
-    m_cameraInterpolateCommand (std::make_shared<cmd::camera::Interpolate> ()),
+    m_camera (std::make_shared <camera::Camera> ()),
+    m_cameraInterpolateCommand (std::make_shared<camera::cmd::Interpolate> ()),
 	m_guiShowScene (true),
 	m_guiShowLog (true),
 	m_guiShowDemo (false)
@@ -175,7 +175,7 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
     }
 }
 
-std::shared_ptr<render::Camera> Lumeview::camera ()
+std::shared_ptr<camera::Camera> Lumeview::camera ()
 {
     return m_camera;
 }
@@ -185,7 +185,7 @@ void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> command)
     m_cameraCommandQueue.enqueue (std::move (command));
 }
 
-void Lumeview::move_camera (const render::Camera& to, const double duration)
+void Lumeview::move_camera (const camera::Camera& to, const double duration)
 {
     // if the interpolation command is currently running, we will tick it once more, so that
     // the camera is actually moving before the interpolation is cancelled again.
@@ -204,7 +204,7 @@ void Lumeview::move_camera (const render::Camera& to, const double duration)
     }
 }
 
-void Lumeview::set_viewport (const render::Viewport& vp)
+void Lumeview::set_viewport (const camera::Viewport& vp)
 {
 	base_t::set_viewport (vp);
 
@@ -322,7 +322,7 @@ void Lumeview::update_scene_viewport ()
     const auto vp       = viewport ();
     const auto& offsets = m_sceneViewportOffsets;
 
-    render::Viewport sceneVP (static_cast <int> (vp.x ()       + offsets.m_left),
+    camera::Viewport sceneVP (static_cast <int> (vp.x ()       + offsets.m_left),
                               static_cast <int> (vp.y ()       + offsets.m_top),
                               static_cast <int> (vp.width ()   - (offsets.m_left + offsets.m_right)),
                               static_cast <int> (vp.height ()  - (offsets.m_top  + offsets.m_bottom)));
@@ -330,7 +330,7 @@ void Lumeview::update_scene_viewport ()
     if (sceneVP.width  () <= 0 ||
         sceneVP.height () <= 0)
     {
-        sceneVP = render::Viewport (0, 0, 1, 1);
+        sceneVP = camera::Viewport (0, 0, 1, 1);
     }
     
     m_camera->set_viewport (sceneVP);

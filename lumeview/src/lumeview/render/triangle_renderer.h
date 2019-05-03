@@ -27,7 +27,7 @@
 #include <lume/array_annex.h>
 #include <lume/mesh.h>
 #include <lumeview/render/buffer.h>
-#include <lumeview/render/camera.h>
+#include <lumeview/camera/camera.h>
 #include <lumeview/render/shader.h>
 #include <lumeview/render/vertex_array_object.h>
 
@@ -70,7 +70,7 @@ public:
         m_vertexArrayObject.bind_to_stage (m_vertices, 0);
     }
 
-    void render (const Camera& camera)
+    void render (const camera::Camera& camera)
     {
         if (!m_shader) {
             init_shader ();

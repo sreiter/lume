@@ -28,7 +28,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
-#include <lumeview/render/camera.h>
+#include <lumeview/camera/camera.h>
 #include <lumeview/scene/content.h>
 #include <lumeview/util/shapes.h>
 
@@ -57,7 +57,7 @@ public:
     Content& content ();
     const Content& content () const;
 
-    void render (const render::Camera& camera);
+    void render (const camera::Camera& camera);
     std::optional <util::FBox> bounding_box ();
     void do_imgui ();
 

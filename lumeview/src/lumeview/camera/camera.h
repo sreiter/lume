@@ -32,10 +32,10 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <lumeview/render/viewport.h>
+#include <lumeview/camera/viewport.h>
 #include <lumeview/util/shapes.h>
 
-namespace lumeview::render
+namespace lumeview::camera
 {
 
 class Camera {
@@ -97,4 +97,4 @@ class Camera {
     glm::vec2 m_zClipDists;
 };
 
-}// end of namespace lumeview
+}// end of namespace lumeview::camera

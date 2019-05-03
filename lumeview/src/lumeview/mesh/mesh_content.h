@@ -24,46 +24,34 @@
 
 #pragma once
 
-#include <glm/vec4.hpp>
+#include <lume/mesh.h>
+#include <lumeview/cmd/command_queue.h>
+#include <lumeview/render/triangle_renderer.h>
+#include <lumeview/scene/content.h>
+#include <lumeview/util/shapes.h>
 
-namespace lumeview::render
+namespace lumeview::mesh
 {
 
-/** Rendering area in window coordinates.
-    - x, y: lower left corner of the viewport rectangle.
-    - width, height: width and height of the viewport rectangle.
-*/
-class Viewport
+class MeshContent : public scene::Content
 {
 public:
-    Viewport()
-        : m_x (0), m_y (0), m_width (0), m_height (0)
-    {}
+    MeshContent () = default;
+    MeshContent (std::string filename);
 
-    Viewport(int x, int y, int width, int height)
-        : m_x (x), m_y (y), m_width (width), m_height (height)
-    {}
+    const std::string& name () const override;
 
-    int x () const       {return m_x;}
-    int y () const       {return m_y;}
-    int width () const   {return m_width;}
-    int height () const  {return m_height;}
+    bool has_imgui () const override;
+    void do_imgui () override;
+    void render (const camera::Camera& camera) override;
+    std::optional <util::FBox> bounding_box () const override;
 
-    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
-    
-    void from_ivec4 (const glm::ivec4& v) 
-    {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
-    }
-    
 private:
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
+    std::shared_ptr <lume::Mesh> m_mesh;
+    util::FBox                   m_boundingBox;
+    std::string                  m_filename;
+    render::TriangleRenderer     m_renderer;
+    cmd::CommandQueue            m_commandQueue;
 };
 
-}//    end of namespace lumeview
+}// end of namespace lumeview::mesh

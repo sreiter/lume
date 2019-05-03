@@ -30,11 +30,11 @@
 #include <memory>
 #include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/gui/window_event_listener.h>
-#include <lumeview/render/camera.h>
+#include <lumeview/camera/camera.h>
 #include <lumeview/scene/node.h>
 #include <lumeview/cmd/command.h>
 #include <lumeview/cmd/command_queue.h>
-#include <lumeview/cmd/camera/interpolate.h>
+#include <lumeview/camera/cmd/interpolate.h>
 
 namespace lumeview {
 
@@ -51,7 +51,7 @@ public:
   	void mouse_move (const glm::vec2& c) override;
   	void mouse_scroll (const glm::vec2& o) override;
 
-  	void set_viewport (const render::Viewport& vp) override;
+  	void set_viewport (const camera::Viewport& vp) override;
 
   	void key (int key, int scancode, int action, int mods) override;
   	void character (unsigned int c) override;
@@ -62,11 +62,11 @@ public:
 
   	void render ();
 
-    std::shared_ptr<render::Camera> camera ();
+    std::shared_ptr<camera::Camera> camera ();
 
     void schedule_camera_command (std::shared_ptr <cmd::Command> command);
 
-    void move_camera (const render::Camera& to, const double duration);
+    void move_camera (const camera::Camera& to, const double duration);
 
 private:
     void update_scene_viewport ();
@@ -76,8 +76,8 @@ private:
 
 	WindowEventListener* m_imguiListener;
 
-    std::shared_ptr <render::Camera>           m_camera;
-    std::shared_ptr <cmd::camera::Interpolate> m_cameraInterpolateCommand;
+    std::shared_ptr <camera::Camera>           m_camera;
+    std::shared_ptr <camera::cmd::Interpolate> m_cameraInterpolateCommand;
 	ArcBallControl		            m_arcBallControl;
     scene::Node                     m_scene;
 

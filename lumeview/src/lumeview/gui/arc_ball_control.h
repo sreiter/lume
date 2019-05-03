@@ -28,7 +28,7 @@
 #include <glm/vec2.hpp>
 #include <lumeview/gui/arc_ball.h>
 #include <lumeview/gui/window_event_listener.h>
-#include <lumeview/render/camera.h>
+#include <lumeview/camera/camera.h>
 
 namespace lumeview
 {
@@ -36,9 +36,9 @@ namespace lumeview
 class ArcBallControl
 {
 public:
-    std::optional <render::Camera> mouse_button (const render::Camera& camera, int button, int action, int mods);
-    std::optional <render::Camera> mouse_move   (const render::Camera& camera, const glm::vec2& c);
-    std::optional <render::Camera> mouse_scroll (const render::Camera& camera, const glm::vec2& o);
+    std::optional <camera::Camera> mouse_button (const camera::Camera& camera, int button, int action, int mods);
+    std::optional <camera::Camera> mouse_move   (const camera::Camera& camera, const glm::vec2& c);
+    std::optional <camera::Camera> mouse_scroll (const camera::Camera& camera, const glm::vec2& o);
 
 private:
     ArcBall   m_arcBall;

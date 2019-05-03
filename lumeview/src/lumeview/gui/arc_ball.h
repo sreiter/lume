@@ -32,7 +32,7 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <lumeview/render/viewport.h>
+#include <lumeview/camera/viewport.h>
 
 namespace lumeview
 {
@@ -42,10 +42,10 @@ class ArcBall
   public:
 	ArcBall();
 
-	void set_viewport (const render::Viewport& viewport);
+	void set_viewport (const camera::Viewport& viewport);
 	void set_radius (const float radius);
 
-	const render::Viewport& viewport () const;
+	const camera::Viewport& viewport () const;
 	float radius () const;
 
 	inline const glm::mat4 rotation_matrix () const	{return glm::mat4_cast(m_rotQuat);}
@@ -75,7 +75,7 @@ class ArcBall
 	quat	m_beginDragQuat;
 	vec3	m_beginDragPos;
 
-    render::Viewport m_viewport;
+    camera::Viewport m_viewport;
 
 	vec2	m_lastMousePos;
 

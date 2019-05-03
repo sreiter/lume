@@ -32,9 +32,9 @@
 
 #include <imgui/imgui.h>
 #include <lumeview/lumeview.h>
-#include <lumeview/scene/mesh_content.h>
+#include <lumeview/mesh/mesh_content.h>
 #include <lumeview/cmd/active_command_queues.h>
-#include <lumeview/cmd/camera/focus_nodes.h>
+#include <lumeview/camera/cmd/focus_nodes.h>
 
 using namespace lumeview;
 using std::cout;
@@ -59,7 +59,7 @@ void FramebufferResized (GLFWwindow* window, int width, int height)
         g_pixelScale = glm::vec2 ((float) width / (float) winWidth,
                                   (float) height / (float) winHeight);
 
-    SPLumeview (g_lumeview)->set_viewport (render::Viewport (0, 0, width, height));
+    SPLumeview (g_lumeview)->set_viewport (camera::Viewport (0, 0, width, height));
 }
 
 void CursorPositionCallback(GLFWwindow* window, double x, double y)
@@ -139,7 +139,7 @@ int main (int argc, char** argv)
 
         if (argc >= 2) {
             for (int i = 1; i < argc; ++i) {
-                auto node = std::make_shared <scene::Node> (std::make_unique <scene::MeshContent> (argv [i]));
+                auto node = std::make_shared <scene::Node> (std::make_unique <mesh::MeshContent> (argv [i]));
                 lumeview->scene ().add_child (node);
                 nodes.emplace_back (std::move (node));
                 // meshContent->schedule (barrier);
@@ -148,7 +148,7 @@ int main (int argc, char** argv)
 
         // lumeview->schedule_camera_command (barrier);
         lumeview->schedule_camera_command (
-            std::make_shared <cmd::camera::FocusNodes> (lumeview->camera (), nodes, 0.5));
+            std::make_shared <camera::cmd::FocusNodes> (lumeview->camera (), nodes, 0.5));
 
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);

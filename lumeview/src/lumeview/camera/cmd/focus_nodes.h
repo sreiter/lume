@@ -26,17 +26,17 @@
 
 #include <memory>
 #include <vector>
-#include <lumeview/cmd/camera/interpolate.h>
+#include <lumeview/camera/cmd/interpolate.h>
 #include <lumeview/scene/node.h>
 
-namespace lumeview::cmd::camera
+namespace lumeview::camera::cmd
 {
 
 class FocusNodes : public Interpolate
 {
 public:
     using base_t        = Interpolate;
-    using camera_t      = render::Camera;
+    using camera_t      = camera::Camera;
     using node_vector_t = std::vector <std::shared_ptr <scene::Node>>;
 
 public:

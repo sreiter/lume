@@ -24,32 +24,46 @@
 
 #pragma once
 
-#include <lume/mesh.h>
-#include <lumeview/render/triangle_renderer.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
+#include <glm/vec4.hpp>
 
-namespace lumeview::scene
+namespace lumeview::camera
 {
 
-class MeshContent : public Content
+/** Rendering area in window coordinates.
+    - x, y: lower left corner of the viewport rectangle.
+    - width, height: width and height of the viewport rectangle.
+*/
+class Viewport
 {
 public:
-    MeshContent () = default;
-    MeshContent (std::string filename);
+    Viewport()
+        : m_x (0), m_y (0), m_width (0), m_height (0)
+    {}
 
-    const std::string& name () const override;
+    Viewport(int x, int y, int width, int height)
+        : m_x (x), m_y (y), m_width (width), m_height (height)
+    {}
 
-    bool has_imgui () const override;
-    void do_imgui () override;
-    void render (const render::Camera& camera) override;
-    std::optional <util::FBox> bounding_box () const override;
+    int x () const       {return m_x;}
+    int y () const       {return m_y;}
+    int width () const   {return m_width;}
+    int height () const  {return m_height;}
 
+    glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
+    
+    void from_ivec4 (const glm::ivec4& v) 
+    {
+        m_x      = v.x;
+        m_y      = v.y;
+        m_width  = v.z;
+        m_height = v.w;
+    }
+    
 private:
-    std::shared_ptr <lume::Mesh> m_mesh;
-    util::FBox                   m_boundingBox;
-    std::string                  m_filename;
-    render::TriangleRenderer     m_renderer;
+    int m_x;
+    int m_y;
+    int m_width;
+    int m_height;
 };
 
-}// end of namespace lumeview::scene
+}//    end of namespace lumeview::camera

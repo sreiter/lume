@@ -30,7 +30,7 @@
 
 namespace lumeview {
 
-using namespace render;
+using namespace camera;
 
 ArcBall::ArcBall() :
 	m_rotQuat (1.f, 0.f, 0.f, 0.f), // w = 1, rest 0

@@ -24,10 +24,10 @@
 
 #include <string>
 #include <lume/file_io.h>
-#include <lumeview/scene/mesh_content.h>
+#include <lumeview/mesh/mesh_content.h>
 #include <lumeview/widgets/mesh_contents.h>
 
-namespace lumeview::scene
+namespace lumeview::mesh
 {
 
 MeshContent::MeshContent (std::string filename)
@@ -65,7 +65,7 @@ void MeshContent::do_imgui ()
     ImGui::EndTabBar ();
 }
 
-void MeshContent::render (const render::Camera& camera)
+void MeshContent::render (const camera::Camera& camera)
 {
     m_renderer.render (camera);
 }
@@ -75,4 +75,4 @@ std::optional <util::FBox> MeshContent::bounding_box () const
     return m_boundingBox;
 }
 
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::mesh
