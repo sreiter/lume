@@ -30,7 +30,7 @@
 namespace lumeview::scene
 {
 
-Node::Node (std::unique_ptr <Content> content)
+Node::Node (std::shared_ptr <Content> content)
     : m_content (std::move (content))
 {
     if (m_content == nullptr) {
@@ -60,7 +60,7 @@ void Node::add_child (std::shared_ptr <Node> node)
     m_children.emplace_back (std::move (node));
 }
 
-void Node::add_child (std::unique_ptr <Content> content)
+void Node::add_child (std::shared_ptr <Content> content)
 {
     m_children.emplace_back (std::make_shared <Node> (std::move (content)));
 }

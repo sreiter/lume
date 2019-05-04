@@ -39,7 +39,7 @@ class Node
 {
 public:
     Node () = default;
-    Node (std::unique_ptr <Content> content);
+    Node (std::shared_ptr <Content> content);
     ~Node ();
 
     Node (const Node&) = delete;
@@ -48,7 +48,7 @@ public:
     void clear ();
 
     void add_child (std::shared_ptr <Node> node);
-    void add_child (std::unique_ptr <Content> content);
+    void add_child (std::shared_ptr <Content> content);
 
     void traverse (const std::function <void (Node&)>& callback);
     void traverse_children (const std::function <void (Node&)>& callback);
@@ -65,7 +65,7 @@ private:
     void set_parent (Node* parent);
     void remove_child (Node* child);
 
-    std::unique_ptr <Content>            m_content;
+    std::shared_ptr <Content>            m_content;
     std::vector <std::shared_ptr <Node>> m_children;
     Node*                                m_parent {nullptr};
 

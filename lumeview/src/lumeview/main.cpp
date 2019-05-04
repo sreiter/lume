@@ -32,9 +32,10 @@
 
 #include <imgui/imgui.h>
 #include <lumeview/lumeview.h>
-#include <lumeview/mesh/mesh_content.h>
-#include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/camera/cmd/focus_nodes.h>
+#include <lumeview/cmd/active_command_queues.h>
+#include <lumeview/mesh/mesh_content.h>
+#include <lumeview/mesh/cmd/load_from_file.h>
 
 using namespace lumeview;
 using std::cout;
@@ -139,16 +140,21 @@ int main (int argc, char** argv)
 
         if (argc >= 2) {
             for (int i = 1; i < argc; ++i) {
-                auto node = std::make_shared <scene::Node> (std::make_unique <mesh::MeshContent> (argv [i]));
+                auto meshContent = std::make_shared <mesh::MeshContent> (argv [i]);
+                meshContent->schedule (std::make_shared <mesh::cmd::LoadFromFile> (meshContent, argv [i]));
+                auto node = std::make_shared <scene::Node> (meshContent);
                 lumeview->scene ().add_child (node);
                 nodes.emplace_back (std::move (node));
                 // meshContent->schedule (barrier);
             }
         }
 
-        // lumeview->schedule_camera_command (barrier);
-        lumeview->schedule_camera_command (
-            std::make_shared <camera::cmd::FocusNodes> (lumeview->camera (), nodes, 0.5));
+        // if (!nodes.empty ())
+        // {
+        //     // lumeview->schedule_camera_command (barrier);
+        //     lumeview->schedule_camera_command (
+        //         std::make_shared <camera::cmd::FocusNodes> (lumeview->camera (), nodes, 0.5));
+        // }
 
         glfwSetCursorPosCallback (window, CursorPositionCallback);
         glfwSetMouseButtonCallback (window, MouseButtonCallback);

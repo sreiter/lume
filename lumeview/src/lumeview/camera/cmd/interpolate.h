@@ -74,7 +74,7 @@ protected:
 
     RunResult on_run () override
     {
-        auto camera = std::shared_ptr <camera_t> (m_camera);
+        auto camera = m_camera.lock ();
         if (camera == nullptr) {
             return RunResult::Done;
         }

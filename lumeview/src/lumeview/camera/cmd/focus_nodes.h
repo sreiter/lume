@@ -51,7 +51,7 @@ public:
 
     void on_prepare () override
     {
-        std::shared_ptr <camera_t> camera (m_camera);
+        auto camera = m_camera.lock ();
 
         if (camera == nullptr ||
             m_nodes.empty ())
@@ -60,7 +60,7 @@ public:
         }
 
         auto targetState = *camera;
-        auto const box = focus_box ();
+        auto const box = compute_focus_box ();
 
         if (box) {
             targetState.center_sphere (util::FSphere::from_box (*box));
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    std::optional <util::FBox> focus_box () const
+    std::optional <util::FBox> compute_focus_box () const
     {
         if (m_nodes.empty ()) {
             return {};

@@ -47,11 +47,16 @@ public:
     {
     }
 
+    void clear ()
+    {
+        m_numIndices = 0;
+    }
+
     void set_mesh_data (const lume::Mesh& mesh,
                         const lume::TypedAnnexKey <lume::ArrayAnnex <float>>& coordinatesKey = lume::keys::vertexCoords)
     {
-        if (!mesh.has (lume::TRIS)
-            || !mesh.has_annex (coordinatesKey))
+        if (!mesh.has (lume::TRIS) ||
+            !mesh.has_annex (coordinatesKey))
         {
             // clear ();
             return;
@@ -72,6 +77,10 @@ public:
 
     void render (const camera::Camera& camera)
     {
+        if (m_numIndices == 0) {
+            return;
+        }
+
         if (!m_shader) {
             init_shader ();
         }

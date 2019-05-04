@@ -30,49 +30,81 @@
 namespace lumeview::mesh
 {
 
-MeshContent::MeshContent (std::string filename)
-{
-    m_mesh = lume::CreateMeshFromFile (filename);
-    m_boundingBox = util::BoxFromCoords (UNPACK_DST (m_mesh->annex (lume::keys::vertexCoords)));
-    m_filename = std::move (filename);
-    m_renderer.set_mesh_data (*m_mesh);
-}
+MeshContent::MeshContent (std::string name)
+    : m_name (std::move (name))
+{}
 
 const std::string& MeshContent::name () const
 {
-    return m_filename;
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
+    return m_name;
 }
 
 bool MeshContent::has_imgui () const
 {
-    return m_mesh != nullptr;
+    return true;
 }
 
 void MeshContent::do_imgui ()
 {
-    if (!m_mesh) {
-        return;
-    }
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
 
-    ImGui::BeginTabBar (m_filename.c_str ());
-    if (ImGui::BeginTabItem ("Content"))
-    {
-        // ImGui::BeginChild ("ChildArea", ImVec2 (0, 100), true, 0);
-        widgets::MeshContents (*m_mesh, m_boundingBox);
-        // ImGui::EndChild ();
-        ImGui::EndTabItem();
+    if (m_mesh != nullptr) {
+        ImGui::BeginTabBar (m_name.c_str ());
+        if (ImGui::BeginTabItem ("Content"))
+        {
+            // ImGui::BeginChild ("ChildArea", ImVec2 (0, 100), true, 0);
+            widgets::MeshContents (*m_mesh, m_boundingBox);
+            // ImGui::EndChild ();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar ();
     }
-    ImGui::EndTabBar ();
+    else if (!m_commandQueue.empty ()) {
+        ImGui::Text ("Processing...");
+    }
 }
 
 void MeshContent::render (const camera::Camera& camera)
 {
+    if (m_updateRendering) {
+        m_updateRendering = false;
+        if (m_mesh != nullptr) {
+            m_renderer.set_mesh_data (*m_mesh);
+        }
+        else {
+            m_renderer.clear ();
+        }
+    }
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
     m_renderer.render (camera);
 }
 
 std::optional <util::FBox> MeshContent::bounding_box () const
 {
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
     return m_boundingBox;
+}
+
+void MeshContent::schedule (std::shared_ptr <lumeview::cmd::Command> cmd)
+{
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
+    m_commandQueue.enqueue (std::move (cmd));
+}
+
+void MeshContent::set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename)
+{
+    auto const box = util::BoxFromCoords (UNPACK_DST (mesh->annex (lume::keys::vertexCoords)));
+
+    std::lock_guard <std::mutex> lockGuard (m_mutex);
+
+    if (optionalFilename) {
+        m_filename = *optionalFilename;
+    }
+
+    m_mesh = mesh;
+    m_boundingBox = box;
+    m_updateRendering = true;
 }
 
 }// end of namespace lumeview::mesh

@@ -24,42 +24,36 @@
 
 #pragma once
 
-#include <mutex>
-#include <lume/mesh.h>
-#include <lumeview/cmd/command_queue.h>
-#include <lumeview/render/triangle_renderer.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
+#include <string>
+#include <lume/file_io.h>
+#include <lumeview/cmd/command.h>
+#include <lumeview/mesh/mesh_content.h>
 
-namespace lumeview::mesh
+namespace lumeview::mesh::cmd
 {
 
-class MeshContent : public scene::Content
+class LoadFromFile : public lumeview::cmd::AsynchronousCommand
 {
 public:
-    MeshContent (std::string name);
+    LoadFromFile (std::weak_ptr <MeshContent> meshContent,
+                  std::string filename)
+        : m_meshContent (std::move (meshContent))
+        , m_filename (std::move (filename))
+    {}
 
-    const std::string& name () const override;
+    RunResult on_run () override
+    {
+        std::shared_ptr <MeshContent> meshContent (m_meshContent);
+        if (meshContent != nullptr) {
+            auto mesh = lume::CreateMeshFromFile (m_filename);
+            meshContent->set_mesh (mesh, m_filename);
+        }
+        return RunResult::Done;
+    }
 
-    bool has_imgui () const override;
-    void do_imgui () override;
-    void render (const camera::Camera& camera) override;
-
-    std::optional <util::FBox> bounding_box () const override;
-
-    void schedule (std::shared_ptr <lumeview::cmd::Command> cmd);
-    
-    void set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename);
-    
 private:
-    std::shared_ptr <lume::Mesh> m_mesh;
-    util::FBox                   m_boundingBox;
-    std::string                  m_name;
-    std::string                  m_filename;
-    render::TriangleRenderer     m_renderer;
-    cmd::CommandQueue            m_commandQueue;
-    bool                         m_updateRendering {false};
-    mutable std::mutex           m_mutex;
+    std::weak_ptr <MeshContent> m_meshContent;
+    std::string                 m_filename;
 };
 
-}// end of namespace lumeview::mesh
+}// end of namespace lumeview::mesh::cmd

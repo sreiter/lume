@@ -138,7 +138,7 @@ private:
     void run_next_command ()
     {
         assert (m_runningCommand == nullptr ||
-                m_runningCommand->executing () == false);
+                m_runningCommand->is_executing () == false);
 
         assert (m_runningCommandFuture.valid () == false ||
                 m_runningCommandFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
