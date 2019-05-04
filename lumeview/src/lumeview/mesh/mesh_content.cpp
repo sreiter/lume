@@ -53,9 +53,9 @@ void MeshContent::do_imgui ()
         ImGui::BeginTabBar (m_name.c_str ());
         if (ImGui::BeginTabItem ("Content"))
         {
-            // ImGui::BeginChild ("ChildArea", ImVec2 (0, 100), true, 0);
-            widgets::MeshContents (*m_mesh, m_boundingBox);
-            // ImGui::EndChild ();
+            if (m_boundingBox) {
+                widgets::MeshContents (*m_mesh, *m_boundingBox);
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar ();

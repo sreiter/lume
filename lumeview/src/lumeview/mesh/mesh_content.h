@@ -53,7 +53,7 @@ public:
     
 private:
     std::shared_ptr <lume::Mesh> m_mesh;
-    util::FBox                   m_boundingBox;
+    std::optional <util::FBox>   m_boundingBox;
     std::string                  m_name;
     std::string                  m_filename;
     render::TriangleRenderer     m_renderer;
