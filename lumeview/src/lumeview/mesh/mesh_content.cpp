@@ -51,12 +51,7 @@ void MeshContent::do_imgui ()
 
     auto const status = this->status ();
     
-    if (status == Status::Ready) {
-        ImGui::Text ("Status: %s", GetStatusMessage (status).c_str ());
-    }
-    else {
-        ImGui::Text ("Status: %s ...", GetStatusMessage (status).c_str ());
-    }
+    ImGui::StatusText (GetStatusMessage (status).c_str (), status != Status::Ready);
 
     if (m_mesh != nullptr) {
         ImGui::BeginTabBar (m_name.c_str ());

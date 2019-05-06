@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <array>
+#include <chrono>
 #include <imgui/imgui.h>
 #include <imgui/imgui_stdlib.h>
 #include <glm/detail/qualifier.hpp>
@@ -129,6 +131,30 @@ void ReadOnly (const char* label, glm::vec <L, float, Q> v, const char* format =
         ImGui::InputFloat4(label, &v.x, format, ImGuiInputTextFlags_ReadOnly);
         break;
     }
+}
+
+void StatusText (const char* text, bool inProgress)
+{
+    std::array <char, 8> progressIndicator {' ', '[', ' ', ' ', ' ', ' ', ']', 0};
+    if (inProgress)
+    {
+        using namespace std::chrono;
+        static auto const firstTime = system_clock::now ();
+        auto timeEllapsed = duration_cast <milliseconds> (system_clock::now () - firstTime);
+
+        int index = (timeEllapsed.count () / 150) % 6;
+        if (index > 3) {
+            index = 6 - index;
+        }
+
+        progressIndicator [index + 2] = '=';
+    }
+    else
+    {
+        progressIndicator [0] = 0;
+    }
+
+    ImGui::Text ("Status: %s%s", text, progressIndicator.data ());
 }
 
 }// end of namespace ImGui
