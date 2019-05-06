@@ -24,9 +24,11 @@
 
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <lume/mesh.h>
 #include <lumeview/cmd/command_queue.h>
+#include <lumeview/mesh/status.h>
 #include <lumeview/render/triangle_renderer.h>
 #include <lumeview/scene/content.h>
 #include <lumeview/util/shapes.h>
@@ -51,6 +53,9 @@ public:
     
     void set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename);
     
+    void   set_status (Status const status);
+    Status status     () const;
+    
 private:
     std::shared_ptr <lume::Mesh> m_mesh;
     std::optional <util::FBox>   m_boundingBox;
@@ -60,6 +65,7 @@ private:
     cmd::CommandQueue            m_commandQueue;
     bool                         m_updateRendering {false};
     mutable std::mutex           m_mutex;
+    std::atomic <Status>         m_status {Status::Ready};
 };
 
 }// end of namespace lumeview::mesh

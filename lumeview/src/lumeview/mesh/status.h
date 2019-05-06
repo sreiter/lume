@@ -24,37 +24,23 @@
 
 #pragma once
 
+#include <map>
 #include <string>
-#include <lume/file_io.h>
-#include <lumeview/cmd/command.h>
-#include <lumeview/mesh/mesh_content.h>
 
-namespace lumeview::mesh::cmd
+namespace lumeview::mesh
 {
 
-class LoadFromFile : public lumeview::cmd::AsynchronousCommand
+enum class Status : unsigned int
 {
-public:
-    LoadFromFile (std::weak_ptr <MeshContent> meshContent,
-                  std::string filename)
-        : m_meshContent (std::move (meshContent))
-        , m_filename (std::move (filename))
-    {}
+    Ready,
+    Loading,
+    Processing,
+    ComputingBoundingBox,
+    ComputingEdges,
 
-    RunResult on_run () override
-    {
-        std::shared_ptr <MeshContent> meshContent (m_meshContent);
-        if (meshContent != nullptr) {
-            meshContent->set_status (lumeview::mesh::Status::Loading);
-            auto mesh = lume::CreateMeshFromFile (m_filename);
-            meshContent->set_mesh (mesh, m_filename);
-        }
-        return RunResult::Done;
-    }
-
-private:
-    std::weak_ptr <MeshContent> m_meshContent;
-    std::string                 m_filename;
+    NumStatusEntries    // Always last!
 };
 
-}// end of namespace lumeview::mesh::cmd
+const std::string& GetStatusMessage (Status const status);
+
+}// end of namespace lumeview::mesh

@@ -49,6 +49,15 @@ void MeshContent::do_imgui ()
 {
     std::lock_guard <std::mutex> lockGuard (m_mutex);
 
+    auto const status = this->status ();
+    
+    if (status == Status::Ready) {
+        ImGui::Text ("Status: %s", GetStatusMessage (status).c_str ());
+    }
+    else {
+        ImGui::Text ("Status: %s ...", GetStatusMessage (status).c_str ());
+    }
+
     if (m_mesh != nullptr) {
         ImGui::BeginTabBar (m_name.c_str ());
         if (ImGui::BeginTabItem ("Content"))
@@ -59,9 +68,6 @@ void MeshContent::do_imgui ()
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar ();
-    }
-    else if (!m_commandQueue.empty ()) {
-        ImGui::Text ("Processing...");
     }
 }
 
@@ -94,8 +100,9 @@ void MeshContent::schedule (std::shared_ptr <lumeview::cmd::Command> cmd)
 
 void MeshContent::set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename)
 {
+    set_status (Status::ComputingBoundingBox);
     auto const box = util::BoxFromCoords (UNPACK_DST (mesh->annex (lume::keys::vertexCoords)));
-
+    set_status (Status::Processing);
     std::lock_guard <std::mutex> lockGuard (m_mutex);
 
     if (optionalFilename) {
@@ -105,6 +112,17 @@ void MeshContent::set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <st
     m_mesh = mesh;
     m_boundingBox = box;
     m_updateRendering = true;
+    set_status (Status::Ready);
+}
+
+void MeshContent::set_status (Status const status)
+{
+    m_status.store (status);
+}
+
+Status MeshContent::status () const
+{
+    return m_status.load ();
 }
 
 }// end of namespace lumeview::mesh

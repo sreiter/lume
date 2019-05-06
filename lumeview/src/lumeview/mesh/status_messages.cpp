@@ -22,39 +22,52 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-
+#include <cassert>
 #include <string>
-#include <lume/file_io.h>
-#include <lumeview/cmd/command.h>
-#include <lumeview/mesh/mesh_content.h>
+#include <vector>
+#include <lumeview/mesh/status.h>
 
-namespace lumeview::mesh::cmd
+namespace
+{
+using Status = lumeview::mesh::Status;
+
+inline size_t Index (Status const status)
+{
+    return static_cast <size_t> (status);
+}
+
+inline size_t NumStatusEntries ()
+{
+    return Index (Status::NumStatusEntries) + 1;
+}
+
+void FillStatusMessages_EN (std::vector <std::string>& messagesOut)
+{
+    assert (messagesOut.size () >= NumStatusEntries ());
+    messagesOut [Index (Status::Ready)]                = "Ready";
+    messagesOut [Index (Status::Loading)]              = "Loading";
+    messagesOut [Index (Status::Processing)]           = "Processing";
+    messagesOut [Index (Status::ComputingBoundingBox)] = "Computing bounding box";
+    messagesOut [Index (Status::ComputingEdges)]       = "Computing edges";
+}
+
+}
+
+namespace lumeview::mesh
 {
 
-class LoadFromFile : public lumeview::cmd::AsynchronousCommand
+const std::string& GetStatusMessage (Status const status)
 {
-public:
-    LoadFromFile (std::weak_ptr <MeshContent> meshContent,
-                  std::string filename)
-        : m_meshContent (std::move (meshContent))
-        , m_filename (std::move (filename))
-    {}
-
-    RunResult on_run () override
+    static std::vector <std::string> statusMessages;
+    // static Language                  activeLanguage;
+    if (statusMessages.empty () /*|| activeLanguage != GetLanguage ()*/)
     {
-        std::shared_ptr <MeshContent> meshContent (m_meshContent);
-        if (meshContent != nullptr) {
-            meshContent->set_status (lumeview::mesh::Status::Loading);
-            auto mesh = lume::CreateMeshFromFile (m_filename);
-            meshContent->set_mesh (mesh, m_filename);
-        }
-        return RunResult::Done;
+        statusMessages.resize (NumStatusEntries ());
+        //todo: fill with correct language
+        FillStatusMessages_EN (statusMessages);
     }
 
-private:
-    std::weak_ptr <MeshContent> m_meshContent;
-    std::string                 m_filename;
-};
+    return statusMessages [Index (status)];
+}
 
-}// end of namespace lumeview::mesh::cmd
+}// end of namespace lumeview::mesh

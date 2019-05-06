@@ -45,6 +45,7 @@ set (sources
         src/lumeview/gui/window_event_listener.cpp
 
         src/lumeview/mesh/mesh_content.cpp
+        src/lumeview/mesh/status_messages.cpp
 
         src/lumeview/scene/node.cpp
 
@@ -94,4 +95,4 @@ add_definitions (-DUSE_GL_VERSION_MAJOR=${GL_VERSION_MAJOR})
 add_definitions (-DUSE_GL_VERSION_MINOR=${GL_VERSION_MINOR})
 
 # lumeview shaders
-file(COPY "shaders" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_target (copyShaders ALL COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
