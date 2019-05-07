@@ -1,6 +1,6 @@
 # lume &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.com/sreiter/lume.svg?branch=master)](https://travis-ci.com/sreiter/lume)
 ## Introduction
-**lume** (**L**ightweight **U**nstructured **ME**shes) is a *BSD* licensed C++ library for the representation of unstructured hybrid meshes (or unstructured hybrid grids).
+**lume** (**L**ightweight **U**nstructured **ME**shes) is a *BSD* licensed C++ library for the representation, modification and visualization of large unstructured hybrid meshes (or unstructured hybrid grids).
 
 Featured element types are: *Vertices, Edges, Triangles, Quadrilaterals, Tetrahedra, Pyramids, Prisms, Hexahedra*.
 The set of available element types is easily extensible.
@@ -9,10 +9,22 @@ By storing underlying data in large contiguous arrays, **lume** is especially su
 
 The underlying data format (e.g. position data, normal data, element indices), is also compatible to many other libraries, e.g., to *OpenGL*.
 
-Please have a look at https://github.com/sreiter/lumeview for a lightweight OpenGL based cross platform mesh viewer based on **lume**.
+**lumeview** provides cross platform realtime visualization of unstructured hybrid meshes. Its multithreaded design aims at fluid user interaction during all stages of the visualization.
+
+## Building lume/lumeview as a stand-alone project
+**lume** features a CMake based build system. Create a 'build' directory in the **lume** root folder and from that build directory execute, e.g.:
+
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make -j
+
+In addition to the **lume** library, the following executables will be build:
+
+    lumeview
+    lumeshell
+    lumetests
 
 ## Building lume as a part of your project
-**lume** features a CMake based build system. You can either build it as part of your project by simply adding the line
+To build **lume** as part of your project, simply adding the line
     
     add_subdirectory (lume)
 
@@ -21,16 +33,6 @@ to the CMakeLists.txt of your project. To link it to your target, please use the
     target_link_libraries (YOUR_TARGET  lume)
 
 Necessary include directories will be automatically added to your target.
-
-## Building lume as a stand-alone library
-Of course you may also build lume as a stand-alone library. To this end create a 'build' directory in the **lume** root folder and from that build directory execute, e.g.:
-
-    cmake -DCMAKE_BUILD_TYPE=Release ..
-    make -j
-
-In addition, an executable will be built which can be executed to run some tests on the lume library:
-
-    ./lume_tests
 
 ## License
 **lume** is licensed under a *2-clause BSD* license:
