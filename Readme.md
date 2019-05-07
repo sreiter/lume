@@ -9,10 +9,9 @@ By storing underlying data in large contiguous arrays, **lume** is especially su
 
 The underlying data format (e.g. position data, normal data, element indices), is also compatible to many other libraries, e.g., to *OpenGL*.
 
-## Lumeview
 **lumeview** provides cross platform realtime visualization of unstructured hybrid meshes. Its multithreaded design aims at fluid user interaction during all stages of the visualization.
 
-## Building lume/lumeview as a stand-alone library
+## Building lume/lumeview as a stand-alone project
 **lume** features a CMake based build system. Create a 'build' directory in the **lume** root folder and from that build directory execute, e.g.:
 
     cmake -DCMAKE_BUILD_TYPE=Release ..
