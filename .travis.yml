@@ -10,6 +10,7 @@ before_install:
 install: 
   # C++17
   - sudo apt-get install -qq g++-7
+  - sudo apt-get install x11-xserver-utils
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
 
 script:
