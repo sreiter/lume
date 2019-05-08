@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <glad/glad.h>  // include before other OpenGL related includes
+#include <lumeview/render/buffer.h>
 #include <lumeview/render/bind_scope.h>
 
 namespace lumeview::render
@@ -93,7 +94,7 @@ public:
     }
 
 private:
-    friend class BindScope;
+    friend class lumeview::render::BindScope <VertexArrayObject>;
 
     void bind () const
     {

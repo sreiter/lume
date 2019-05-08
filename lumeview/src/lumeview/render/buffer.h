@@ -85,7 +85,7 @@ public:
     void set_data (const Container& container, GLenum dataType, const GLint tupleSize = 1)
     {
         set_data (container.data (),
-                  container.size () * sizeof (Container::value_type),
+                  container.size () * sizeof (typename Container::value_type),
                   dataType,
                   tupleSize);
     }
@@ -123,7 +123,7 @@ public:
     GLenum data_type () const   {return m_dataType;}
     
 private:
-    friend class BindScope;
+    friend class lumeview::render::BindScope <Buffer>;
 
     void bind () const
     {

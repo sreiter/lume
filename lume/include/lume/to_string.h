@@ -41,6 +41,11 @@ inline const std::string& to_string (const std::string& s)
     return s;
 }
 
+inline std::string to_string (const char* s)
+{
+    return s;
+}
+
 template <class T>
 std::string to_string (const std::vector <T>& v) {
     std::string s ("{");

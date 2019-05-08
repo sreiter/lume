@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <lume/lume_error.h>
 #include <lumeview/util/to_string.h>
+#include <lume/lume_error.h>
 
 namespace lumeview
 {

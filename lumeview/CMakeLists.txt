@@ -90,6 +90,10 @@ target_include_directories(lumeview
 
 target_link_libraries(lumeview glfw3 ${OPENGL_LIBRARIES} lume )
 
+if (UNIX)
+    target_link_libraries(lumeview dl X11 Xcursor Xxf86vm Xrandr Xinerama)
+endif (UNIX)
+
 add_definitions (-DGLM_ENABLE_EXPERIMENTAL)
 add_definitions (-DUSE_GL_VERSION_MAJOR=${GL_VERSION_MAJOR})
 add_definitions (-DUSE_GL_VERSION_MINOR=${GL_VERSION_MINOR})
