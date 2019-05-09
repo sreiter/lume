@@ -8,10 +8,12 @@ uniform vec2 viewport = vec2 (800, 600);
 
 in VertexShader {
     vec3 viewPos;
+    vec4 vrtColor;
 } vertexShader [];
 
 out float elemLightIntensity;
 out vec3 vrtDist;
+out vec4 vrtColor;
 
 float distancePointToLine (vec2 p, vec2 a, vec2 b)
 {
@@ -41,6 +43,7 @@ void main ()
         gl_Position = gl_in[i].gl_Position;
         vrtDist = vec3 (0, 0, 0);
         vrtDist [i] = distToOpposingLine [i];
+        vrtColor = vertexShader [i].vrtColor;
         EmitVertex();
     }
 

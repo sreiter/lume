@@ -5,6 +5,7 @@ uniform vec4 wireColor = vec4 (0.1, 0.1, 0.1, 1.f);
 
 in float elemLightIntensity;
 in vec3 vrtDist;
+in vec4 vrtColor;
 out vec4 fragColor;
 
 void main ()
@@ -15,7 +16,7 @@ void main ()
                              min (smoothstep (minDist, maxDist, min (vrtDist.y, vrtDist.z)),
                                   smoothstep (minDist, maxDist, min (vrtDist.z, vrtDist.x))));
 
-    vec4 color = mix (wireColor, solidColor, solidAmount);
+    vec4 color = mix (wireColor, 15.f * vrtColor.zyxw, solidAmount);
 
     fragColor = vec4 (elemLightIntensity * color.rgb, color.a);
 }
