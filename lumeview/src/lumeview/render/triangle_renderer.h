@@ -88,6 +88,7 @@ public:
         m_shader.use ();
         m_shader.set_uniform ("view", camera.view_matrix ());
         m_shader.set_uniform ("projection", camera.projection_matrix ());
+        m_shader.set_uniform ("viewport", camera.viewport ().size_f ());
 
         auto vaoScope = m_vertexArrayObject.bind_scope ();
         auto indScope = m_indices.bind_scope ();

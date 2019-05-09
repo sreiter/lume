@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
 namespace lumeview::camera
@@ -49,6 +50,8 @@ public:
     int width () const   {return m_width;}
     int height () const  {return m_height;}
 
+    glm::ivec2 size_i ()   const    {return glm::ivec2 (m_width, m_height);}
+    glm::vec2  size_f ()   const    {return glm::vec2  (static_cast<float> (m_width), static_cast<float> (m_height));}
     glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
     
     void from_ivec4 (const glm::ivec4& v) 

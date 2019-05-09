@@ -145,6 +145,18 @@ public:
         glUniform1f(glGetUniformLocation(data().m_shaderProg, name), v);
     }
 
+    void set_uniform (const char* name, const glm::vec2& v) const
+    {
+        glUniform2fv(glGetUniformLocation(data().m_shaderProg, name),
+                     1, glm::value_ptr(v));
+    }
+
+    void set_uniform (const char* name, const glm::vec3& v) const
+    {
+        glUniform3fv(glGetUniformLocation(data().m_shaderProg, name),
+                     1, glm::value_ptr(v));
+    }
+
     void set_uniform (const char* name, const glm::vec4& v) const
     {
         glUniform4fv(glGetUniformLocation(data().m_shaderProg, name),
