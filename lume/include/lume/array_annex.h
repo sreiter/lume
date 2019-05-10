@@ -102,6 +102,8 @@ public:
 	inline const_iterator begin () const	{return m_vector.begin();}
 	inline const_iterator end () const		{return m_vector.end();}
 
+    ArithmeticTuple <T> tuple (const size_type i) {return m_vector.tuple (i);}
+    
 private:
 	TupleVector <T>	m_vector;
 };

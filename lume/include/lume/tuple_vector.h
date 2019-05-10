@@ -32,6 +32,7 @@
 #include "types.h"
 #include "annex.h"
 #include "lume_error.h"
+#include "arithmetic_tuple.h"
 
 namespace lume {
 
@@ -112,6 +113,8 @@ public:
     inline const_iterator end () const      {return m_vector.end();}
 
     inline void push_back (const T& t)      {m_vector.push_back (t);}
+
+    ArithmeticTuple <T> tuple (const size_type i) {return ArithmeticTuple <T> (m_vector.data () + i * m_tupleSize, m_tupleSize);}
 
 private:
     std::vector <T> m_vector;
