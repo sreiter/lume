@@ -196,7 +196,6 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 	index_t numInsertions = 0;
 
 	for(auto grobType : grobSet) {
-		const index_t numCorners = GrobDesc (grobType).num_corners ();
 		const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
 
 		for(auto grob : mesh.grobs (grobType)) {
@@ -210,6 +209,46 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 	return numInsertions;
 }
 
+index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
+                                 Mesh& mesh,
+                                 const GrobSet grobSet,
+                                 const index_t sideDim,
+                                 const index_t indexOffset)
+{
+    index_t numInsertions = 0;
+    index_t const startIndex = hashMapInOut.size () + indexOffset;
+    for(auto grobType : grobSet) {
+        const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
+
+        for(auto grob : mesh.grobs (grobType)) {
+            for(index_t iside = 0; iside < numSides; ++iside) {
+                auto const entry = std::make_pair (grob.side (sideDim, iside), startIndex + numInsertions);
+                const auto r = hashMapInOut.insert(entry);
+                numInsertions += static_cast<index_t> (r.second);
+            }
+        }
+    }
+
+    return numInsertions;
+}
+
+index_t InsertGrobsNumbered (GrobHashMap <index_t>& hashMapInOut,
+                             Mesh& mesh,
+                             const GrobSet grobSet,
+                             const index_t indexOffset)
+{
+    index_t numInsertions = 0;
+    index_t const startIndex = hashMapInOut.size () + indexOffset;
+    for(auto grobType : grobSet) {
+        for(auto grob : mesh.grobs (grobType)) {
+            auto const entry = std::make_pair (grob, startIndex + numInsertions);
+            const auto r = hashMapInOut.insert(entry);
+            numInsertions += static_cast<index_t> (r.second);
+        }
+    }
+
+    return numInsertions;
+}
 
 void CreateSideGrobs (Mesh& mesh, const index_t sideDim)
 {

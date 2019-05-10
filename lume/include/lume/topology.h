@@ -99,17 +99,44 @@ GrobHashMap <index_t> ComputeGrobValences (const Mesh& mesh,
 /// Returns a vector which stores at position `i` the number of `grobs` with `i` `nbrGrobs`.
 std::vector <index_t> ValenceHistogram (const Mesh& mesh, GrobSet grobs, GrobSet nbrGrobs);
 
-/// Collects all sides of the *grobs* specified by `cornerInds` and `grobType`.
-/** \note It is assumed, that `cornerInds` holds the corner indices of one or
-*			    more *grobs* of the same `grobType` in sequential order.
-* \note  `sideHashInOut is not cleared during this function. It is thus possible
+/// Collects all sides of the specified *sideDim* of the *grobs* in the specified grob set.
+/** \note  `sideHashInOut` is not cleared during this function. It is thus possible to
 *		     call this method repeatedly on different grobSets to
-*		     find all sides of a hybrid grid.*/
+*		     find all sides of a hybrid grid.
+* \returns  The number of newly inserted grobs.*/
 index_t FindUniqueSides (GrobHash& sideHashInOut,
                          Mesh& mesh,
                          const GrobSet grobSet,
                          const index_t sideDim);
 
+/// Collects all sides of the specified *sideDim* of the *grobs* in the specified grob set.
+/** The grobs are numbered in sequential order according to when they were first encountered
+* during iteration over the grob set. The index is derivied from the size of the provided
+* *hashMapInOut* at the start of the algorithm plus the provided indexOffset.
+*
+* \note  `hashMapInOut` is not cleared during this function. It is thus possible to
+*         call this method repeatedly on different grobSets to
+*         find all sides of a hybrid grid.
+* \returns  The number of newly inserted grobs.*/
+index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
+                                 Mesh& mesh,
+                                 const GrobSet grobSet,
+                                 const index_t sideDim,
+                                 const index_t indexOffset = 0);
+
+/// Inserts all *grobs* in the specified grob set into the provided *hashMapInOut*.
+/** The grobs are numbered in sequential order according to when they were first encountered
+* during iteration over the grob set. The index is derivied from the size of the provided
+* *hashMapInOut* at the start of the algorithm plus the provided indexOffset.
+*
+* \note  `hashMapInOut` is not cleared during this function. It is thus possible to
+*         call this method repeatedly on different grobSets to
+*         find all sides of a hybrid grid.
+* \returns  The number of newly inserted grobs.*/
+index_t InsertGrobsNumbered (GrobHashMap <index_t>& hashMapInOut,
+                             Mesh& mesh,
+                             const GrobSet grobSet,
+                             const index_t indexOffset = 0);
 
 template <class TIndexVector>
 void GrobHashToIndexArray (TIndexVector& indArrayInOut,
