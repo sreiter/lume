@@ -24,15 +24,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#ifndef __H__lume__vec_math_raw
-#define __H__lume__vec_math_raw
+#pragma once
 
 #include <cmath>
-#include "types.h"
+#include "lume/types.h"
 
-namespace lume {
-
+namespace lume::math::raw
+{
 
 template <class real_t>
 real_t* VecCopy (real_t* vOut, const size_t n, const real_t* v)
@@ -52,7 +50,7 @@ real_t* VecSet (real_t* vOut, const size_t n, const value_t v)
 }
 
 template <class real_t>
-real_t* VecAppend (real_t* vOut, const size_t n, const real_t* v)
+real_t* VecAddInplace (real_t* vOut, const size_t n, const real_t* v)
 {
 	for (size_t i = 0; i < n; ++i, ++vOut, ++v)
 		*vOut += *v;
@@ -68,7 +66,7 @@ real_t* VecAdd (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1
 }
 
 template <class real_t>
-real_t* VecSub (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1)
+real_t* VecSubtract (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1)
 {
 	for (size_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)
 		*vOut = *v0 - *v1;
@@ -85,7 +83,7 @@ real_t* VecScale (real_t* vOut, const size_t n, const real_t* v, const value_t s
 }
 
 template <class real_t, class value_t>
-real_t* VecScale (real_t* vInOut, const size_t n, const value_t s)
+real_t* VecScaleInplace (real_t* vInOut, const size_t n, const value_t s)
 {
 	const real_t ts = static_cast <real_t> (s);
 	for (size_t i = 0; i < n; ++i, ++vInOut)
@@ -146,7 +144,7 @@ real_t* VecNormalize (real_t* vOut, const size_t n, const real_t* v)
 }
 
 template <class real_t>
-real_t* VecNormalize (real_t* v, const size_t n)
+real_t* VecNormalizeInplace (real_t* v, const size_t n)
 {
 	const real_t l = VecLen (v, n);
 	if (l != 0) {
@@ -164,7 +162,7 @@ real_t* VecNormalize (real_t* v, const size_t n)
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupAppend (real_t* vInOut, const size_t n, const size_t ntup, const real_t* vtup)
+real_t* VecTupAddInplace (real_t* vInOut, const size_t n, const size_t ntup, const real_t* vtup)
 {
 	for(size_t i = 0; i < n; i += ntup)
 		VecAppend (vInOut + i, ntup, vtup);
@@ -196,7 +194,7 @@ real_t* VecTupAdd (real_t* vOut, const real_t* v, const size_t n, const size_t n
  * \param vtup		vector of size `ntup`
  */
 template <class real_t>
-real_t* VecTupSub (real_t* vOut, const real_t* v, const size_t n, const size_t ntup, const real_t* vtup)
+real_t* VecTupSubtract (real_t* vOut, const real_t* v, const size_t n, const size_t ntup, const real_t* vtup)
 {
 	for(size_t i = 0; i < n; i += ntup)
 		VecSub (vOut + i, ntup, v + i, vtup);
@@ -225,10 +223,10 @@ real_t* VecTupNormalize (real_t* vOut, const size_t n, const size_t ntup, const 
  * \param ntup		number of entries of one tuple
  */
 template <class real_t>
-real_t* VecTupNormalize (real_t* vInOut, const size_t n, const size_t ntup)
+real_t* VecTupNormalizeInplace (real_t* vInOut, const size_t n, const size_t ntup)
 {
 	for(size_t i = 0; i < n; i += ntup)
-		VecNormalize (vInOut + i, ntup);
+		VecNormalizeInplace (vInOut + i, ntup);
 	return vInOut;
 }
 
@@ -244,7 +242,7 @@ real_t* VecTupSum (real_t* tupOut, const real_t* v, const size_t n, const size_t
 {
 	VecSet (tupOut, ntup, 0);
 	for(size_t i = 0; i < n; i += ntup)
-		VecAppend (tupOut, ntup, v + i);
+		VecAddInplace (tupOut, ntup, v + i);
 	return tupOut;
 }
 
@@ -260,7 +258,7 @@ real_t* VecTupAverage (real_t* tupOut, const real_t* v, const size_t n, const si
 {
 	VecTupSum (tupOut, v, n, ntup);
 	if (ntup > 0 && n >= ntup)
-		VecScale (tupOut, ntup, real_t(1) / (n / ntup));
+		VecScaleInplace (tupOut, ntup, real_t(1) / (n / ntup));
 	return tupOut;
 }
 
@@ -268,16 +266,10 @@ real_t* VecTupAverage (real_t* tupOut, const real_t* v, const size_t n, const si
 template <class real_t>
 real_t* VecCross3 (real_t* vOut, const real_t* v0, const real_t* v1)
 {
-	real_t c[3];
-	c[0] = v0[1] * v1[2] - v1[1] * v0[2];
-	c[1] = v0[2] * v1[0] - v1[2] * v0[0];
-	c[2] = v0[0] * v1[1] - v1[0] * v0[1];
-	vOut[0] = c[0];
-	vOut[1] = c[1];
-	vOut[2] = c[2];
+	vOut[0] = v0[1] * v1[2] - v1[1] * v0[2];
+	vOut[1] = v0[2] * v1[0] - v1[2] * v0[0];
+	vOut[2] = v0[0] * v1[1] - v1[0] * v0[1];
 	return vOut;
 }
 
-}// end of namespace lume
-
-#endif	//__H__lume__vec_math_raw
+}

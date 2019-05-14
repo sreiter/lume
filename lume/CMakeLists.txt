@@ -40,6 +40,7 @@ set (sources
         src/lume/neighborhoods.cpp
         src/lume/neighbors.cpp
         src/lume/normals.cpp
+        src/lume/refinement.cpp
         src/lume/rim_mesh.cpp
         src/lume/subset_info_annex.cpp
         src/lume/surface_analytics.cpp

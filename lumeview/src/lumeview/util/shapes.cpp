@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <limits>
 #include <glm/gtc/type_ptr.hpp>
-#include <lume/vec_math_raw.h>
+#include <lume/math/vector_math.h>
 #include <lumeview/lumeview_error.h>
 #include <lumeview/util/shapes.h>
 
@@ -226,14 +226,14 @@ Sphere <real_t> SphereFromCoords (const real_t* coords, glm::length_t size, glm:
 //  compute center
     glm::tvec3<real_t> center (0);
     real_t* pcenter = glm::value_ptr(center);
-    VecTupAverage (pcenter, coords, size, tupleSize);
+    lume::math::raw::VecTupAverage (pcenter, coords, size, tupleSize);
 
 //  find the coordinate with the largest index
     const glm::length_t cmps = std::min<glm::length_t> (tupleSize, 3);
 
     real_t maxRadSq = 0;
     for(glm::length_t i = 0; i < size; i+=tupleSize) {
-        const real_t d = VecDistSq (pcenter, tupleSize, coords + i);
+        const real_t d = lume::math::raw::VecDistSq (pcenter, tupleSize, coords + i);
         if (d > maxRadSq)
             maxRadSq = d;
     }

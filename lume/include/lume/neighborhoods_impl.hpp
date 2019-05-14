@@ -29,6 +29,7 @@
 
 #include "neighborhoods.h"
 #include "topology.h"
+#include "lume/math/vector_math.h"
 
 namespace lume {
 namespace impl {
@@ -161,7 +162,7 @@ void FillLowerDimNeighborMap (TIndexVector& nbrMapOut,
 	FillGrobToIndexMap (nbrGrobToIndexMap, nbrGrobBaseInds, mesh, nbrGrobSet);
 
 	index_t counter = 0;
-	VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
+	lume::math::raw::VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
 	for(auto grobType : grobSet) {
 		grobBaseIndsOut [grobType] = counter;
 		for(auto grob : mesh.grobs (grobType)) {
@@ -240,7 +241,7 @@ void FillNeighborMap (TIndexVector& elemMapOut,
 		elemMapOut.clear();
 
 		index_t counter = 0;
-		VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
+		lume::math::raw::VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
 		for(auto grobType : grobSet) {
 			grobBaseIndsOut [grobType] = counter;
 			for(auto grob : mesh.grobs (grobType)) {

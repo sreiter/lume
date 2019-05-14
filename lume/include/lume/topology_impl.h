@@ -29,7 +29,6 @@
 #define __H__lume_topology_impl
 
 #include "topology.h"
-#include "vec_math_raw.h"
 
 namespace lume {
 

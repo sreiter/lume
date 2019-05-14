@@ -27,7 +27,7 @@
 #include "lume/array_annex.h"
 #include "lume/normals.h"
 #include "lume/mesh.h"
-#include "lume/vec_math_raw.h"
+#include "lume/math/vector_math.h"
 
 namespace lume {
 
@@ -39,10 +39,10 @@ real_t* TriangleNormal3 (real_t* normalOut,
 	real_t d0[3];
 	real_t d1[3];
 
-	VecSub (d0, 3, c1, c0);
-	VecSub (d1, 3, c2, c0);
+	math::raw::VecSubtract (d0, 3, c1, c0);
+	math::raw::VecSubtract (d1, 3, c2, c0);
 
-	return VecNormalize (VecCross3 (normalOut, d0, d1), 3);
+	return math::raw::VecNormalizeInplace (math::raw::VecCross3 (normalOut, d0, d1), 3);
 }
 
 void
@@ -63,7 +63,7 @@ ComputeFaceVertexNormals3 (Mesh& mesh,
     if (normalAnnex.size () != coordsAnnex.size ())
         throw AnnexError () << "Provided coordinate and normal annexes have different size.";
 
-    VecSet (UNPACK_DS(normalAnnex), 0);
+    math::VecSet (normalAnnex, 0);
 
     const real_t*   coords      = coordsAnnex.data();
     real_t*         normals     = normalAnnex.data();
@@ -80,18 +80,18 @@ ComputeFaceVertexNormals3 (Mesh& mesh,
             real_t d0[3];
             real_t d1[3];
 
-            VecSub (d0, 3, coords + elem[offset] * 3, coords + elem[0] * 3);
-            VecSub (d1, 3, coords + elem[1 + offset] * 3, coords + elem[1] * 3);
+            math::raw::VecSubtract (d0, 3, coords + elem[offset] * 3, coords + elem[0] * 3);
+            math::raw::VecSubtract (d1, 3, coords + elem[1 + offset] * 3, coords + elem[1] * 3);
 
             real_t n[3];
-            VecNormalize (VecCross3 (n, d0, d1), 3);
+            math::raw::VecNormalizeInplace (math::raw::VecCross3 (n, d0, d1), 3);
 
             for(size_t j = 0; j < numCorners; ++j)
-                VecAppend (normals + elem [j] * 3, 3, n);
+                math::raw::VecAddInplace (normals + elem [j] * 3, 3, n);
         }
     }
 
-    VecTupNormalize (UNPACK_DST(normalAnnex));
+    math::VecTupNormalizeInplace (normalAnnex);
 }
 
 void

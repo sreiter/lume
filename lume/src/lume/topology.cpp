@@ -27,7 +27,7 @@
 
 #include "lume/mesh.h"
 #include "lume/topology.h"
-#include "lume/vec_math_raw.h"
+#include "lume/math/vector_math.h"
 
 //todo: remove this include
 #include "lume/neighborhoods.h"
@@ -92,7 +92,7 @@ void FillGrobToIndexMap (GrobHashMap <index_t>& indexMapInOut,
                        const Mesh& mesh,
                        const GrobSet grobSet)
 {
-	VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
+	math::raw::VecSet (grobBaseIndsOut, NUM_GROB_TYPES, NO_INDEX);
 
 	index_t counter = 0;
 	
