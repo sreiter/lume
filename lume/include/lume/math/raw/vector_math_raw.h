@@ -66,6 +66,14 @@ real_t* VecAdd (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1
 }
 
 template <class real_t>
+real_t* VecSubtractInplace (real_t* vOut, const size_t n, const real_t* v)
+{
+    for (size_t i = 0; i < n; ++i, ++vOut, ++v)
+        *vOut -= *v;
+    return vOut;
+}
+
+template <class real_t>
 real_t* VecSubtract (real_t* vOut, const size_t n, const real_t* v0, const real_t* v1)
 {
 	for (size_t i = 0; i < n; ++i, ++vOut, ++v0, ++v1)

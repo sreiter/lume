@@ -32,26 +32,24 @@ namespace lume::math
 
 template <class Vec1, class Vec2>
 bool
-IsMatching (Vec1 const& a, Vec2 const& b)
+SizesMatch (Vec1 const& a, Vec2 const& b)
 {
     return a.size () == b.size ();
 }
 
-template <class VecOut, class VecIn>
-VecOut&
-ResizeMatching (VecOut& out, const VecIn& in)
+template <class Vec1, class Vec2, class Vec3>
+bool
+SizesMatch (Vec1 const& a, Vec2 const& b, Vec3 const& c)
 {
-    if (out.size () != in.size ()) {
-        out.resize (in.size ());
-    }
-    return out;
+    return a.size () == b.size () &&
+           a.size () == c.size ();
 }
 
 template <class VecOut, class VecIn>
 VecOut&
 VecCopy (VecOut& out, const VecIn& in)
 {
-    ResizeMatching (out, in);
+    assert (SizesMatch (out, in));
     raw::VecCopy (out.data (), out.size (), in.data ());
     return out;
 }
@@ -68,11 +66,7 @@ template <class VecInOut, class VecIn>
 VecInOut&
 VecAddInplace (VecInOut& out, const VecIn& in)
 {
-    if (!IsMatching (out, in)) {
-        assert (!"Cannot add vectors of different size!");
-        return out;
-    }
-
+    assert (SizesMatch (out, in));
     raw::VecAddInplace (out.data (), out.size (), in.data ());
     return out;
 }
@@ -81,27 +75,26 @@ template <class VecOut, class VecIn1, class VecIn2>
 VecOut&
 VecAdd (VecOut& out, const VecIn1& a, const VecIn2& b)
 {
-    if (!IsMatching (a, b)) {
-        assert (!"Cannot add input vectors of different size!");
-        return out;
-    }
-
-    ResizeMatching (out, a);
+    assert (SizesMatch (out, a, b));
     raw::VecAdd (out.data (), out.size (), a.data (), b.data ());
+    return out;
+}
+
+template <class VecInOut, class VecIn>
+VecInOut&
+VecSubtractInplace (VecInOut& out, const VecIn& in)
+{
+    assert (SizesMatch (out, in));
+    raw::VecSubtractInplace (out.data (), out.size (), in.data ());
     return out;
 }
 
 template <class VecOut, class VecIn1, class VecIn2>
 VecOut&
-VecSub (VecOut& out, const VecIn1& a, const VecIn2& b)
+VecSubtract (VecOut& out, const VecIn1& a, const VecIn2& b)
 {
-    if (!IsMatching (a, b)) {
-        assert (!"Cannot subtract input vectors of different size!");
-        return out;
-    }
-
-    ResizeMatching (out, a);
-    raw::VecSub (out.data (), out.size (), a.data (), b.data ());
+    assert (SizesMatch (a, b));
+    raw::VecSubtract (out.data (), out.size (), a.data (), b.data ());
     return out;
 }
 
@@ -117,7 +110,7 @@ template <class VecOut, class VecIn>
 VecOut&
 VecScale (VecOut& out, const VecIn& in, typename VecIn::value_type const s)
 {
-    ResizeMatching (out, in);
+    assert (SizesMatch (out, in));
     raw::VecScale (out.data (), out.size (), in.data (), s);
     return out;
 }
@@ -126,11 +119,7 @@ template <class Vec1, class Vec2>
 typename Vec1::value_type
 VecDot (const Vec1& a, const Vec2& b)
 {
-    if (!IsMatching (a, b)) {
-        assert (!"Cannot compute dot product of vectors of different size!");
-        return 0;
-    }
-
+    assert (SizesMatch (a, b));
     return raw::VecDot (a.data (), a.size (), b.data ());
 }
 
@@ -152,11 +141,7 @@ template <class Vec1, class Vec2>
 typename Vec1::value_type
 VecDistSq (const Vec1& a, const Vec2& b)
 {
-    if (!IsMatching (a, b)) {
-        assert (!"Cannot compute squared distance between vectors of different size!");
-        return 0;
-    }
-
+    assert (SizesMatch (a, b));
     return raw::VecDistSq (a.data (), a.size (), b.data ());
 }
 
@@ -164,11 +149,7 @@ template <class Vec1, class Vec2>
 typename Vec1::value_type
 VecDist (const Vec1& a, const Vec2& b)
 {
-    if (!IsMatching (a, b)) {
-        assert (!"Cannot compute distance between vectors of different size!");
-        return 0;
-    }
-
+    assert (SizesMatch (a, b));
     return raw::VecDist (a.data (), a.size (), b.data ());
 }
 
@@ -176,7 +157,7 @@ template <class VecOut, class VecIn>
 VecOut&
 VecNormalize (VecOut& out, const VecIn& in)
 {
-    ResizeMatching (out, in);
+    assert (SizesMatch (out, in));
     raw::VecNormalize (out.data (), out.size (), in.data ());
     return out;
 }
@@ -220,7 +201,7 @@ VecOut& VecTupSubtract (VecOut& out, VecIn const& in, Tuple const& tup)
 template <class TupleVecOut, class TupleVecIn>
 TupleVecOut& VecTupNormalize (TupleVecOut& out, TupleVecIn const& in)
 {
-    ResizeMatching (out, in);
+    assert (SizesMatch (out, in));
     raw::VecTupNormalize (out.data (), out.size (), out.tuple_size (), in.data ())
     return out;
 }
@@ -255,14 +236,8 @@ Tuple& VecTupAverage (Tuple& out, VecIn const& in)
 template <class VecOut, class VecIn1, class VecIn2>
 VecOut& VecCross3 (VecOut& out, VecIn1 const& v0, VecIn2 const& v1)
 {
-    if (!IsMatching (v0, v1) ||
-        v0.size () != 3)
-    {
-        assert (!"Cannot compute VecCross3 between vectors which do not both have length 3.");
-        return out;
-    }
-
-    ResizeMatching (out, v0);
+    assert (SizesMatch (out, v0, v1));
+    assert (out.size () == 3);
     raw::VecCross3 (out.data (), v0.data (), v1.data ());
     return out;
 }
