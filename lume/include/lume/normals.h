@@ -29,30 +29,30 @@
 #define __H__lume__normals
 
 #include <memory>
-#include "grob.h"
-#include "mesh.h"
-#include "types.h"
+#include "lume/grob.h"
+#include "lume/mesh.h"
+#include "lume/types.h"
+#include "lume/array_annex.h"
 
 namespace lume {
 
+/**	Computes the 3 dimensional vertex normals of a mesh by averaging the normals of associated faces
+    and stores them in an annex of the mesh's vertices.
 
-///	computes the normal of a single triangle
-/**
- * \param normalOut	array of length 3. The resulting normal will be written to this array.
- * \param c0		array of length 3. coordinate of first corner.
- * \param c1		array of length 3. coordinate of second corner.
- * \param c2		array of length 3. coordinate of third corner.
- */
-real_t* TriangleNormal3 (real_t* normalOut,
-                         const real_t* c0,
-                         const real_t* c1,
-                         const real_t* c2);
+    If not provided, the key `lume::keys::vertexCoords` is used to access vertex coordinates and
+    `lume::keys::vertexNormals` is used to access vertex normals. The latter annex is created if
+    not present during call-time. Both have to have a tuple size of 3.
+    \{
+*/
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                const RealArrayAnnex& coordsAnnex,
+                                RealArrayAnnex& normalAnnex);
 
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                const RealArrayAnnex& coordsAnnex,
+                                const TypedAnnexKey <RealArrayAnnex> vertexNormalsKey);
 
-///	computes the vertex normals of a mesh and stores them in the specified data array
-void
-ComputeFaceVertexNormals3 (Mesh& meshInOut,
-                           const std::string& normalId = "normals");
+void ComputeFaceVertexNormals3 (Mesh& mesh);
 
 }// end of namespace lume
 

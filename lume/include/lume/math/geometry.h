@@ -1,8 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018, 2019 Sebastian Reiter
-// Copyright (C) 2018 G-CSC, Goethe University Frankfurt
-// Author: Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2019 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,13 +24,23 @@
 
 #pragma once
 
-#include <string>
-#include <exception>
-#include "lume_error.h"
-#include "mesh.h"
+#include <lume/math/vector_math.h>
 
-namespace lume {
+namespace lume::math
+{
 
-SPMesh CreateMeshFromFile (std::string filename);
+template <class VecOut, class Corner0, class Corner1, class Corner2>
+VecOut& TriangleNormal3 (VecOut& out, Corner0 const& c0, Corner1 const& c1, Corner2 const& c2)
+{
+    assert (SizesMatch (out, c0, c1, c2));
+    assert (out.size () == 3);
 
-}//	end of namespace lume
+    using real_t = typename VecOut::value_type;
+    std::array <real_t, 3> v0;
+    std::array <real_t, 3> v1;
+
+    VecNormalizeInplace (VecCross3 (out, VecSubtract (v0, c1, c0), VecSubtract (v1, c2, c0)));
+    return out;
+}
+
+}// end of namespace lume::math

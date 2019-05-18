@@ -1,6 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
+// Copyright (C) 2018, 2019 Sebastian Reiter
 // Copyright (C) 2018 G-CSC, Goethe University Frankfurt
 // Author: Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
@@ -24,17 +24,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#ifndef __H__lume_annex
-#define __H__lume_annex
+#pragma once
 
 #include <optional>
 #include "lume_error.h"
 #include "grob.h"
 
 namespace lume {
-
-DECLARE_CUSTOM_EXCEPTION (AnnexError, LumeError);
 
 class Mesh;
 
@@ -60,5 +56,3 @@ public:
 };
 
 }//	end of namespace lume
-
-#endif	//__H__lume_annex

@@ -1,6 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
+// Copyright (C) 2018, 2019 Sebastian Reiter
 // Copyright (C) 2018 G-CSC, Goethe University Frankfurt
 // Author: Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
@@ -24,9 +24,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#ifndef __H__lume__mesh
-#define __H__lume__mesh
+#pragma once
 
 #include <array>
 #include <map>
@@ -47,9 +45,6 @@
 #include "types.h"
 
 namespace lume {
-
-DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
-DECLARE_CUSTOM_EXCEPTION (AnnexTypeError, AnnexError);
 
 /** A mesh holds index arrays to define a net and provides annexes to store associtated data.
     \note   The 'const' interface is thread safe. The non-const interface is not thread save.
@@ -362,5 +357,3 @@ using SPMesh = std::shared_ptr <Mesh>;
 using CSPMesh = std::shared_ptr <const Mesh>;
 
 }// end of namespace lume
-
-#endif	//__H__lume__mesh

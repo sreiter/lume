@@ -1,6 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
+// Copyright (C) 2018, 2019 Sebastian Reiter
 // Copyright (C) 2018 G-CSC, Goethe University Frankfurt
 // Author: Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
@@ -24,13 +24,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#ifndef __H__lume_lume_error
-#define __H__lume_lume_error
+#pragma once
 
 #include <stdexcept>
 #include <string>
 #include <lume/to_string.h>
+
+/// Declares an exception class. baseClass should derive be LumeError or a derived class.
+#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
+    class className : public baseClass {\
+    public:\
+        className () : baseClass (#className) {}\
+    protected:\
+        className (const char* derivedClassName) : baseClass (derivedClassName) {}\
+    }; 
 
 namespace lume {
 
@@ -61,15 +68,17 @@ private:
     std::string m_what;
 };
 
-}// end of namespace lume
+DECLARE_CUSTOM_EXCEPTION (BadNumberOfIndices, LumeError);
 
-///	Declares an exception class. baseClass should derive be LumeError or a derived class.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-	class className : public baseClass {\
-	public:\
-		className () : baseClass (#className) {}\
-    protected:\
-        className (const char* derivedClassName) : baseClass (derivedClassName) {}\
-	}; 
-	
-#endif	//__H__lume_lume_error
+DECLARE_CUSTOM_EXCEPTION (BadTupleSizeError, LumeError);
+
+DECLARE_CUSTOM_EXCEPTION (AnnexError, LumeError);
+DECLARE_CUSTOM_EXCEPTION (NoSuchAnnexError, AnnexError)
+DECLARE_CUSTOM_EXCEPTION (AnnexTypeError, AnnexError);
+
+DECLARE_CUSTOM_EXCEPTION (FileIOError, LumeError);
+DECLARE_CUSTOM_EXCEPTION (FileSuffixError, FileIOError);
+DECLARE_CUSTOM_EXCEPTION (FileNotFoundError, FileIOError);
+DECLARE_CUSTOM_EXCEPTION (FileParseError, FileIOError);
+
+}// end of namespace lume

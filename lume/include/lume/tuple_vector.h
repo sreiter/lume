@@ -22,8 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __H__lume_tuple_vector
-#define __H__lume_tuple_vector
+#pragma once
 
 #include <cassert>
 #include <iterator>
@@ -32,11 +31,8 @@
 #include "types.h"
 #include "annex.h"
 #include "lume_error.h"
-#include "arithmetic_tuple.h"
 
 namespace lume {
-
-DECLARE_CUSTOM_EXCEPTION (BadTupleSizeError, LumeError);
 
 template <class T>
 class TupleVector {
@@ -114,13 +110,9 @@ public:
 
     inline void push_back (const T& t)      {m_vector.push_back (t);}
 
-    ArithmeticTuple <T> tuple (const size_type i) {return ArithmeticTuple <T> (m_vector.data () + i * m_tupleSize, m_tupleSize);}
-
 private:
     std::vector <T> m_vector;
     size_type       m_tupleSize;
 };
 
 }//    end of namespace lume
-
-#endif    //__H__lume_tuple_vector

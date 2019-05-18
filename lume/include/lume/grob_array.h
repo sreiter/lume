@@ -1,6 +1,6 @@
 // This file is part of lume, a C++ library for lightweight unstructured meshes
 //
-// Copyright (C) 2018 Sebastian Reiter
+// Copyright (C) 2018, 2019 Sebastian Reiter
 // Copyright (C) 2018 G-CSC, Goethe University Frankfurt
 // Author: Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
@@ -24,9 +24,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#ifndef __H__lume_grob_array
-#define __H__lume_grob_array
+#pragma once
 
 #include "grob.h"
 #include "grob_iterator.h"
@@ -37,8 +35,6 @@
 #include <vector>
 
 namespace lume {
-
-DECLARE_CUSTOM_EXCEPTION (BadNumberOfIndices, LumeError);
 
 class GrobArray {
 public:
@@ -128,5 +124,3 @@ using SPGrobArray	= std::shared_ptr <GrobArray>;
 using CSPGrobArray	= std::shared_ptr <const GrobArray>;
 
 }//	end of namespace lume
-
-#endif	//__H__lume_grob_array

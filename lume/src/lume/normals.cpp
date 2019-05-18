@@ -27,81 +27,60 @@
 #include "lume/array_annex.h"
 #include "lume/normals.h"
 #include "lume/mesh.h"
-#include "lume/math/vector_math.h"
+#include "lume/math/geometry.h"
+#include "lume/math/tuple_view.h"
 
 namespace lume {
 
-real_t* TriangleNormal3 (real_t* normalOut,
-                         const real_t* c0,
-                         const real_t* c1,
-                         const real_t* c2)
-{
-	real_t d0[3];
-	real_t d1[3];
-
-	math::raw::VecSubtract (d0, 3, c1, c0);
-	math::raw::VecSubtract (d1, 3, c2, c0);
-
-	return math::raw::VecNormalizeInplace (math::raw::VecCross3 (normalOut, d0, d1), 3);
-}
-
-void
-ComputeFaceVertexNormals3 (Mesh& mesh,
-                           RealArrayAnnex& normalAnnex)
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                const RealArrayAnnex& coordsAnnex,
+                                RealArrayAnnex& normalAnnex)
 {
     if (!mesh.has_annex (keys::vertexCoords))
         return;
 
-    auto const& coordsAnnex = mesh.annex (keys::vertexCoords);
+    auto const coords = math::TupleView (coordsAnnex);
+    auto normals      = math::TupleView (normalAnnex);
 
-    if (coordsAnnex.tuple_size() != 3)
-        throw BadTupleSizeError () << coordsAnnex.tuple_size();
+    if (coords.tuple_size() != 3)
+        throw BadTupleSizeError () << coords.tuple_size();
     
-    if (normalAnnex.tuple_size() != 3)
-        throw BadTupleSizeError () << normalAnnex.tuple_size();
+    if (normals.tuple_size() != 3)
+        throw BadTupleSizeError () << normals.tuple_size();
 
-    if (normalAnnex.size () != coordsAnnex.size ())
+    if (normals.size () != coords.size ())
         throw AnnexError () << "Provided coordinate and normal annexes have different size.";
 
-    math::VecSet (normalAnnex, 0);
+    math::VecSet (normals, 0);
 
-    const real_t*   coords      = coordsAnnex.data();
-    real_t*         normals     = normalAnnex.data();
-    
-    for(auto gt : GrobSet (FACES)) {
-        const index_t*  inds        = mesh.grobs (gt).data();
-        const size_t   numInds     = mesh.grobs (gt).num_indices();
-        const size_t   numCorners  = mesh.grobs (gt).grob_desc ().num_corners ();
-        const size_t   offset = numCorners / 2;
+    for (auto const grob : mesh.grobs (TRI))
+    {
+        std::array <real_t, 3> n;
+        math::TriangleNormal3 (n, coords [grob.corner (0)], coords [grob.corner (1)], coords [grob.corner (2)]);
 
-        for (size_t i = 0; i < numInds; i += numCorners) {
-            const index_t* elem = inds + i;
-
-            real_t d0[3];
-            real_t d1[3];
-
-            math::raw::VecSubtract (d0, 3, coords + elem[offset] * 3, coords + elem[0] * 3);
-            math::raw::VecSubtract (d1, 3, coords + elem[1 + offset] * 3, coords + elem[1] * 3);
-
-            real_t n[3];
-            math::raw::VecNormalizeInplace (math::raw::VecCross3 (n, d0, d1), 3);
-
-            for(size_t j = 0; j < numCorners; ++j)
-                math::raw::VecAddInplace (normals + elem [j] * 3, 3, n);
+        for(int i = 0; i < 3; ++i) {
+            normals [grob.corner (i)] += n;
         }
     }
 
     math::VecTupNormalizeInplace (normalAnnex);
 }
 
-void
-ComputeFaceVertexNormals3 (Mesh& mesh,
-						   const std::string& normalId)
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                const RealArrayAnnex& coordsAnnex,
+						        const TypedAnnexKey <RealArrayAnnex> vertexNormalsKey)
 {
-    auto const normalKey = TypedAnnexKey <RealArrayAnnex> (normalId, VERTEX);
-    if (!mesh.has_annex (normalKey))
-        mesh.set_annex (normalKey, RealArrayAnnex {3});
-    ComputeFaceVertexNormals3 (mesh, mesh.annex (normalKey));
+    if (!mesh.has_annex (vertexNormalsKey))
+        mesh.set_annex (vertexNormalsKey, RealArrayAnnex {3});
+    ComputeFaceVertexNormals3 (mesh, coordsAnnex, mesh.annex (vertexNormalsKey));
+}
+
+void ComputeFaceVertexNormals3 (Mesh& mesh)
+{
+    if (!mesh.has_annex (keys::vertexCoords))
+        throw NoSuchAnnexError () << keys::vertexCoords.name ();
+
+    ComputeFaceVertexNormals3 (mesh, mesh.annex (keys::vertexCoords), mesh.annex (keys::vertexNormals));
 }
 
 }// end of namespace lume

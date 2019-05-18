@@ -25,7 +25,7 @@
 #include <lume/grob_hash.h>
 #include <lume/refinement.h>
 #include <lume/topology.h>
-
+#include <lume/math/tuple_view.h>
 namespace
 {
 using namespace lume;
@@ -47,14 +47,14 @@ void Refine (Mesh& mesh)
 
     mesh.resize_vertices (numOldVertices + numNewVertices);
 
-    auto& vertexCoords = mesh.annex (keys::vertexCoords);
+    auto vertexCoords = math::TupleView (mesh.annex (keys::vertexCoords));
 
     for (auto const& entry : childVertices)
     {
         Grob    const& grob  = entry.first;
         index_t const  index = entry.second;
-        vertexCoords.tuple (index) = 0.5 * (vertexCoords.tuple (grob.corner (0)) +
-                                            vertexCoords.tuple (grob.corner (1)));
+        vertexCoords [index] = 0.5 * (vertexCoords [grob.corner (0)] +
+                                      vertexCoords [grob.corner (1)]);
     }
 }
 

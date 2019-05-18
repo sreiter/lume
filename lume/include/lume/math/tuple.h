@@ -24,37 +24,36 @@
 
 #pragma once
 
-namespace lume
+namespace lume::math
 {
 
-template <class T>
-class TemporaryArithmeticTuple;
+/** Tuple and ConstTuple are temporary wrappers around a given memory region in which a given number
+    of POD types are stored contiguously.
 
+    \warning Make sure that the underlying memory region is valid as long as the associated tuple exists.
+*/
 template <class T>
-class ArithmeticTuple
+class Tuple
 {
 public:
     using value_type = T;
 
-    ArithmeticTuple () = delete;
-    ArithmeticTuple (ArithmeticTuple const&) = delete;
+    Tuple () = delete;
 
-    ArithmeticTuple (T* data, size_t size)
+    template <class Array>
+    Tuple (Array& t)
+        : m_data (t.m_data ())
+        , m_size (t.m_size ())
+    {}
+
+    Tuple (T* data, size_t size)
         : m_data (data)
         , m_size (size)
     {
     }
 
-    ArithmeticTuple& operator = (ArithmeticTuple const& v)
-    {
-        assert (m_size == v.size ());
-        for(size_t i = 0; i < m_size; ++i) {
-            m_data [i] = v.m_data [i];
-        }
-        return *this;
-    }
-
-    ArithmeticTuple& operator = (TemporaryArithmeticTuple <T> const& v)
+    template <class Array>
+    Tuple& operator = (Array const& v)
     {
         assert (m_size == v.size ());
         for(size_t i = 0; i < m_size; ++i) {
@@ -63,7 +62,48 @@ public:
         return *this;
     }
 
-    bool operator == (ArithmeticTuple const& v)
+    template <class Array>
+    Tuple& operator += (Array const& v)
+    {
+        assert (m_size == v.size ());
+        for(size_t i = 0; i < m_size; ++i) {
+            m_data [i] += v [i];
+        }
+        return *this;
+    }
+
+    template <class Array>
+    Tuple& operator -= (Array const& v)
+    {
+        assert (m_size == v.size ());
+        for(size_t i = 0; i < m_size; ++i) {
+            m_data [i] -= v [i];
+        }
+        return *this;
+    }
+
+    template <class Array>
+    Tuple& operator *= (Array const& v)
+    {
+        assert (m_size == v.size ());
+        for(size_t i = 0; i < m_size; ++i) {
+            m_data [i] *= v [i];
+        }
+        return *this;
+    }
+
+    template <class Array>
+    Tuple& operator /= (Array const& v)
+    {
+        assert (m_size == v.size ());
+        for(size_t i = 0; i < m_size; ++i) {
+            m_data [i] /= v [i];
+        }
+        return *this;
+    }
+
+    template <class Array>
+    bool operator == (Array const& v) const
     {
         assert (m_size == v.size ());
 
@@ -76,7 +116,8 @@ public:
         return true;
     }
 
-    bool operator != (ArithmeticTuple const& v)
+    template <class Array>
+    bool operator != (Array const& v) const
     {
         return ! (*this == v);
     }
@@ -95,18 +136,68 @@ private:
 };
 
 template <class T>
-class TemporaryArithmeticTuple
+class ConstTuple
+{
+public:
+    using value_type = T;
+
+    ConstTuple () = delete;
+
+    template <class Array>
+    ConstTuple (Array const& t)
+        : m_data (t.data ())
+        , m_size (t.size ())
+    {}
+
+    ConstTuple (T* data, size_t size)
+        : m_data (data)
+        , m_size (size)
+    {}
+
+    template <class Array>
+    bool operator == (Array const& v) const
+    {
+        assert (m_size == v.size ());
+
+        for(size_t i = 0; i < m_size; ++i) {
+            if (m_data [i] != v.m_data [i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template <class Array>
+    bool operator != (Array const& v) const
+    {
+        return ! (*this == v);
+    }
+
+    size_t size () const                    {return m_size;}
+
+    T operator [] (size_t const i) const   {return m_data [i];}
+
+    T const* data () const                  {return m_data;}
+
+private:
+    T const* m_data;
+    size_t   m_size;
+};
+
+template <class T>
+class TemporaryTuple
 {
 public:
     using value_type = T;
     
-    TemporaryArithmeticTuple (size_t s)
+    TemporaryTuple (size_t s)
         : m_size (s)
     {
         assert (s <= m_maxSize);
     }
 
-    TemporaryArithmeticTuple& operator = (TemporaryArithmeticTuple <T> const& v)
+    TemporaryTuple& operator = (TemporaryTuple <T> const& v)
     {
         assert (m_size == v.size ());
         for(size_t i = 0; i < m_size; ++i) {
@@ -130,11 +221,11 @@ private:
 };
 
 template <class Tuple>
-TemporaryArithmeticTuple <typename Tuple::value_type>
+TemporaryTuple <typename Tuple::value_type>
 operator + (Tuple const& a, Tuple const& b)
 {
     assert (a.size () == b.size ());
-    TemporaryArithmeticTuple <typename Tuple::value_type> r (a.size ());
+    TemporaryTuple <typename Tuple::value_type> r (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = a[i] + b[i];
     }
@@ -142,10 +233,10 @@ operator + (Tuple const& a, Tuple const& b)
 }
 
 template <class Tuple>
-TemporaryArithmeticTuple <typename Tuple::value_type>
+TemporaryTuple <typename Tuple::value_type>
 operator * (const typename Tuple::value_type s, Tuple const& a)
 {
-    TemporaryArithmeticTuple <typename Tuple::value_type> r (a.size ());
+    TemporaryTuple <typename Tuple::value_type> r (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = s * a[i];
     }
@@ -153,10 +244,10 @@ operator * (const typename Tuple::value_type s, Tuple const& a)
 }
 
 template <class Tuple>
-TemporaryArithmeticTuple <typename Tuple::value_type>
+TemporaryTuple <typename Tuple::value_type>
 operator * (Tuple const& a, const typename Tuple::value_type s)
 {
     return s * a;
 }
 
-}// end of namespace lume
+}// end of namespace lume::math

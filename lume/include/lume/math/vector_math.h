@@ -45,6 +45,15 @@ SizesMatch (Vec1 const& a, Vec2 const& b, Vec3 const& c)
            a.size () == c.size ();
 }
 
+template <class Vec1, class Vec2, class Vec3, class Vec4>
+bool
+SizesMatch (Vec1 const& a, Vec2 const& b, Vec3 const& c, Vec4 const& d)
+{
+    return a.size () == b.size () &&
+           a.size () == c.size () &&
+           a.size () == d.size ();
+}
+
 template <class VecOut, class VecIn>
 VecOut&
 VecCopy (VecOut& out, const VecIn& in)
