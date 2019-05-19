@@ -53,6 +53,7 @@ void ComputeFaceVertexNormals3 (Mesh& mesh,
                                 const TypedAnnexKey <RealArrayAnnex> vertexNormalsKey);
 
 void ComputeFaceVertexNormals3 (Mesh& mesh);
+/** \} */
 
 }// end of namespace lume
 

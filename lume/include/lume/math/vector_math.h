@@ -211,7 +211,7 @@ template <class TupleVecOut, class TupleVecIn>
 TupleVecOut& VecTupNormalize (TupleVecOut& out, TupleVecIn const& in)
 {
     assert (SizesMatch (out, in));
-    raw::VecTupNormalize (out.data (), out.size (), out.tuple_size (), in.data ())
+    raw::VecTupNormalize (out.data (), out.size (), out.tuple_size (), in.data ());
     return out;
 }
 
@@ -224,21 +224,21 @@ TupleVecInOut& VecTupNormalizeInplace (TupleVecInOut& inOut)
 }
 
 /// Computes the sum of all tuples in `in`.
-/** Considers the contents of `in` to be a sequence of tuples, each of size `tupOut.size ()`.*/
+/** Considers the contents of `in` to be a sequence of tuples, each of size `out.size ()`.*/
 template <class Tuple, class VecIn>
 Tuple& VecTupSum (Tuple& out, VecIn const& in)
 {
     raw::VecTupSum (out.data (), in.data (), in.size (), out.size ());
-    return tupOut;
+    return out;
 }
 
 /// Computes the sum of all tuples in `in`.
-/** Considers the contents of `in` to be a sequence of tuples, each of size `tupOut.size ()`.*/
+/** Considers the contents of `in` to be a sequence of tuples, each of size `out.size ()`.*/
 template <class Tuple, class VecIn>
 Tuple& VecTupAverage (Tuple& out, VecIn const& in)
 {
     raw::VecTupAverage (out.data (), in.data (), in.size (), out.size ());
-    return tupOut;
+    return out;
 }
 
 

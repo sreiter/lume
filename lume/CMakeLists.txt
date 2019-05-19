@@ -76,7 +76,12 @@ set (headers
         include/lume/tuple_vector.h
         include/lume/types.h
         include/lume/unpack.h
-        include/lume/vec_math_raw.h)
+
+        include/lume/math/geometry.h
+        include/lume/math/tuple.h
+        include/lume/math/tuple_view.h
+        include/lume/math/vector_math.h
+        include/lume/math/raw/vector_math_raw.h)
 
 set (privateHeaders)
 
