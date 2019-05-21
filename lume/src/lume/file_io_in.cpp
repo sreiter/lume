@@ -301,7 +301,6 @@ static void ParseElementIndicesToArrayAnnex (SPMesh& mesh,
 	ParseElementIndicesToArrayAnnex (mesh, annexName, node->first_node ("volumes"), value, CELLS);
 }
 
-
 std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 {
 	xml_document<> doc;
@@ -450,7 +449,6 @@ std::shared_ptr <Mesh> CreateMeshFromUGX (std::string filename)
 
 	return mesh;
 }
-
 
 std::shared_ptr <Mesh> CreateMeshFromFile (std::string filename)
 {

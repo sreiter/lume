@@ -80,5 +80,6 @@ DECLARE_CUSTOM_EXCEPTION (FileIOError, LumeError);
 DECLARE_CUSTOM_EXCEPTION (FileSuffixError, FileIOError);
 DECLARE_CUSTOM_EXCEPTION (FileNotFoundError, FileIOError);
 DECLARE_CUSTOM_EXCEPTION (FileParseError, FileIOError);
+DECLARE_CUSTOM_EXCEPTION (CannotOpenFileError, FileIOError);
 
 }// end of namespace lume

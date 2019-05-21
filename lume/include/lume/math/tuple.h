@@ -220,14 +220,26 @@ private:
     size_t m_size;
 };
 
-template <class Tuple>
-TemporaryTuple <typename Tuple::value_type>
-operator + (Tuple const& a, Tuple const& b)
+template <class TupleA, class TupleB>
+TemporaryTuple <typename TupleA::value_type>
+operator + (TupleA const& a, TupleB const& b)
 {
     assert (a.size () == b.size ());
-    TemporaryTuple <typename Tuple::value_type> r (a.size ());
+    TemporaryTuple <typename TupleA::value_type> r (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = a[i] + b[i];
+    }
+    return r;
+}
+
+template <class TupleA, class TupleB>
+TemporaryTuple <typename TupleA::value_type>
+operator - (TupleA const& a, TupleB const& b)
+{
+    assert (a.size () == b.size ());
+    TemporaryTuple <typename TupleA::value_type> r (a.size ());
+    for(size_t i = 0; i < a.size (); ++i) {
+        r [i] = a[i] - b[i];
     }
     return r;
 }
@@ -248,6 +260,72 @@ TemporaryTuple <typename Tuple::value_type>
 operator * (Tuple const& a, const typename Tuple::value_type s)
 {
     return s * a;
+}
+
+template <class Tuple>
+TemporaryTuple <typename Tuple::value_type>
+operator / (Tuple const& a, const typename Tuple::value_type s)
+{
+    TemporaryTuple <typename Tuple::value_type> r (a.size ());
+    for(size_t i = 0; i < a.size (); ++i) {
+        r [i] = a[i] / s;
+    }
+    return r;
+}
+
+template <class TupleA, class TupleB>
+typename TupleA::value_type
+Dot (TupleA const& a, TupleB const& b)
+{
+    assert (a.size () == b.size ());
+    typename TupleA::value_type d = 0;
+    size_t const size = a.size ();
+    
+    for(size_t i = 0; i < size; ++i) {
+        d += a [i] * b [i];
+    }
+
+    return d;
+}
+
+template <class Tuple>
+typename Tuple::value_type
+LengthSquared (Tuple const& a)
+{
+    return Dot (a, a);
+}
+
+template <class Tuple>
+typename Tuple::value_type
+Length (Tuple const& a)
+{
+    return sqrt (LengthSquared (a));
+}
+
+template <class TupleA, class TupleB>
+typename TupleA::value_type
+DistanceSquared (TupleA const& a, TupleB const& b)
+{
+    return LengthSquared (b - a);
+}
+
+template <class TupleA, class TupleB>
+typename TupleA::value_type
+Distance (TupleA const& a, TupleB const& b)
+{
+    return sqrt (DistanceSquared (a, b));
+}
+
+template <class Tuple>
+TemporaryTuple <typename Tuple::value_type>
+Normalized (Tuple const& a)
+{
+    auto const len = Length (a);
+    if (len == 0) {
+        return a * 0;
+    }
+
+    return a / len;
 }
 
 }// end of namespace lume::math

@@ -51,7 +51,7 @@ void ComputeFaceVertexNormals3 (Mesh& mesh,
     if (normals.size () != coords.size ())
         throw AnnexError () << "Provided coordinate and normal annexes have different size.";
 
-    math::VecSet (normals, 0);
+    math::VecSet (normalAnnex, 0);
 
     for (auto const grob : mesh.grobs (TRI))
     {

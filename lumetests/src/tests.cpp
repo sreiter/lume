@@ -25,14 +25,16 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "lume/lume_error.h"
-#include "lume/grob.h"
-#include "lume/file_io.h"
-#include "lume/parallel_for.h"
-#include "lume/topology.h"
-#include "lume/neighborhoods.h"
-#include "lume/rim_mesh.h"
-#include "lume/subset_info_annex.h"
+#include <lume/lume_error.h>
+#include <lume/grob.h>
+#include <lume/file_io.h>
+#include <lume/parallel_for.h>
+#include <lume/topology.h>
+#include <lume/neighborhoods.h>
+#include <lume/rim_mesh.h>
+#include <lume/subset_info_annex.h>
+#include <lume/normals.h>
+#include <lume/math/tuple_view.h>
 
 #include "pettyprof/pettyprof.h"
 
@@ -595,6 +597,25 @@ static void TestFaceCellNeighborhoods (SPMesh mesh)
 	PEPRO_END();
 }
 
+static void TestComputeFaceVertexNormals3 ()
+{
+    auto mesh = CreateMeshFromFile ("meshes/sphere.stl");
+    ComputeFaceVertexNormals3 (*mesh);
+    auto coords  = math::TupleView (mesh->annex (keys::vertexCoords));
+    auto normals = math::TupleView (mesh->annex (keys::vertexNormals));
+
+    SaveMeshToFile (*mesh, "sphere_with_normal_coords.ugx", keys::vertexNormals);
+
+    for(size_t ivrt = 0; ivrt < mesh->num (VERTEX); ++ivrt)
+    {
+        static constexpr real_t expected = 5.e-3f;
+        auto const deviation = math::Distance (normals [ivrt], math::Normalized (coords [ivrt]));
+        COND_FAIL (deviation > expected,
+                   "Computed normals should approximate the normalized "
+                   "coordinates of the given geometry. Deviation was "
+                   << deviation << ", expected was " << expected);
+    }
+}
 
 namespace impl {
 	static void TestNeighborValence (NeighborIndices nbrs,
@@ -887,6 +908,7 @@ bool RunTests ()
 	RUN_TEST_ON_MESHES(testStats, TestFillLowerDimNeighborOffsetMap, topologymeshes);
 	RUN_TEST_ON_MESHES(testStats, TestFillHigherDimNeighborOffsetMap, topologymeshes);
 	RUN_TEST_ON_MESHES(testStats, TestNeighborhoods, topologymeshes);
+    RUN_TEST(testStats, TestComputeFaceVertexNormals3);
 	RUN_TEST(testStats, TestFaceNeighbors);
 	RUN_TEST(testStats, TestCreateRimMesh);
 	RUN_TEST(testStats, TestSubsets);

@@ -28,11 +28,17 @@
 
 #include <string>
 #include <exception>
-#include "lume_error.h"
-#include "mesh.h"
+#include <lume/annex_key.h>
+#include <lume/lume_error.h>
+#include <lume/mesh.h>
+#include <lume/array_annex.h>
 
 namespace lume {
 
 SPMesh CreateMeshFromFile (std::string filename);
+
+void SaveMeshToFile (Mesh const& mesh,
+                     std::string filename,
+                     TypedAnnexKey <RealArrayAnnex> const& vertexCoordsKey = keys::vertexCoords);
 
 }//	end of namespace lume

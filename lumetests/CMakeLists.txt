@@ -33,5 +33,4 @@ set (sources
 add_executable (lumetests ${sources})
 target_link_libraries(lumetests lume)
 
-# lume_tests executable and test environment
-file(COPY "testdata/meshes" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+add_custom_target (copyTestData ALL COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testdata/meshes ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/meshes)

@@ -30,7 +30,8 @@ project (lume LANGUAGES CXX)
 set (sources
         src/lume/commands/arguments.cpp
         src/lume/commands/types.cpp
-        src/lume/file_io.cpp
+        src/lume/file_io_in.cpp
+        src/lume/file_io_out.cpp
         src/lume/grob.cpp
         src/lume/grob_desc.cpp
         src/lume/grob_set.cpp
