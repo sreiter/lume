@@ -22,6 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <fstream>
 #include <lume/file_io.h>
 
@@ -107,8 +108,8 @@ void SaveMeshToFile (Mesh const& mesh,
                      std::string filename,
                      TypedAnnexKey <RealArrayAnnex> const& vertexCoordsKey)
 {
-    std::string suffix = filename.substr(filename.size() - 4, 4);
-    transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+    std::string suffix = filename.substr (filename.size() - 4, 4);
+    transform (suffix.begin (), suffix.end (), suffix.begin (), ::tolower);
 
     if (suffix == ".ugx" ){
         SaveMeshToUGX (mesh, std::move (filename), vertexCoordsKey);
