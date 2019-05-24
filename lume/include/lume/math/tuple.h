@@ -67,10 +67,9 @@ struct Array
 {
     using value_type = T;
 
-    Array (size_t const size)
-    {
-        assert (size < m_data.size ());
-    }
+    static constexpr size_t maxSize = 4;
+
+    Array () = default;
 
     Array (T const* data, size_t const size)
         : m_data (data)
@@ -84,7 +83,7 @@ struct Array
     T const* data () const {return m_data.data ();}
     
 private:
-    std::array <T, 4> m_data;
+    std::array <T, maxSize> m_data;
 };
 
 }
@@ -104,7 +103,7 @@ public:
     static TupleTemplate <tuple_storage::Array <value_type>>
     uninitialized (size_t const size)
     {
-        assert (size < array_storage_t::max_size ());
+        assert (size < array_storage_t::maxSize);
         return TupleTemplate <array_storage_t> (size);
     }
 
@@ -156,8 +155,7 @@ private:
     TupleTemplate () = default;
     
     TupleTemplate (size_t const size)
-        : m_storage (size)
-        , m_size (size)
+        : m_size (size)
     {}
 
 private:
