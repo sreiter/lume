@@ -33,7 +33,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator = (Array const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        data () [i] = v [i];
+        value (i) = v [i];
     }
     return *this;
 }
@@ -44,7 +44,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator += (Array const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        data () [i] += v [i];
+        value (i) += v [i];
     }
     return *this;
 }
@@ -55,7 +55,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator -= (Array const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        data () [i] -= v [i];
+        value (i) -= v [i];
     }
     return *this;
 }
@@ -66,7 +66,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (Array const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        data () [i] *= v [i];
+        value (i) *= v [i];
     }
     return *this;
 }
@@ -77,7 +77,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator /= (Array const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        data () [i] /= v [i];
+        value (i) /= v [i];
     }
     return *this;
 }
@@ -89,7 +89,7 @@ bool TupleTemplate <Storage>:: operator == (Array const& v) const
     assert (size () == v.size ());
 
     for(size_t i = 0; i < size (); ++i) {
-        if (data () [i] != v.data () [i]) {
+        if (value (i) != v.value (i)) {
             return false;
         }
     }

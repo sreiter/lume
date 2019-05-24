@@ -33,7 +33,10 @@ template <class T>
 class Pointer
 {
 public:
-    using value_type = T;
+    using value_type     = T;
+    using ptr_type       = T*;
+    using const_ptr_type = const T*;
+    using ref_type       = T&;
 
     Pointer (T* data, size_t const)
         : m_data (data)
@@ -50,9 +53,12 @@ template <class T>
 class ConstPointer
 {
 public:
-    using value_type = T;
+    using value_type     = T;
+    using ptr_type       = const T*;
+    using const_ptr_type = const T*;
+    using ref_type       = const T&;
 
-    ConstPointer (T const* data)
+    ConstPointer (T const* data, size_t const)
         : m_data (data)
     {}
 
@@ -65,7 +71,10 @@ private:
 template <class T>
 struct Array
 {
-    using value_type = T;
+    using value_type     = T;
+    using ptr_type       = T*;
+    using const_ptr_type = const T*;
+    using ref_type       = T&;
 
     static constexpr size_t maxSize = 4;
 
@@ -95,7 +104,10 @@ template <class Storage>
 class TupleTemplate
 {
 public:
-    using value_type = typename Storage::value_type;
+    using value_type      = typename Storage::value_type;
+    using ptr_type        = typename Storage::ptr_type;
+    using const_ptr_type  = typename Storage::const_ptr_type;
+    using ref_type        = typename Storage::ref_type;
     using array_storage_t = tuple_storage::Array <value_type>;
 
     size_t size () const {return m_size;}
@@ -133,11 +145,11 @@ public:
     template <class Array>
     TupleTemplate& operator -= (Array const& v);
 
-    template <class Array>
-    TupleTemplate& operator *= (Array const& v);
+    template <class Scalar>
+    TupleTemplate& operator *= (Scalar const& v);
 
-    template <class Array>
-    TupleTemplate& operator /= (Array const& v);
+    template <class Scalar>
+    TupleTemplate& operator /= (Scalar const& v);
 
     template <class Array>
     bool operator == (Array const& v) const;
@@ -145,11 +157,14 @@ public:
     template <class Array>
     bool operator != (Array const& v) const;
 
-    value_type& operator [] (size_t const i)         {return data () [i];}
-    value_type  operator [] (size_t const i) const   {return data () [i];}
+    ref_type   operator [] (size_t const i)       {return data () [i];}
+    value_type operator [] (size_t const i) const {return data () [i];}
 
-    value_type*       data ()                        {return m_storage.data ();}
-    value_type const* data () const                  {return m_storage.data ();}
+    ref_type   value (size_t const i)             {return data () [i];}
+    value_type value (size_t const i) const       {return data () [i];}
+
+    ptr_type       data ()                        {return m_storage.data ();}
+    const_ptr_type data () const                  {return m_storage.data ();}
 
 private:
     TupleTemplate () = default;
@@ -160,42 +175,6 @@ private:
 
 private:
     Storage m_storage;
-    size_t const m_size;
-};
-
-template <class T>
-class ConstTupleTemplate
-{
-public:
-    using const_pointer_storage_t = detail::tuple_storage::ConstPointer <T>;
-    using value_type = typename const_pointer_storage_t::value_type;
-
-    size_t size () const {return m_size;}
-
-    ConstTupleTemplate () = delete;
-
-    template <class Array>
-    ConstTupleTemplate (Array const& t)
-        : ConstTupleTemplate (t.data (), t.size ())
-    {}
-
-    ConstTupleTemplate (value_type const* data, size_t const size)
-        : m_storage (data)
-        , m_size (size)
-    {}
-
-    template <class Array>
-    bool operator == (Array const& v) const;
-
-    template <class Array>
-    bool operator != (Array const& v) const;
-
-    value_type operator [] (size_t const i) const    {return data () [i];}
-
-    value_type const* data () const                  {return m_storage.data ();}
-
-private:
-    const_pointer_storage_t m_storage;
     size_t const m_size;
 };
 
@@ -210,14 +189,14 @@ namespace lume::math
     \{
 */
 template <class T>
-using Tuple            = detail::TupleTemplate <detail::tuple_storage::Pointer<T>>;
+using Tuple            = detail::TupleTemplate <detail::tuple_storage::Pointer <T>>;
 
 template <class T>
-using ConstTuple       = detail::ConstTupleTemplate <T>;
+using ConstTuple       = detail::TupleTemplate <detail::tuple_storage::ConstPointer <T>>;
 /** \} */
 
 template <class T>
-using TupleWithStorage = detail::TupleTemplate <detail::tuple_storage::Array<T>>;
+using TupleWithStorage = detail::TupleTemplate <detail::tuple_storage::Array <T>>;
 
 template <class TupleA, class TupleB>
 TupleWithStorage <typename TupleA::value_type>
