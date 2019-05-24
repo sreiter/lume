@@ -609,7 +609,7 @@ static void TestComputeFaceVertexNormals3 ()
     for(size_t ivrt = 0; ivrt < mesh->num (VERTEX); ++ivrt)
     {
         static constexpr real_t expected = 5.e-3f;
-        auto const deviation = math::Distance (normals [ivrt], math::Normalized (coords [ivrt]));
+        auto const deviation = normals [ivrt].distance (coords [ivrt].normalized ());
         COND_FAIL (deviation > expected,
                    "Computed normals should approximate the normalized "
                    "coordinates of the given geometry. Deviation was "

@@ -44,9 +44,6 @@ void Refine (Mesh& mesh)
 
     auto vertexCoords = math::TupleView (mesh.annex (keys::vertexCoords));
 
-    //todo: Delete this namespace and move + operator into TupleTemplate class instead
-    using namespace lume::math;
-
     for (auto const& entry : childVertices)
     {
         Grob    const& grob  = entry.first;

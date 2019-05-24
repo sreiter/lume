@@ -104,11 +104,12 @@ template <class Storage>
 class TupleTemplate
 {
 public:
-    using value_type      = typename Storage::value_type;
-    using ptr_type        = typename Storage::ptr_type;
-    using const_ptr_type  = typename Storage::const_ptr_type;
-    using ref_type        = typename Storage::ref_type;
-    using array_storage_t = tuple_storage::Array <value_type>;
+    using value_type           = typename Storage::value_type;
+    using ptr_type             = typename Storage::ptr_type;
+    using const_ptr_type       = typename Storage::const_ptr_type;
+    using ref_type             = typename Storage::ref_type;
+    using array_storage_t      = tuple_storage::Array <value_type>;
+    using tuple_with_storage_t = TupleTemplate <array_storage_t>;
 
     size_t size () const {return m_size;}
 
@@ -116,7 +117,7 @@ public:
     uninitialized (size_t const size)
     {
         assert (size < array_storage_t::maxSize);
-        return TupleTemplate <array_storage_t> (size);
+        return tuple_with_storage_t (size);
     }
 
     template <class Array>
@@ -164,6 +165,23 @@ public:
     ptr_type       data ()                        {return m_storage.data ();}
     const_ptr_type data () const                  {return m_storage.data ();}
 
+    template <class Array>
+    value_type dot (Array const& v) const;
+
+    value_type length_squared () const;
+
+    value_type length () const;
+
+    template <class Array>
+    value_type distance_squared (Array const& v) const;
+
+    template <class Array>
+    value_type distance (Array const& v) const;
+
+    tuple_with_storage_t normalized () const;
+
+    TupleTemplate& normalize ();
+
 private:
     TupleTemplate () = default;
     
@@ -201,118 +219,26 @@ using TupleWithStorage = detail::TupleTemplate <detail::tuple_storage::Array <T>
 template <class StorageA, class StorageB>
 lume::math::TupleWithStorage <typename StorageA::value_type>
 operator + (lume::math::detail::TupleTemplate <StorageA> const& a,
-            lume::math::detail::TupleTemplate <StorageB> const& b)
-{
-    assert (a.size () == b.size ());
-    auto r = lume::math::TupleWithStorage <typename StorageA::value_type>::uninitialized (a.size ());
-    for(size_t i = 0; i < a.size (); ++i) {
-        r [i] = a[i] + b[i];
-    }
-    return r;
-}
+            lume::math::detail::TupleTemplate <StorageB> const& b);
 
 template <class StorageA, class StorageB>
 lume::math::TupleWithStorage <typename StorageA::value_type>
 operator - (lume::math::detail::TupleTemplate <StorageA> const& a,
-            lume::math::detail::TupleTemplate <StorageB> const& b)
-{
-    assert (a.size () == b.size ());
-    auto r = lume::math::TupleWithStorage <typename StorageA::value_type>::uninitialized (a.size ());
-    for(size_t i = 0; i < a.size (); ++i) {
-        r [i] = a[i] - b[i];
-    }
-    return r;
-}
+            lume::math::detail::TupleTemplate <StorageB> const& b);
 
 template <class Storage>
 lume::math::TupleWithStorage <typename Storage::value_type>
 operator * (const typename Storage::value_type s,
-            lume::math::detail::TupleTemplate <Storage> const& a)
-{
-    auto r = lume::math::TupleWithStorage <typename Storage::value_type>::uninitialized (a.size ());
-    for(size_t i = 0; i < a.size (); ++i) {
-        r [i] = s * a[i];
-    }
-    return r;
-}
+            lume::math::detail::TupleTemplate <Storage> const& a);
 
 template <class Storage>
 lume::math::TupleWithStorage <typename Storage::value_type>
 operator * (lume::math::detail::TupleTemplate <Storage> const& a,
-            const typename Storage::value_type s)
-{
-    return s * a;
-}
+            const typename Storage::value_type s);
 
 template <class Storage>
 lume::math::TupleWithStorage <typename Storage::value_type>
 operator / (lume::math::detail::TupleTemplate <Storage> const& a,
-            const typename Storage::value_type s)
-{
-    auto r = lume::math::TupleWithStorage <typename Storage:: value_type>:: uninitialized (a.size ());
-    for(size_t i = 0; i < a.size (); ++i) {
-        r [i] = a[i] / s;
-    }
-    return r;
-}
-
-namespace lume::math
-{
-
-template <class TupleA, class TupleB>
-typename TupleA::value_type
-Dot (TupleA const& a, TupleB const& b)
-{
-    assert (a.size () == b.size ());
-    typename TupleA::value_type d = 0;
-    size_t const size = a.size ();
-    
-    for(size_t i = 0; i < size; ++i) {
-        d += a [i] * b [i];
-    }
-
-    return d;
-}
-
-template <class Tuple>
-typename Tuple::value_type
-LengthSquared (Tuple const& a)
-{
-    return Dot (a, a);
-}
-
-template <class Tuple>
-typename Tuple::value_type
-Length (Tuple const& a)
-{
-    return sqrt (LengthSquared (a));
-}
-
-template <class TupleA, class TupleB>
-typename TupleA::value_type
-DistanceSquared (TupleA const& a, TupleB const& b)
-{
-    return LengthSquared (b - a);
-}
-
-template <class TupleA, class TupleB>
-typename TupleA::value_type
-Distance (TupleA const& a, TupleB const& b)
-{
-    return sqrt (DistanceSquared (a, b));
-}
-
-template <class Tuple>
-lume::math::TupleWithStorage <typename Tuple::value_type>
-Normalized (Tuple const& a)
-{
-    auto const len = Length (a);
-    if (len == 0) {
-        return a * 0;
-    }
-
-    return a / len;
-}
-}
+            const typename Storage::value_type s);
 
 #include <lume/math/tuple_impl.h>
