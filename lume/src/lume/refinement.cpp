@@ -26,11 +26,6 @@
 #include <lume/refinement.h>
 #include <lume/topology.h>
 #include <lume/math/tuple_view.h>
-namespace
-{
-using namespace lume;
-
-}
 
 namespace lume
 {
@@ -48,6 +43,9 @@ void Refine (Mesh& mesh)
     mesh.resize_vertices (numOldVertices + numNewVertices);
 
     auto vertexCoords = math::TupleView (mesh.annex (keys::vertexCoords));
+
+    //todo: Delete this namespace and move + operator into TupleTemplate class instead
+    using namespace lume::math;
 
     for (auto const& entry : childVertices)
     {

@@ -26,6 +26,7 @@
 
 #include <lume/math/vector_math.h>
 #include <lume/math/tuple.h>
+#include <lume/math/raw/vector_math_raw.h>
 
 namespace lume::math::detail
 {
@@ -43,15 +44,25 @@ public:
         , m_tupleSize (tupleSize)
     {}
 
-    Tuple <T>      operator [] (size_t const itup)       {return Tuple (m_data + m_tupleSize * itup, m_tupleSize);}
-    ConstTuple <T> operator [] (size_t const itup) const {return Tuple (m_data + m_tupleSize * itup, m_tupleSize);}
+    Tuple <T>      operator [] (size_t const itup)       {return Tuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
+    ConstTuple <T> operator [] (size_t const itup) const {return Tuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
 
-    size_t size ()       const {return m_numTuples;}
-    size_t tuple_size () const {return m_tupleSize;}
+    size_t size ()           const {return m_numTuples;}
+    size_t tuple_size ()     const {return m_tupleSize;}
+    size_t num_components () const {return size () * tuple_size ();}
 
-    T*       data ()       {return m_data;}
-    T const* data () const {return m_data;}
+    TupleView& operator = (T const v) 
+    {
+        lume::math::raw::VecSet (m_data, num_components (), v);
+        return *this;
+    }
     
+    TupleView& normalize ()
+    {
+        lume::math::raw::VecTupNormalizeInplace (m_data, num_components (), tuple_size ());
+        return *this;
+    }
+
 private:
     T*     const m_data;
     size_t const m_numTuples;
@@ -71,12 +82,11 @@ public:
         , m_tupleSize (tupleSize)
     {}
 
-    ConstTuple <T> operator [] (size_t const itup) const {return Tuple (m_data + m_tupleSize * itup, m_tupleSize);}
+    ConstTuple <T> operator [] (size_t const itup) const {return ConstTuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
 
-    size_t size ()       const {return m_numTuples;}
-    size_t tuple_size () const {return m_tupleSize;}
-
-    T const* data () const {return m_data;}
+    size_t size ()           const {return m_numTuples;}
+    size_t tuple_size ()     const {return m_tupleSize;}
+    size_t num_components () const {return size () * tuple_size ();}
     
 private:
     T const* const m_data;
