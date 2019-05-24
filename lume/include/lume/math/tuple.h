@@ -145,11 +145,9 @@ public:
     template <class Array>
     TupleTemplate& operator -= (Array const& v);
 
-    template <class Scalar>
-    TupleTemplate& operator *= (Scalar const& v);
+    TupleTemplate& operator *= (value_type const& v);
 
-    template <class Scalar>
-    TupleTemplate& operator /= (Scalar const& v);
+    TupleTemplate& operator /= (value_type const& v);
 
     template <class Array>
     bool operator == (Array const& v) const;
@@ -198,58 +196,68 @@ using ConstTuple       = detail::TupleTemplate <detail::tuple_storage::ConstPoin
 template <class T>
 using TupleWithStorage = detail::TupleTemplate <detail::tuple_storage::Array <T>>;
 
-template <class TupleA, class TupleB>
-TupleWithStorage <typename TupleA::value_type>
-operator + (TupleA const& a, TupleB const& b)
+}
+
+template <class StorageA, class StorageB>
+lume::math::TupleWithStorage <typename StorageA::value_type>
+operator + (lume::math::detail::TupleTemplate <StorageA> const& a,
+            lume::math::detail::TupleTemplate <StorageB> const& b)
 {
     assert (a.size () == b.size ());
-    auto r = TupleWithStorage <typename TupleA::value_type>::uninitialized (a.size ());
+    auto r = lume::math::TupleWithStorage <typename StorageA::value_type>::uninitialized (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = a[i] + b[i];
     }
     return r;
 }
 
-template <class TupleA, class TupleB>
-TupleWithStorage <typename TupleA::value_type>
-operator - (TupleA const& a, TupleB const& b)
+template <class StorageA, class StorageB>
+lume::math::TupleWithStorage <typename StorageA::value_type>
+operator - (lume::math::detail::TupleTemplate <StorageA> const& a,
+            lume::math::detail::TupleTemplate <StorageB> const& b)
 {
     assert (a.size () == b.size ());
-    auto r = TupleWithStorage <typename TupleA::value_type>::uninitialized (a.size ());
+    auto r = lume::math::TupleWithStorage <typename StorageA::value_type>::uninitialized (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = a[i] - b[i];
     }
     return r;
 }
 
-template <class Array>
-TupleWithStorage <typename Array::value_type>
-operator * (const typename Array::value_type s, Array const& a)
+template <class Storage>
+lume::math::TupleWithStorage <typename Storage::value_type>
+operator * (const typename Storage::value_type s,
+            lume::math::detail::TupleTemplate <Storage> const& a)
 {
-    auto r = TupleWithStorage <typename Array::value_type>::uninitialized (a.size ());
+    auto r = lume::math::TupleWithStorage <typename Storage::value_type>::uninitialized (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = s * a[i];
     }
     return r;
 }
 
-template <class Array>
-TupleWithStorage <typename Array::value_type>
-operator * (Array const& a, const typename Array::value_type s)
+template <class Storage>
+lume::math::TupleWithStorage <typename Storage::value_type>
+operator * (lume::math::detail::TupleTemplate <Storage> const& a,
+            const typename Storage::value_type s)
 {
     return s * a;
 }
 
-template <class Array>
-TupleWithStorage <typename Array::value_type>
-operator / (Array const& a, const typename Array::value_type s)
+template <class Storage>
+lume::math::TupleWithStorage <typename Storage::value_type>
+operator / (lume::math::detail::TupleTemplate <Storage> const& a,
+            const typename Storage::value_type s)
 {
-    auto r = TupleWithStorage <typename Array:: value_type>:: uninitialized (a.size ());
+    auto r = lume::math::TupleWithStorage <typename Storage:: value_type>:: uninitialized (a.size ());
     for(size_t i = 0; i < a.size (); ++i) {
         r [i] = a[i] / s;
     }
     return r;
 }
+
+namespace lume::math
+{
 
 template <class TupleA, class TupleB>
 typename TupleA::value_type
@@ -295,7 +303,7 @@ Distance (TupleA const& a, TupleB const& b)
 }
 
 template <class Tuple>
-TupleWithStorage <typename Tuple::value_type>
+lume::math::TupleWithStorage <typename Tuple::value_type>
 Normalized (Tuple const& a)
 {
     auto const len = Length (a);
@@ -305,7 +313,6 @@ Normalized (Tuple const& a)
 
     return a / len;
 }
-
-}// end of namespace lume::math
+}
 
 #include <lume/math/tuple_impl.h>

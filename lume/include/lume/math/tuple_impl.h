@@ -61,8 +61,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator -= (Array const& v)
 }
 
 template <class Storage>
-template <class Array>
-TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (Array const& v)
+TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (value_type const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
@@ -72,8 +71,7 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (Array const& v)
 }
 
 template <class Storage>
-template <class Array>
-TupleTemplate <Storage>& TupleTemplate <Storage>:: operator /= (Array const& v)
+TupleTemplate <Storage>& TupleTemplate <Storage>:: operator /= (value_type const& v)
 {
     assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
