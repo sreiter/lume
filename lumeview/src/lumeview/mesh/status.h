@@ -37,6 +37,7 @@ enum class Status : unsigned int
     Processing,
     ComputingBoundingBox,
     ComputingEdges,
+    Refining,
 
     NumStatusEntries    // Always last!
 };

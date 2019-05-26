@@ -22,53 +22,43 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cassert>
-#include <string>
-#include <vector>
-#include <lumeview/mesh/status.h>
+#pragma once
+#include <lumeview/cmd/command.h>
+#include <lumeview/mesh/mesh_content.h>
+#include <lume/refinement.h>
 
-namespace
-{
-using Status = lumeview::mesh::Status;
-
-inline size_t Index (Status const status)
-{
-    return static_cast <size_t> (status);
-}
-
-inline size_t NumStatusEntries ()
-{
-    return Index (Status::NumStatusEntries) + 1;
-}
-
-void FillStatusMessages_EN (std::vector <std::string>& messagesOut)
-{
-    assert (messagesOut.size () >= NumStatusEntries ());
-    messagesOut [Index (Status::Ready)]                = "Ready";
-    messagesOut [Index (Status::Loading)]              = "Loading";
-    messagesOut [Index (Status::Processing)]           = "Processing";
-    messagesOut [Index (Status::ComputingBoundingBox)] = "Computing bounding box";
-    messagesOut [Index (Status::ComputingEdges)]       = "Computing edges";
-    messagesOut [Index (Status::Refining)]             = "Refining";
-}
-
-}
-
-namespace lumeview::mesh
+namespace lumeview::mesh::cmd
 {
 
-const std::string& GetStatusMessage (Status const status)
+class Refine : public lumeview::cmd::AsynchronousCommand
 {
-    static std::vector <std::string> statusMessages;
-    // static Language                  activeLanguage;
-    if (statusMessages.empty () /*|| activeLanguage != GetLanguage ()*/)
+public:
+    Refine (std::weak_ptr <MeshContent> meshContent)
+        : m_meshContent (std::move (meshContent))
+    {}
+
+    RunResult on_run () override
     {
-        statusMessages.resize (NumStatusEntries ());
-        //todo: fill with correct language
-        FillStatusMessages_EN (statusMessages);
+        std::shared_ptr <MeshContent> meshContent (m_meshContent);
+        if (meshContent == nullptr)
+            return RunResult::Done;
+
+        auto mesh = meshContent->mesh ();
+        if (mesh == nullptr)
+            return RunResult::Done;
+
+        meshContent->set_status (lumeview::mesh::Status::Refining);
+        auto refinedMesh = lume::RefineTriangles (*mesh);
+
+        // todo: transfer annex data from mesh to refinedMesh
+
+        meshContent->set_mesh (refinedMesh);
+        return RunResult::Done;
     }
 
-    return statusMessages [Index (status)];
-}
+private:
+    std::weak_ptr <MeshContent> m_meshContent;
+    std::string                 m_filename;
+};
 
-}// end of namespace lumeview::mesh
+}

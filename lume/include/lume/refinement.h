@@ -29,6 +29,6 @@
 namespace lume
 {
 
-void Refine (SPMesh mesh);
+SPMesh RefineTriangles (Mesh const & mesh);
 
 }// end of namespace lume

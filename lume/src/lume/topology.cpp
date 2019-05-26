@@ -189,7 +189,7 @@ std::vector <index_t> ValenceHistogram (const Mesh& mesh, GrobSet grobs, GrobSet
 }
 
 index_t FindUniqueSides (GrobHash& sideHashInOut,
-                         Mesh& mesh,
+                         const Mesh& mesh,
                          const GrobSet grobSet,
                          const index_t sideDim)
 {
@@ -210,7 +210,7 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 }
 
 index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
-                                 Mesh& mesh,
+                                 const Mesh& mesh,
                                  const GrobSet grobSet,
                                  const index_t sideDim,
                                  const index_t indexOffset)

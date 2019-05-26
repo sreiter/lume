@@ -51,11 +51,13 @@ public:
 
     void schedule (std::shared_ptr <lumeview::cmd::Command> cmd);
     
-    void set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename);
+    void set_mesh (std::shared_ptr <lume::Mesh> mesh, std::optional <std::string> optionalFilename = {});
     
     void   set_status (Status const status);
     Status status     () const;
     
+    std::shared_ptr <const lume::Mesh> mesh () const {return m_mesh;}
+
 private:
     std::shared_ptr <lume::Mesh> m_mesh;
     std::optional <util::FBox>   m_boundingBox;

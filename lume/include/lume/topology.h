@@ -105,7 +105,7 @@ std::vector <index_t> ValenceHistogram (const Mesh& mesh, GrobSet grobs, GrobSet
 *		     find all sides of a hybrid grid.
 * \returns  The number of newly inserted grobs.*/
 index_t FindUniqueSides (GrobHash& sideHashInOut,
-                         Mesh& mesh,
+                         const Mesh& mesh,
                          const GrobSet grobSet,
                          const index_t sideDim);
 
@@ -119,7 +119,7 @@ index_t FindUniqueSides (GrobHash& sideHashInOut,
 *         find all sides of a hybrid grid.
 * \returns  The number of newly inserted grobs.*/
 index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
-                                 Mesh& mesh,
+                                 const Mesh& mesh,
                                  const GrobSet grobSet,
                                  const index_t sideDim,
                                  const index_t indexOffset = 0);
