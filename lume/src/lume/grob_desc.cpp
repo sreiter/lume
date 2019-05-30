@@ -31,7 +31,11 @@ using namespace lume;
 const index_t g_vertexDesc [] = {
     VERTEX,        // TYPE
     0,             // DIM
-    NO_GROB_SET    // grob_set_t of sides
+    VERTICES,   // grob_set_t of 0D sides
+    1,      // Offset to num 0D sides entry counting from this entry
+    1,      // num 0D sides (CORNERS)
+    1,      // Offset to first 0D side counting from the this entry
+    VERTEX, 0
 };
 
 const index_t g_edgeDesc [] = {

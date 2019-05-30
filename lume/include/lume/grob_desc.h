@@ -25,6 +25,7 @@
 #ifndef __H__lume_grob_desc
 #define __H__lume_grob_desc
 
+#include <algorithm>
 #include "grob_set_types.h"
 #include "grob_types.h"
 #include "types.h"
@@ -48,7 +49,7 @@ public:
     inline GrobType grob_type () const              {return static_cast<GrobType>(m_rawDesc [0]);}
     inline const std::string& name () const         {return GrobTypeName (grob_type());}
     inline index_t dim () const                     {return m_rawDesc [1];}
-    inline index_t num_corners () const             {return (grob_type() == VERTEX) ? 1 : m_rawDesc [side_offset (0)];}
+    inline index_t num_corners () const             {return m_rawDesc [side_offset (0)];}
 
     inline index_t local_corner (const index_t cornerIndex) const
     {
@@ -91,7 +92,8 @@ public:
 private:
     inline index_t side_offset (const index_t sideDim) const
     {
-        return 2 + dim() + sideDim + m_rawDesc [2 + dim() + sideDim];
+        const index_t t = 2 + std::min <index_t> (dim(), 1) + sideDim;
+        return t + m_rawDesc [t];
     }
 
     inline index_t side_desc_offset (const index_t sideDim, const index_t sideIndex) const
