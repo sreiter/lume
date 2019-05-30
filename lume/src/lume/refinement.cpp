@@ -26,58 +26,145 @@
 #include <lume/refinement.h>
 #include <lume/topology.h>
 #include <lume/math/tuple_view.h>
+#include <lume/math/grob_math.h>
 
 namespace lume
 {
 
-SPMesh RefineTriangles (Mesh const & mesh)
+class Genealogy
 {
-    size_t const numOldVertices = mesh.num (VERTEX);
+public:
+    Genealogy (CSPMesh   parentMesh,
+               SPMesh    childMesh)
+        : m_parentMesh (std::move (parentMesh))
+        , m_childMesh  (std::move (childMesh))
+    {}
 
-    GrobHashMap <index_t> childVertices;
-    FindUniqueSidesNumbered (childVertices, mesh, TRIS, 1, numOldVertices);
+    Genealogy (Genealogy& other) = delete;
 
-    size_t const numChildVertices = childVertices.size ();
-    size_t const numNewVertices   = numOldVertices + numChildVertices;
-
-    auto newMesh = std::make_shared <Mesh> ();
-    newMesh->resize_vertices (numNewVertices);
-
-    auto const& oldCoordsAnnex = mesh.annex (keys::vertexCoords);
-    auto const  tupleSize = oldCoordsAnnex.tuple_size ();
-    
-    RealArrayAnnex newCoordsAnnex (tupleSize, numNewVertices);
-    auto newCoords = math::TupleView (newCoordsAnnex);
-
-    math::raw::VecCopy (newCoordsAnnex.data (), oldCoordsAnnex.size (), oldCoordsAnnex.data ());
-
-    for (auto const& entry : childVertices)
+    Genealogy (Genealogy&& other)
+        : m_parentMesh (std::move (other.m_parentMesh))
+        , m_childMesh  (std::move (other.m_childMesh))
     {
-        Grob    const& grob  = entry.first;
-        index_t const  index = entry.second;
-        newCoords [index] = 0.5 * (newCoords [grob.corner (0)] +
-                                   newCoords [grob.corner (1)]);
+        for(size_t i = 0; i < m_parents.size (); ++i) {
+            m_parents [i] = std::move (other.m_parents [i]);
+        }
+    }
+
+    Mesh const& parent_mesh () const {return *m_parentMesh;}
+    Mesh&       child_mesh  ()       {return *m_childMesh;}
+
+    /** Returns an array of grobs referring to the parent mesh. Each such grob
+        corresponds to the child at the same index of type childType in the child mesh.
+        The returned array has the same size and order as `child_mesh ().grob_array (childType)`.*/
+    std::vector <Grob> const& parents (GrobType childType)
+    {
+        assert ((m_childMesh == nullptr &&
+                 m_parents [childType].empty ()) ||
+                (m_childMesh != nullptr &&
+                 m_parents [childType].size () == m_childMesh->num (childType)));
+        return m_parents [childType];
+    }
+
+    void add_parent (GrobType const childType, const Grob& parentIndex)
+    {
+        m_parents [childType].push_back (parentIndex);
+    }
+
+    template <class Container>
+    void add_parents (GrobType const childType, Container const& newParents)
+    {
+        auto& parents = m_parents [childType];
+        for (auto const& parent : newParents)
+            parents.push_back (parent);
+    }
+
+private:
+    CSPMesh   m_parentMesh;
+    SPMesh    m_childMesh;
+    std::array <std::vector <Grob>, NUM_GROB_TYPES> m_parents;
+};
+
+
+void RefinementCallback (Genealogy genealogy)
+{
+    Mesh const& parentMesh = genealogy.parent_mesh ();
+    Mesh&       childMesh  = genealogy.child_mesh ();
+
+    auto const& parentCoords = math::TupleView (parentMesh.annex (keys::vertexCoords));
+    auto const  tupleSize = parentCoords.tuple_size ();
+
+    RealArrayAnnex childCoordsAnnex (tupleSize, childMesh.num (VERTEX));
+    auto childCoords = math::TupleView (childCoordsAnnex);
+
+    auto const& parents = genealogy.parents (VERTEX);
+
+    size_t index = 0;
+    for (auto const& parentGrob : parents)
+    {
+        childCoords [index++] = math::GrobCenter (parentGrob, parentCoords);
+    }
+
+    childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
+
+}
+
+SPMesh RefineTriangles (CSPMesh meshIn)
+{
+    if (meshIn == nullptr) {
+        return {};
+    }
+
+    Mesh const& parentMesh = *meshIn;
+    index_t const numOldVertices = static_cast <index_t> (parentMesh.num (VERTEX));
+
+    GrobHashMap <index_t> parentEdges;
+    FindUniqueSidesNumbered (parentEdges, parentMesh, TRIS, 1, numOldVertices);
+
+    index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
+    index_t const numNewVertices   = numOldVertices + numParentEdges;
+
+    auto childMesh = std::make_shared <Mesh> ();
+    Genealogy genealogy (meshIn, childMesh);
+
+    childMesh->resize_vertices (numNewVertices);
+
+    genealogy.add_parents (VERTEX, parentMesh.grobs (VERTEX));
+    for (auto const& entry : parentEdges) {
+        genealogy.add_parent (VERTEX, entry.first);
     }
 
     std::vector <index_t> newTris;
-    newTris.reserve (mesh.num_indices (TRIS) * 4);
-    for (auto const grob : mesh.grobs (TRI))
+    newTris.reserve (parentMesh.num_indices (TRIS) * 4);
+    for (auto const grob : parentMesh.grobs (TRI))
     {
+        std::array <index_t, 3> parentEdgeIndices;
+        for(size_t i = 0; i < 3; ++i) {
+            parentEdgeIndices [i] = parentEdges [grob.side (1, i)];
+        }
+
         for (index_t i = 0; i < 3; ++i)
         {
             newTris.push_back (grob.corner (i));
-            newTris.push_back (childVertices [grob.side (1, i)]);
-            newTris.push_back (childVertices [grob.side (1, (i+2) % 3)]);
+            newTris.push_back (parentEdgeIndices [i]);
+            newTris.push_back (parentEdgeIndices [(i+2) % 3]);
         }
 
-        newTris.push_back (childVertices [grob.side (1, 0)]);
-        newTris.push_back (childVertices [grob.side (1, 1)]);
-        newTris.push_back (childVertices [grob.side (1, 2)]);
+        newTris.push_back (parentEdgeIndices [0]);
+        newTris.push_back (parentEdgeIndices [1]);
+        newTris.push_back (parentEdgeIndices [2]);
     }
 
-    newMesh->set_annex (keys::vertexCoords, std::move (newCoordsAnnex));
-    newMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
-    return newMesh;
+    childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
+
+    for (auto const grob : parentMesh.grobs (TRI))
+    {
+        for(int i = 0; i < 4; ++i) {
+            genealogy.add_parent (TRI, grob);
+        }
+    }
+
+    return childMesh;
 }
 
 }// end of namespace lume

@@ -144,6 +144,11 @@ int main (int argc, char** argv)
                 auto meshContent = std::make_shared <mesh::MeshContent> (argv [i]);
                 meshContent->schedule (std::make_shared <mesh::cmd::LoadFromFile> (meshContent, argv [i]));
                 meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
+                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
+                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
+                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
+                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
+                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
 
                 auto node = std::make_shared <scene::Node> (meshContent);
                 lumeview->scene ().add_child (node);

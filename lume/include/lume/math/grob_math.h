@@ -24,15 +24,29 @@
 
 #pragma once
 
-#include <functional>
-#include <lume/mesh.h>
+#include <lume/grob.h>
+#include <lume/math/tuple_view.h>
 
-namespace lume
+namespace lume::math
 {
 
-// using RefinementCallback = std::function <void (Mesh& newMesh,
-//                                                 Mesh const& srcMesh)>;
+template <class T>
+TupleWithStorage <T>
+GrobCenter (Grob const& grob, detail::ConstTupleView <T> const& coords)
+{
+    assert (grob.num_corners ());
 
-SPMesh RefineTriangles (CSPMesh mesh);
+    auto sum = TupleWithStorage <T>::uninitialized (coords.tuple_size ());
+    sum = T (0);
 
-}// end of namespace lume
+    index_t const numCorners = grob.num_corners ();
+    for(index_t i = 0; i < numCorners; ++i) {
+        sum += coords [grob.corner (i)];
+    }
+
+    sum /= static_cast <T> (numCorners);
+
+    return sum;
+}
+
+}// end of namespace lume::math

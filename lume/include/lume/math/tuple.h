@@ -137,6 +137,8 @@ public:
         , m_size (size)
     {}
 
+    TupleTemplate& operator = (value_type const& v);
+    
     template <class Array>
     TupleTemplate& operator = (Array const& v);
 

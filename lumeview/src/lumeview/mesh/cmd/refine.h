@@ -48,7 +48,7 @@ public:
             return RunResult::Done;
 
         meshContent->set_status (lumeview::mesh::Status::Refining);
-        auto refinedMesh = lume::RefineTriangles (*mesh);
+        auto refinedMesh = lume::RefineTriangles (mesh);
 
         // todo: transfer annex data from mesh to refinedMesh
 

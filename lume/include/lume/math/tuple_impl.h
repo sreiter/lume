@@ -24,8 +24,19 @@
 
 #pragma once
 
+#include <lume/math/tuple.h>
+
 namespace lume::math::detail
 {
+
+template <class Storage>
+TupleTemplate <Storage>& TupleTemplate <Storage>:: operator = (value_type const& v)
+{
+    for(size_t i = 0; i < size (); ++i) {
+        value (i) = v;
+    }
+    return *this;
+}
 
 template <class Storage>
 template <class Array>
@@ -63,7 +74,6 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator -= (Array const& v)
 template <class Storage>
 TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (value_type const& v)
 {
-    assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
         value (i) *= v [i];
     }
@@ -73,9 +83,8 @@ TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (value_type const
 template <class Storage>
 TupleTemplate <Storage>& TupleTemplate <Storage>:: operator /= (value_type const& v)
 {
-    assert (size () == v.size ());
     for(size_t i = 0; i < size (); ++i) {
-        value (i) /= v [i];
+        value (i) /= v;
     }
     return *this;
 }
