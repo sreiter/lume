@@ -92,7 +92,7 @@ public:
 private:
     inline index_t side_offset (const index_t sideDim) const
     {
-        const index_t t = 2 + std::min <index_t> (dim(), 1) + sideDim;
+        const index_t t = 2 + std::max <index_t> (dim(), 1) + sideDim;
         return t + m_rawDesc [t];
     }
 

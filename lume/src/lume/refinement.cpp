@@ -66,9 +66,19 @@ public:
         return m_parents [childType];
     }
 
-    void add_parent (GrobType const childType, const Grob& parentIndex)
+    void add_parent (GrobType const childType, const Grob& parentGrob)
     {
-        m_parents [childType].push_back (parentIndex);
+        m_parents [childType].push_back (parentGrob);
+    }
+
+    void add_parent (GrobType const childType, const Grob& parentGrob, size_t const index)
+    {
+        auto& parents = m_parents [childType];
+        if (index >= parents.size ()) {
+            parents.resize (index + 1, Grob (VERTEX, nullptr));
+        }
+
+        parents [index] = parentGrob;
     }
 
     template <class Container>
@@ -98,6 +108,7 @@ void RefinementCallback (Genealogy genealogy)
     auto childCoords = math::TupleView (childCoordsAnnex);
 
     auto const& parents = genealogy.parents (VERTEX);
+    assert (childCoords.size () == parents.size ());
 
     size_t index = 0;
     for (auto const& parentGrob : parents)
@@ -106,7 +117,6 @@ void RefinementCallback (Genealogy genealogy)
     }
 
     childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
-
 }
 
 SPMesh RefineTriangles (CSPMesh meshIn)
@@ -130,8 +140,9 @@ SPMesh RefineTriangles (CSPMesh meshIn)
     childMesh->resize_vertices (numNewVertices);
 
     genealogy.add_parents (VERTEX, parentMesh.grobs (VERTEX));
+
     for (auto const& entry : parentEdges) {
-        genealogy.add_parent (VERTEX, entry.first);
+        genealogy.add_parent (VERTEX, entry.first, entry.second);
     }
 
     std::vector <index_t> newTris;
@@ -139,7 +150,7 @@ SPMesh RefineTriangles (CSPMesh meshIn)
     for (auto const grob : parentMesh.grobs (TRI))
     {
         std::array <index_t, 3> parentEdgeIndices;
-        for(size_t i = 0; i < 3; ++i) {
+        for(index_t i = 0; i < 3; ++i) {
             parentEdgeIndices [i] = parentEdges [grob.side (1, i)];
         }
 
@@ -163,6 +174,8 @@ SPMesh RefineTriangles (CSPMesh meshIn)
             genealogy.add_parent (TRI, grob);
         }
     }
+
+    RefinementCallback (std::move (genealogy));
 
     return childMesh;
 }
