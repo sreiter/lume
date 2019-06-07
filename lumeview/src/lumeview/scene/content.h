@@ -42,8 +42,10 @@ public:
     virtual const std::string& name () const = 0;
 
     virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui ()                           {};
+    virtual void do_imgui  ()                          {};
+    
     virtual void render (const camera::Camera& camera) {};
+
     virtual std::optional <util::FBox> bounding_box () const {return {};}
     
 };

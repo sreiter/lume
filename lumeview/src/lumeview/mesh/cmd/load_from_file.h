@@ -35,6 +35,16 @@ namespace lumeview::mesh::cmd
 class LoadFromFile : public lumeview::cmd::AsynchronousCommand
 {
 public:
+    // static CommandDesc command_desc ()
+    // {
+    //     using namespace lume::cmd;
+    //     return MakeCommandDesc <MeshContent, LoadFromFile> (
+    //             "LoadFromFile",
+    //             "Loads the contents of a mesh from a specified file."
+    //         .arg (Type::String, "filename", "The filename containing the mesh data.")
+    //         .extend_menu (Menus::Load);
+    // }
+
     LoadFromFile (std::weak_ptr <MeshContent> meshContent,
                   std::string filename)
         : m_meshContent (std::move (meshContent))

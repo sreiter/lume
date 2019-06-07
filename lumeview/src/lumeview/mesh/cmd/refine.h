@@ -33,6 +33,13 @@ namespace lumeview::mesh::cmd
 class Refine : public lumeview::cmd::AsynchronousCommand
 {
 public:
+    // static CommandDesc command_desc ()
+    // {
+    //     return MakeCommandDesc <Refine, MeshContent> (
+    //             "Refine",
+    //             "Refines the elements of a grid");
+    // }
+
     Refine (std::weak_ptr <MeshContent> meshContent)
         : m_meshContent (std::move (meshContent))
     {}

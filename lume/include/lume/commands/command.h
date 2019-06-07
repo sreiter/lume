@@ -36,19 +36,6 @@ namespace commands {
 class Command
 {
 public:
-    Command (std::string name, std::string description)
-        : m_name (std::move (name))
-        , m_description (std::move (description))
-    {}
-
-    Command (std::string name,
-             std::string description,
-             std::initializer_list <ArgumentDesc> argDesc)
-        : m_name (std::move (name))
-        , m_description (std::move (description))
-        , m_argDesc (argDesc)
-    {}
-
     virtual ~Command () = default;
 
     const std::string& name () const            {return m_name;}
@@ -64,6 +51,19 @@ public:
     }
 
 protected:
+    Command (std::string name, std::string description)
+        : m_name (std::move (name))
+        , m_description (std::move (description))
+    {}
+
+    Command (std::string name,
+             std::string description,
+             std::initializer_list <ArgumentDesc> argDesc)
+        : m_name (std::move (name))
+        , m_description (std::move (description))
+        , m_argDesc (argDesc)
+    {}
+
     virtual void run (const Arguments& args) = 0;
 
 private:

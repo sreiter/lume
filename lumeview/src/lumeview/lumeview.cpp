@@ -39,6 +39,10 @@
 #include <lumeview/lumeview_error.h>
 #include <lumeview/camera/cmd/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
+#include <lumeview/cmd/command_factory.h>
+#include <lumeview/mesh/mesh_content.h>
+#include <lumeview/mesh/cmd/load_from_file.h>
+#include <lumeview/mesh/cmd/refine.h>
 
 namespace
 {
@@ -51,6 +55,25 @@ public:
         static bool gladInitialized = gladLoadGL ();
         if (!gladInitialized) {
             throw lumeview::InitializationError () << "Unable to initialize glad.";
+        }
+
+        static bool commandFactoryInitialized = false;
+        if (!commandFactoryInitialized)
+        {
+            using namespace lumeview;
+            using Factory       = cmd::CommandFactory;
+            using SPMeshContent = std::shared_ptr <mesh::MeshContent>;
+
+            commandFactoryInitialized = true;
+
+            Factory::add_command <mesh::cmd::LoadFromFile, SPMeshContent, std::string> ("LoadFromFile")
+                .help ("Loads the specified geometry from file")
+                .arg (cmd::Type::MeshContent, "mesh", "The mesh into which to load the specified file.")
+                .arg (cmd::Type::String, "filename", "The name of the file containing the mesh data to load.");
+
+            Factory::add_command <mesh::cmd::Refine, SPMeshContent> ("Refine")
+                .help ("Refines the specified mesh.")
+                .arg (cmd::Type::MeshContent, "mesh", "The mesh which shall be refined.");
         }
 
         if (inst ().m_refCount == 0) {
