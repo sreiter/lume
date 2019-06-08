@@ -24,60 +24,14 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-#include <lumeview/camera/camera.h>
-#include <lumeview/scene/content.h>
-#include <lumeview/util/shapes.h>
-
-namespace lumeview::scene
+namespace lumeview::cmd
 {
 
-class Node
+enum class Group
 {
-public:
-    Node () = default;
-    Node (std::shared_ptr <Content> content);
-    ~Node ();
+    File_Load,
 
-    Node (const Node&) = delete;
-    Node& operator = (const Node&) = delete;
-
-    void clear ();
-
-    void add_child (std::shared_ptr <Node> node);
-    void add_child (std::shared_ptr <Content> content);
-
-    void traverse (const std::function <void (Node&)>& callback);
-    void traverse_children (const std::function <void (Node&)>& callback);
-    
-    bool has_content () const;
-    Content& content ();
-    const Content& content () const;
-
-    void render (const camera::Camera& camera);
-    std::optional <util::FBox> bounding_box ();
-    void do_imgui ();
-
-private:
-    void set_parent (Node* parent);
-    void remove_child (Node* child);
-
-    void node_clicked (Node& clickedNode);
-    
-    void select           ();
-    void deselect         ();
-    void toggle_selection ();
-    bool is_selected      () const;
-
-    std::shared_ptr <Content>            m_content;
-    std::vector <std::shared_ptr <Node>> m_children;
-    Node*                                m_parent {nullptr};
-
-    // imgui
-    bool m_isSelected {false};
+    Scene_Mesh,
 };
 
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::cmd

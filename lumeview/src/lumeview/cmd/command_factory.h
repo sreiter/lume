@@ -28,6 +28,7 @@
 #include <map>
 #include <lumeview/cmd/command.h>
 #include <lumeview/cmd/command_desc.h>
+
 namespace lumeview::cmd
 {
 

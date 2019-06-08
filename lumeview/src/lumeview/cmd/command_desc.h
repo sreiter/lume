@@ -27,6 +27,7 @@
 #include <lume/commands/arguments.h>
 #include <lume/commands/types.h>
 #include <lumeview/cmd/command.h>
+#include <lumeview/cmd/group.h>
 
 namespace lumeview::mesh
 {
@@ -98,6 +99,12 @@ public:
         return *this;
     }
 
+    CommandDesc& group (Group group)
+    {
+        m_groups.push_back (group);
+        return *this;
+    }
+
     std::vector <Argument> const& arguments () const
     {
         return m_arguments;
@@ -107,6 +114,7 @@ private:
     std::string            m_name;
     std::string            m_help;
     std::vector <Argument> m_arguments;
+    std::vector <Group>    m_groups;
 };
 
 }// end of namespace lumeview::cmd

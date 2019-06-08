@@ -47,22 +47,28 @@ Node::~Node ()
 
 void Node::clear ()
 {
-    for (auto& child : m_children) {
+    std::vector <std::shared_ptr <Node>> tmpChildren;
+    tmpChildren.swap (m_children);
+
+    for (auto& child : tmpChildren) {
         child->set_parent (nullptr);
         child->clear ();
     }
 
+    m_children.swap (tmpChildren);
     m_children.clear ();
 }
 
 void Node::add_child (std::shared_ptr <Node> node)
 {
     m_children.emplace_back (std::move (node));
+    m_children.back ()->set_parent (this);
 }
 
 void Node::add_child (std::shared_ptr <Content> content)
 {
     m_children.emplace_back (std::make_shared <Node> (std::move (content)));
+    m_children.back ()->set_parent (this);
 }
 
 void Node::traverse (const std::function <void (Node&)>& callback)
@@ -80,7 +86,9 @@ void Node::traverse_children (const std::function <void (Node&)>& callback)
 
 void Node::set_parent (Node* parent)
 {
-    if (m_parent) {
+    if (m_parent &&
+        m_parent != parent)
+    {
         m_parent->remove_child (this);
     }
 
@@ -153,10 +161,10 @@ void Node::do_imgui ()
     {
         const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
         ImGuiTreeNodeFlags nodeFlags = //ImGuiTreeNodeFlags_OpenOnArrow
-                                     //| ImGuiTreeNodeFlags_OpenOnDoubleClick
-                                     //| (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
+                                       ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                     | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
                                      //|
-                                     (isLeaf ? (ImGuiTreeNodeFlags_Leaf
+                                     | (isLeaf ? (ImGuiTreeNodeFlags_Leaf
                                                   | ImGuiTreeNodeFlags_NoTreePushOnOpen
                                                   | ImGuiTreeNodeFlags_Bullet)
                                                 : 0);
@@ -164,7 +172,7 @@ void Node::do_imgui ()
         bool nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
         
         if (ImGui::IsItemClicked()) {
-            // m_isSelected = !m_isSelected;
+            node_clicked (*this);
         }
 
         if (! isLeaf
@@ -172,6 +180,7 @@ void Node::do_imgui ()
         {
             if (m_content->has_imgui ()) {
                 m_content->do_imgui ();
+                // ImGui::Separator ();
             }
 
             ImGui::TreePop();
@@ -183,5 +192,48 @@ void Node::do_imgui ()
                             ImGui::Separator ();
                         });
 }
+
+void Node::node_clicked (Node& clickedNode)
+{
+    if (m_parent != nullptr) {
+        m_parent->node_clicked (clickedNode);
+    }
+    else
+    {
+        ImGuiIO const& io = ImGui::GetIO ();
+        if (io.KeyCtrl) {
+            clickedNode.toggle_selection ();
+        }
+        else
+        {
+            traverse ([] (Node& node) {node.deselect ();});
+            clickedNode.select ();
+        }
+    }
+}
+    
+void Node::select ()
+{
+    m_isSelected = true;
+}
+
+void Node::deselect ()
+{
+    m_isSelected = false;
+}
+
+void Node::toggle_selection ()
+{
+    if (is_selected ())
+        deselect ();
+    else
+        select ();
+}
+
+bool Node::is_selected () const
+{
+    return m_isSelected;
+}
+
 
 }//    end of namespace lumeview::scene
