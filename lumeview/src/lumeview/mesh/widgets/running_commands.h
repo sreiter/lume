@@ -24,32 +24,20 @@
 
 #pragma once
 
-#include <optional>
-#include <string>
-#include <lumeview/camera/camera.h>
-#include <lumeview/cmd/group_id.h>
-#include <lumeview/util/shapes.h>
+#include <lume/mesh.h>
+#include <lumeview/gui/imgui.h>
+#include <lumeview/cmd/command_queue.h>
 
-namespace lumeview::scene
+namespace lumeview::mesh::widgets
 {
 
-class Content
+void RunningCommands (lumeview::cmd::CommandQueue const& queue)
 {
-public:
-    Content () = default;
-    virtual ~Content () = default;
+    ImGui::SlimScope slimScope {};
 
-    // virtual std::unique_ptr <Content> clone () = 0;
-    virtual const std::string& name () const = 0;
+    // show running command with progress
+    // show scheduled commands in list
 
-    virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui  ()                          {};
-    virtual void do_command_menu ()                    {};
-    
-    virtual void render (const camera::Camera& camera) {};
+}
 
-    virtual std::optional <util::FBox> bounding_box () const {return {};}
-    
-};
-
-}// end of namespace lumeview::scene
+}// end of namespace lumeview::mesh::widgets

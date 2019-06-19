@@ -171,7 +171,12 @@ void Node::do_imgui ()
 
         bool nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
         
-        if (ImGui::IsItemClicked()) {
+        if (ImGui::BeginPopupContextItem ())
+        {
+            m_content->do_command_menu ();
+            ImGui::EndPopup ();
+        }
+        else if (ImGui::IsItemClicked()) {
             node_clicked (*this);
         }
 

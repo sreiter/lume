@@ -24,8 +24,9 @@
 
 #include <string>
 #include <lume/file_io.h>
+#include <lumeview/cmd/widgets/command_menu.h>
 #include <lumeview/mesh/mesh_content.h>
-#include <lumeview/widgets/mesh_contents.h>
+#include <lumeview/mesh/widgets/info.h>
 
 namespace lumeview::mesh
 {
@@ -55,14 +56,33 @@ void MeshContent::do_imgui ()
 
     if (m_mesh != nullptr) {
         ImGui::BeginTabBar (m_name.c_str ());
-        if (ImGui::BeginTabItem ("Content"))
+        if (ImGui::BeginTabItem ("Cmd"))
+        {
+            if (ImGui::Button ("Run"))
+            {
+
+            }
+
+            // auto runningCommands = m_commandQueue.command_names ();
+
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem ("Info"))
         {
             if (m_boundingBox) {
-                widgets::MeshContents (*m_mesh, *m_boundingBox);
+                widgets::Info (*m_mesh, *m_boundingBox);
             }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar ();
+    }
+}
+
+void MeshContent::do_command_menu ()
+{
+    auto command = cmd::widgets::CommandMenu (cmd::Group::get (cmd::GroupId::Scene_Mesh), shared_from_this ());
+    if (command != nullptr) {
+        schedule (std::move (command));
     }
 }
 

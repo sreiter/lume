@@ -24,42 +24,19 @@
 
 #pragma once
 
-#include <lume/mesh.h>
-#include <lumeview/gui/imgui.h>
-#include <lumeview/util/shapes.h>
-#include <lumeview/util/to_string.h>
-
-namespace lumeview::widgets
+namespace lumeview::cmd
 {
 
-void MeshContents (lume::Mesh& mesh, const lumeview::util::FBox& box)
+enum class GroupId
 {
-    ImGui::SlimScope slimScope {};
+    File,
+    File_Load,
 
-    auto grobTypes = mesh.grob_types ();
+    Scene,
+    Scene_Mesh,
 
-    ImGui::BeginGroup ();
-    for (auto gt : grobTypes) {
-        ImGui::Text ((lume::GrobSet (gt).name () + ":").c_str ());
-    }
-    ImGui::Text ("box min:");
-    ImGui::Text ("box max:");
-    ImGui::Text ("box size:");
-    ImGui::EndGroup ();
+    InvalidGroupId,              // always second to last!
+    NumGroupIds = InvalidGroupId // always last!
+};
 
-    ImGui::SameLine ();
-
-    ImGui::BeginGroup ();
-    for (auto gt : grobTypes) {
-        ImGui::IDScope idScope (static_cast <int> (gt));
-        ImGui::ReadOnly ("", static_cast <int> (mesh.num (gt)));
-    }
-
-    ImGui::ReadOnly ("box.min", box.min ());
-    ImGui::ReadOnly ("box.max", box.max ());
-    ImGui::ReadOnly ("box.size", box.max () - box.min ());
-
-    ImGui::EndGroup ();
-}
-
-}// end of namespace lumeview::widgets
+}// end of namespace lumeview::cmd

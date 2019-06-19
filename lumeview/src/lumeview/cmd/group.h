@@ -24,14 +24,62 @@
 
 #pragma once
 
+#include <vector>
+#include <lumeview/cmd/group_id.h>
+
 namespace lumeview::cmd
 {
 
-enum class Group
+class Group
 {
-    File_Load,
+public:
+    Group ()
+        : m_id (GroupId::InvalidGroupId)
+        , m_name ("")
+    {}
 
-    Scene_Mesh,
+    Group (GroupId id, std::string name)
+        : m_id (id)
+        , m_name (std::move (name))
+    {}
+
+    static const Group& root ();
+    static       Group& get  (GroupId id);
+
+    std::string const& name () const  {return m_name;}
+    
+    void add_command (std::string commandName);
+
+    std::vector <Group*>      const& children ()      const {return m_children;}
+    std::vector <std::string> const& command_names () const {return m_commands;}
+
+    GroupId id () const {return m_id;}
+    
+private:
+    static void init ();
+
+    Group& add_group (GroupId id, std::string name)
+    {
+        s_groups [static_cast <int> (id)] = Group (id, std::move (name));
+        m_children.push_back (&s_groups [static_cast <int> (id)]);
+        return *m_children.back ();
+    }
+
+    Group& add_leaf (GroupId id, std::string name)
+    {
+        add_group (id, name);
+        return *this;
+    }
+
+private:
+    static Group               s_root;
+    static std::vector <Group> s_groups;
+
+private:
+    GroupId                   m_id;
+    std::string               m_name;
+    std::vector <Group*>      m_children;
+    std::vector <std::string> m_commands;
 };
 
 }// end of namespace lumeview::cmd

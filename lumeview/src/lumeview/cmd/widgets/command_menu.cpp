@@ -22,34 +22,3 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-
-#include <optional>
-#include <string>
-#include <lumeview/camera/camera.h>
-#include <lumeview/cmd/group_id.h>
-#include <lumeview/util/shapes.h>
-
-namespace lumeview::scene
-{
-
-class Content
-{
-public:
-    Content () = default;
-    virtual ~Content () = default;
-
-    // virtual std::unique_ptr <Content> clone () = 0;
-    virtual const std::string& name () const = 0;
-
-    virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui  ()                          {};
-    virtual void do_command_menu ()                    {};
-    
-    virtual void render (const camera::Camera& camera) {};
-
-    virtual std::optional <util::FBox> bounding_box () const {return {};}
-    
-};
-
-}// end of namespace lumeview::scene

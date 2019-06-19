@@ -24,32 +24,42 @@
 
 #pragma once
 
-#include <optional>
-#include <string>
-#include <lumeview/camera/camera.h>
-#include <lumeview/cmd/group_id.h>
+#include <lume/mesh.h>
+#include <lumeview/gui/imgui.h>
 #include <lumeview/util/shapes.h>
+#include <lumeview/util/to_string.h>
 
-namespace lumeview::scene
+namespace lumeview::mesh::widgets
 {
 
-class Content
+void Info (lume::Mesh& mesh, const lumeview::util::FBox& box)
 {
-public:
-    Content () = default;
-    virtual ~Content () = default;
+    ImGui::SlimScope slimScope {};
 
-    // virtual std::unique_ptr <Content> clone () = 0;
-    virtual const std::string& name () const = 0;
+    auto grobTypes = mesh.grob_types ();
 
-    virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui  ()                          {};
-    virtual void do_command_menu ()                    {};
-    
-    virtual void render (const camera::Camera& camera) {};
+    ImGui::BeginGroup ();
+    for (auto gt : grobTypes) {
+        ImGui::Text ((lume::GrobSet (gt).name () + ":").c_str ());
+    }
+    ImGui::Text ("box min:");
+    ImGui::Text ("box max:");
+    ImGui::Text ("box size:");
+    ImGui::EndGroup ();
 
-    virtual std::optional <util::FBox> bounding_box () const {return {};}
-    
-};
+    ImGui::SameLine ();
 
-}// end of namespace lumeview::scene
+    ImGui::BeginGroup ();
+    for (auto gt : grobTypes) {
+        ImGui::IDScope idScope (static_cast <int> (gt));
+        ImGui::ReadOnly ("", static_cast <int> (mesh.num (gt)));
+    }
+
+    ImGui::ReadOnly ("box.min", box.min ());
+    ImGui::ReadOnly ("box.max", box.max ());
+    ImGui::ReadOnly ("box.size", box.max () - box.min ());
+
+    ImGui::EndGroup ();
+}
+
+}// end of namespace lumeview::widgets

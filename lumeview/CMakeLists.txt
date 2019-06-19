@@ -38,6 +38,8 @@ set (sources
         src/lumeview/camera/camera.cpp
 
         src/lumeview/cmd/active_command_queues.cpp
+        src/lumeview/cmd/group.cpp
+        src/lumeview/cmd/widgets/command_menu.cpp
 
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp
@@ -46,6 +48,7 @@ set (sources
 
         src/lumeview/mesh/mesh_content.cpp
         src/lumeview/mesh/status_messages.cpp
+        src/lumeview/mesh/cmd/register_mesh_commands.cpp
 
         src/lumeview/scene/node.cpp
 

@@ -34,22 +34,13 @@ namespace lumeview::cmd
 
 class CommandFactory
 {
-public:
-    template <class Cmd, class ... Args>
-    static CommandDesc& add_command (std::string name)
-    {
-        s_commandDescs [name] = Entry (CommandDesc (std::move (name)),
-                                       &CommandFactory::make_command <Cmd, Args...>);
-
-        return s_commandDescs [name].m_commandDesc;
-    }
-
 private:
+    using make_command_function_t =  std::shared_ptr <Command> (*) (std::vector <Variant> const&);
+    
     struct Entry
     {
-        using make_command_function_t =  std::shared_ptr <Command> (lumeview::cmd::CommandFactory::*) (std::vector <Variant> const&);
         Entry ()
-            : m_commandDesc ("")
+            : m_commandDesc ("", GroupId::InvalidGroupId)
             , m_makeCommandFct (nullptr)
         {}
 
@@ -62,9 +53,39 @@ private:
         make_command_function_t m_makeCommandFct;
     };
 
-    static inline std::map <std::string, Entry> s_commandDescs;
+public:
+    template <class Cmd, class ... Args>
+    static CommandDesc& add_command (std::string name, GroupId groupId)
+    {
+        auto& entry = s_commandDescs [std::make_pair (name, groupId)];
+        entry = Entry {CommandDesc (name, groupId),
+                       &CommandFactory::make_command <Cmd, Args...>};
 
+        Group::get (groupId).add_command (std::move (name));
+
+        return entry.m_commandDesc;
+    }
+
+    inline static CommandDesc const& command_desc (std::string const& name, GroupId const groupId)
+    {
+        return s_commandDescs.at (std::make_pair (name, groupId)).m_commandDesc;
+    }
+
+    inline static std::shared_ptr <Command> new_command (CommandDesc const& desc,
+                                                          std::vector <Variant> const& params)
+    {
+        Entry const& entry = s_commandDescs.at (std::make_pair (desc.name (), desc.group_id ()));
+        
+        if (entry.m_makeCommandFct != nullptr) {
+            return entry.m_makeCommandFct (params);
+        }
+
+        return {};
+    }
+
+private:
     template <class Cmd>
+    static
     std::shared_ptr <Command> make_command (std::vector <Variant> const& params)
     {
         // if (params.size () != 0) throw ...
@@ -72,6 +93,7 @@ private:
     }
 
     template <class Cmd, class T0>
+    static
     std::shared_ptr <Command> make_command (std::vector <Variant> const& params)
     {
         // if (params.size () != 1) throw ...
@@ -79,12 +101,16 @@ private:
     }
 
     template <class Cmd, class T0, class T1>
+    static
     std::shared_ptr <Command> make_command (std::vector <Variant> const& params)
     {
         // if (params.size () != 2) throw ...
         return std::make_shared <Cmd> (std::get <T0> (params[0]),
                                        std::get <T1> (params[1]));
     }
+
+private:
+    static inline std::map <std::pair <std::string, GroupId>, Entry> s_commandDescs;
 };
 
 }// end of namespace lumeview::cmd

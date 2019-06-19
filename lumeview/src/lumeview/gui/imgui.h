@@ -133,7 +133,7 @@ void ReadOnly (const char* label, glm::vec <L, float, Q> v, const char* format =
     }
 }
 
-void StatusText (const char* text, bool inProgress)
+inline void StatusText (const char* text, bool inProgress)
 {
     std::array <char, 8> progressIndicator {' ', '[', ' ', ' ', ' ', ' ', ']', 0};
     if (inProgress)

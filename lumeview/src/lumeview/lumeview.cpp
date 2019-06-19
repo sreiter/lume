@@ -40,9 +40,8 @@
 #include <lumeview/camera/cmd/interpolate.h>
 #include <lumeview/gui/imgui_binding.h>
 #include <lumeview/cmd/command_factory.h>
-#include <lumeview/mesh/mesh_content.h>
-#include <lumeview/mesh/cmd/load_from_file.h>
-#include <lumeview/mesh/cmd/refine.h>
+
+#include <lumeview/mesh/cmd/register_mesh_commands.h>
 
 namespace
 {
@@ -60,22 +59,10 @@ public:
         static bool commandFactoryInitialized = false;
         if (!commandFactoryInitialized)
         {
-            using namespace lumeview;
-            using Factory       = cmd::CommandFactory;
-            using SPMeshContent = std::shared_ptr <mesh::MeshContent>;
-
             commandFactoryInitialized = true;
+            using namespace lumeview;
 
-            Factory::add_command <mesh::cmd::LoadFromFile, SPMeshContent, std::string> ("LoadFromFile")
-                .help ("Loads the specified geometry from file")
-                .arg (cmd::Type::MeshContent, "mesh", "The mesh into which to load the specified file.")
-                .arg (cmd::Type::String, "filename", "The name of the file containing the mesh data to load.")
-                .group (cmd::Group::File_Load);
-
-            Factory::add_command <mesh::cmd::Refine, SPMeshContent> ("Refine")
-                .help ("Refines the specified mesh.")
-                .arg (cmd::Type::MeshContent, "mesh", "The mesh which shall be refined.")
-                .group (cmd::Group::Scene_Mesh);
+            mesh::cmd::RegisterMeshCommands ();
         }
 
         if (inst ().m_refCount == 0) {

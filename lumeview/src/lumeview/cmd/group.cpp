@@ -22,34 +22,43 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <lumeview/cmd/group.h>
 
-#include <optional>
-#include <string>
-#include <lumeview/camera/camera.h>
-#include <lumeview/cmd/group_id.h>
-#include <lumeview/util/shapes.h>
-
-namespace lumeview::scene
+namespace lumeview::cmd
 {
 
-class Content
+Group               Group::s_root;
+std::vector <Group> Group::s_groups;
+
+const Group& Group::root ()
 {
-public:
-    Content () = default;
-    virtual ~Content () = default;
+    init ();
+    return s_root;
+}
 
-    // virtual std::unique_ptr <Content> clone () = 0;
-    virtual const std::string& name () const = 0;
+Group& Group::get (GroupId id)
+{
+    init ();
+    return s_groups [static_cast <int> (id)];
+}
 
-    virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui  ()                          {};
-    virtual void do_command_menu ()                    {};
-    
-    virtual void render (const camera::Camera& camera) {};
+void Group::add_command (std::string commandName)
+{
+    m_commands.push_back (std::move (commandName));
+}
 
-    virtual std::optional <util::FBox> bounding_box () const {return {};}
-    
-};
+void Group::init ()
+{
+    if (s_groups.empty ())
+    {
+        s_groups.resize (static_cast <int> (GroupId::NumGroupIds) + 1);
 
-}// end of namespace lumeview::scene
+        s_root.add_group (GroupId::File, "File")
+              .add_leaf  (GroupId::File_Load, "Load");
+
+        s_root.add_group (GroupId::Scene, "Scene")
+              .add_leaf  (GroupId::Scene_Mesh, "Mesh");
+    }
+}
+
+}// end of namespace lumeview::cmd

@@ -36,7 +36,8 @@
 namespace lumeview::mesh
 {
 
-class MeshContent : public scene::Content
+class MeshContent : public scene::Content,
+                    public std::enable_shared_from_this <MeshContent>
 {
 public:
     MeshContent (std::string name);
@@ -45,6 +46,8 @@ public:
 
     bool has_imgui () const override;
     void do_imgui () override;
+    void do_command_menu () override;
+
     void render (const camera::Camera& camera) override;
 
     std::optional <util::FBox> bounding_box () const override;

@@ -83,8 +83,9 @@ private:
 class CommandDesc
 {
 public:
-    CommandDesc (std::string name)
+    CommandDesc (std::string name, GroupId groupId)
         : m_name (std::move (name))
+        , m_groupId (groupId)
     {}
 
     CommandDesc& help (std::string help)
@@ -99,22 +100,26 @@ public:
         return *this;
     }
 
-    CommandDesc& group (Group group)
-    {
-        m_groups.push_back (group);
-        return *this;
-    }
-
     std::vector <Argument> const& arguments () const
     {
         return m_arguments;
     }
 
+    GroupId group_id () const
+    {
+        return m_groupId;
+    }
+
+    std::string const& name () const
+    {
+        return m_name;
+    }
+    
 private:
     std::string            m_name;
     std::string            m_help;
     std::vector <Argument> m_arguments;
-    std::vector <Group>    m_groups;
+    GroupId                m_groupId;
 };
 
 }// end of namespace lumeview::cmd

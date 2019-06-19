@@ -22,34 +22,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <lumeview/mesh/mesh_content.h>
+#include <lumeview/mesh/cmd/load_from_file.h>
+#include <lumeview/mesh/cmd/refine.h>
+#include <lumeview/mesh/cmd/register_mesh_commands.h>
 
-#include <optional>
-#include <string>
-#include <lumeview/camera/camera.h>
-#include <lumeview/cmd/group_id.h>
-#include <lumeview/util/shapes.h>
-
-namespace lumeview::scene
+namespace lumeview::mesh::cmd
 {
 
-class Content
+void RegisterMeshCommands ()
 {
-public:
-    Content () = default;
-    virtual ~Content () = default;
-
-    // virtual std::unique_ptr <Content> clone () = 0;
-    virtual const std::string& name () const = 0;
-
-    virtual bool has_imgui () const                    {return false;}
-    virtual void do_imgui  ()                          {};
-    virtual void do_command_menu ()                    {};
+    using namespace lumeview::cmd;
     
-    virtual void render (const camera::Camera& camera) {};
+    using Factory       = CommandFactory;
+    using SPMeshContent = std::shared_ptr <mesh::MeshContent>;
 
-    virtual std::optional <util::FBox> bounding_box () const {return {};}
-    
-};
+    Factory::add_command <LoadFromFile, SPMeshContent, std::string> (
+        "LoadFromFile", GroupId::File_Load)
+        .help ("Loads the specified geometry from file")
+        .arg (Type::MeshContent, "mesh", "The mesh into which to load the specified file.")
+        .arg (Type::String, "filename", "The name of the file containing the mesh data to load.");
 
-}// end of namespace lumeview::scene
+    Factory::add_command <Refine, SPMeshContent> (
+        "Refine", GroupId::Scene_Mesh)
+        .help ("Refines the specified mesh.")
+        .arg (Type::MeshContent, "mesh", "The mesh that shall be refined.");
+}
+
+}// end of namespace lumeview::mesh::cmd
