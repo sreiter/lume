@@ -122,9 +122,7 @@ bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
 Lumeview::Lumeview () :
     m_camera (std::make_shared <camera::Camera> ()),
     m_cameraInterpolateCommand (std::make_shared<camera::cmd::Interpolate> ()),
-	m_guiShowScene (true),
-	m_guiShowLog (true),
-	m_guiShowDemo (false)
+    m_scene (std::make_shared <scene::Node> ())
 {
     StaticDependencies::init ();
 	m_imguiListener = ImGui_GetEventListener ();
@@ -137,7 +135,7 @@ Lumeview::~Lumeview ()
 
 void Lumeview::clear ()
 {
-    // m_scene.reset();
+    // m_scene->reset();
 }
 
 void Lumeview::mouse_button (int button, int action, int mods)
@@ -248,7 +246,7 @@ void Lumeview::character (unsigned int c)
 
 scene::Node& Lumeview::scene ()
 {
-    return m_scene;
+    return *m_scene;
 }
 
 void Lumeview::process_gui ()
@@ -256,15 +254,12 @@ void Lumeview::process_gui ()
     ImGui::GetStyle().FrameRounding = 0;
 	lumeview::ImGui_NewFrame();
 
-    ViewportOffsets newSceneViewportOffsets;
-
     ImVec2 mainMenuSize (0, 0);
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Panels"))
         {
             ImGui::MenuItem("Show Visualization", NULL, &m_guiShowScene);
-            ImGui::MenuItem("Show Log", NULL, &m_guiShowLog);
             ImGui::MenuItem("Show ImGui Demo", NULL, &m_guiShowDemo);
             ImGui::EndMenu();
         }
@@ -272,39 +267,59 @@ void Lumeview::process_gui ()
         ImGui::EndMainMenuBar();
     }
 
-    // if (m_guiShowLog) {
-    //     DefLog().draw("log", &m_guiShowLog);
-    // }
-
 	if (m_guiShowDemo) {
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
     }
 
-    {
-
-        const float sceneWidgetWidth = 300.f;
-        ImGui::SetNextWindowPos (ImVec2 (0, mainMenuSize.y));
-        ImGui::SetNextWindowSize (ImVec2 (sceneWidgetWidth, m_camera->viewport ().height () - mainMenuSize.y));
-        
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove
-                                      | ImGuiWindowFlags_NoResize;
-                                      // | ImGuiWindowFlags_NoCollapse;
-
-        if (ImGui::Begin("Scene", nullptr, window_flags)) {
-            newSceneViewportOffsets.m_left = sceneWidgetWidth;
-            m_scene.do_imgui ();
-        }
-        ImGui::End();
-    }
+    ViewportOffsets newSceneViewportOffsets = draw_scene_gui (mainMenuSize.y);
 
 	ImGui::Render();
 
-    if (!(newSceneViewportOffsets == m_sceneViewportOffsets))
+    if (newSceneViewportOffsets != m_sceneViewportOffsets)
     {
         m_sceneViewportOffsets = newSceneViewportOffsets;
         update_scene_viewport ();
     }
 }
+
+Lumeview::ViewportOffsets Lumeview::draw_scene_gui (float const mainMenuHeight)
+{
+    ViewportOffsets newSceneViewportOffsets;
+    const float sceneWidgetWidth = 300.f;
+    const float detailsWidgetHeight = 200.f;
+    ImVec2 sceneWidgetPos  (0, mainMenuHeight);
+    ImVec2 sceneWidgetSize (sceneWidgetWidth, m_camera->viewport ().height () - mainMenuHeight - detailsWidgetHeight);
+    ImGui::SetNextWindowPos  (sceneWidgetPos);
+    ImGui::SetNextWindowSize (sceneWidgetSize);
+    
+    if (ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
+    {
+        newSceneViewportOffsets.m_left = sceneWidgetWidth;
+        m_scene->draw_scene_tree_gui ();
+        m_scene->collect_selection (m_selectedNodes);
+        
+        ImGui::SetNextWindowPos  (ImVec2 (0, sceneWidgetPos.y + sceneWidgetSize.y));
+        ImGui::SetNextWindowSize (ImVec2 (sceneWidgetWidth, detailsWidgetHeight));
+        if (ImGui::Begin("Details", nullptr, ImGuiWindowFlags_NoTitleBar |
+                                             ImGuiWindowFlags_NoMove |
+                                             ImGuiWindowFlags_NoResize |
+                                             ImGuiWindowFlags_NoCollapse))
+        {
+            if (m_selectedNodes.size () == 1)
+            {
+                if (auto selectedNode = m_selectedNodes.front ().lock ())
+                {
+                    selectedNode->draw_details_gui ();
+                }
+            }
+        }
+        ImGui::End();
+    }
+    ImGui::End();
+
+    return newSceneViewportOffsets;
+}
+
 
 void Lumeview::render ()
 {
@@ -313,7 +328,7 @@ void Lumeview::render ()
 	glClearColor (0.25f, 0.25f, 0.25f, 1.0f);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto const bbox = m_scene.bounding_box ();
+	auto const bbox = m_scene->bounding_box ();
     if (bbox) {
         m_camera->adjust_z_clip_dists (*bbox);
     }
@@ -324,7 +339,7 @@ void Lumeview::render ()
     auto const& vp = m_camera->viewport ();
     glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
 
-    m_scene.render (*m_camera);
+    m_scene->render (*m_camera);
 
 	lumeview::ImGui_Display();
 }

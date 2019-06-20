@@ -69,18 +69,6 @@ public:
     void move_camera (const camera::Camera& to, const double duration);
 
 private:
-    void update_scene_viewport ();
-
-private:
-    using base_t = WindowEventListener;
-
-	WindowEventListener* m_imguiListener;
-
-    std::shared_ptr <camera::Camera>           m_camera;
-    std::shared_ptr <camera::cmd::Interpolate> m_cameraInterpolateCommand;
-	ArcBallControl		            m_arcBallControl;
-    scene::Node                     m_scene;
-
     struct ViewportOffsets {
         bool operator == (const ViewportOffsets& vo) const;
         bool operator != (const ViewportOffsets& vo) const;
@@ -90,13 +78,28 @@ private:
         float m_bottom {0};
     };
 
+    using base_t = WindowEventListener;
+
+private:
+    ViewportOffsets draw_scene_gui (float const mainMenuHeight);
+    void update_scene_viewport ();
+
+private:
+	WindowEventListener* m_imguiListener;
+
+    std::shared_ptr <camera::Camera>           m_camera;
+    std::shared_ptr <camera::cmd::Interpolate> m_cameraInterpolateCommand;
+	ArcBallControl		                       m_arcBallControl;
+    std::shared_ptr <scene::Node>              m_scene;
+    std::vector <std::weak_ptr <scene::Node>>  m_selectedNodes;
+
     ViewportOffsets m_sceneViewportOffsets;
 
-	bool  m_guiShowScene;
-	bool  m_guiShowLog;
-	bool  m_guiShowDemo;
+	bool  m_guiShowScene {true};
+	bool  m_guiShowDemo  {false};
 
     cmd::CommandQueue m_cameraCommandQueue;
+
 };
 
 }//	end of namespace lumeview

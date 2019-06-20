@@ -133,6 +133,32 @@ void ReadOnly (const char* label, glm::vec <L, float, Q> v, const char* format =
     }
 }
 
+template <glm::length_t L, glm::qualifier Q>
+void ReadOnly (glm::vec <L, float, Q> const& vref, const char* format = "%.3f")
+{
+    static_assert (L > 0 && L <= 4);
+
+    ImGui::IDScope idScope (static_cast <int> (reinterpret_cast <ptrdiff_t> (&vref)));
+
+    glm::vec <L, float, Q> v = vref;
+
+    switch (L)
+    {
+    case 1:
+        ReadOnly ("", v.x, format);
+        break;
+    case 2:
+        ImGui::InputFloat2("", &v.x, format, ImGuiInputTextFlags_ReadOnly);
+        break;
+    case 3:
+        ImGui::InputFloat3("", &v.x, format, ImGuiInputTextFlags_ReadOnly);
+        break;
+    case 4:
+        ImGui::InputFloat4("", &v.x, format, ImGuiInputTextFlags_ReadOnly);
+        break;
+    }
+}
+
 inline void StatusText (const char* text, bool inProgress)
 {
     std::array <char, 8> progressIndicator {' ', '[', ' ', ' ', ' ', ' ', ']', 0};

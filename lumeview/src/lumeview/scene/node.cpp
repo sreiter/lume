@@ -154,12 +154,13 @@ std::optional <util::FBox> Node::bounding_box ()
     return box;
 }
 
-void Node::do_imgui ()
+void Node::draw_scene_tree_gui ()
 {
     if (m_content != nullptr
         && !m_content->name (). empty ())
     {
-        const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
+        // const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
+        const bool isLeaf = m_children.empty ();
         ImGuiTreeNodeFlags nodeFlags = //ImGuiTreeNodeFlags_OpenOnArrow
                                        ImGuiTreeNodeFlags_OpenOnDoubleClick
                                      | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
@@ -169,7 +170,7 @@ void Node::do_imgui ()
                                                   | ImGuiTreeNodeFlags_Bullet)
                                                 : 0);
 
-        bool nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
+        bool const nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
         
         if (ImGui::BeginPopupContextItem ())
         {
@@ -180,22 +181,33 @@ void Node::do_imgui ()
             node_clicked (*this);
         }
 
-        if (! isLeaf
-            && nodeOpen)
-        {
-            if (m_content->has_imgui ()) {
-                m_content->do_imgui ();
-                // ImGui::Separator ();
-            }
-
+        if (nodeOpen) {
             ImGui::TreePop();
         }
     }
 
     traverse_children ([](auto& node) {
-                            node.do_imgui ();
+                            node.draw_scene_tree_gui ();
                             ImGui::Separator ();
                         });
+}
+
+void Node::draw_details_gui ()
+{
+    if (m_content->has_imgui ()) {
+        m_content->do_imgui ();
+        // ImGui::Separator ();
+    }
+}
+
+void Node::collect_selection (std::vector <std::weak_ptr <Node>>& selectionOut)
+{
+    selectionOut.clear ();
+    traverse (  [&selectionOut] (auto& node) {
+                    if (node.is_selected ()) {
+                        selectionOut.push_back (node.shared_from_this ());
+                    }
+                });
 }
 
 void Node::node_clicked (Node& clickedNode)
@@ -216,7 +228,7 @@ void Node::node_clicked (Node& clickedNode)
         }
     }
 }
-    
+
 void Node::select ()
 {
     m_isSelected = true;

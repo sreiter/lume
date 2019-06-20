@@ -35,7 +35,7 @@
 namespace lumeview::scene
 {
 
-class Node
+class Node : public std::enable_shared_from_this <Node>
 {
 public:
     Node () = default;
@@ -59,7 +59,11 @@ public:
 
     void render (const camera::Camera& camera);
     std::optional <util::FBox> bounding_box ();
-    void do_imgui ();
+
+    void draw_scene_tree_gui ();
+    void draw_details_gui ();
+
+    void collect_selection (std::vector <std::weak_ptr <Node>>& selectionOut);
 
 private:
     void set_parent (Node* parent);

@@ -55,9 +55,9 @@ void Info (lume::Mesh& mesh, const lumeview::util::FBox& box)
         ImGui::ReadOnly ("", static_cast <int> (mesh.num (gt)));
     }
 
-    ImGui::ReadOnly ("box.min", box.min ());
-    ImGui::ReadOnly ("box.max", box.max ());
-    ImGui::ReadOnly ("box.size", box.max () - box.min ());
+    ImGui::ReadOnly (box.min ());
+    ImGui::ReadOnly (box.max ());
+    ImGui::ReadOnly (box.max () - box.min ());
 
     ImGui::EndGroup ();
 }
