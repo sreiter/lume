@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 #include <lumeview/cmd/group_id.h>
 

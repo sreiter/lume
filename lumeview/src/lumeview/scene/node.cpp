@@ -170,7 +170,7 @@ void Node::draw_scene_tree_gui ()
                                                   | ImGuiTreeNodeFlags_Bullet)
                                                 : 0);
 
-        bool const nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, m_content->name ().c_str ());
+        bool const nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, "%s", m_content->name ().c_str ());
         
         if (ImGui::BeginPopupContextItem ())
         {

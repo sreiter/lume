@@ -89,7 +89,7 @@ private:
     std::shared_ptr <Command> make_command (std::vector <Variant> const& params)
     {
         // if (params.size () != 0) throw ...
-        return std::make_shared <Cmd> ()
+        return std::make_shared <Cmd> ();
     }
 
     template <class Cmd, class T0>

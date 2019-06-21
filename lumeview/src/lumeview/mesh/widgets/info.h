@@ -40,7 +40,7 @@ void Info (lume::Mesh& mesh, const lumeview::util::FBox& box)
 
     ImGui::BeginGroup ();
     for (auto gt : grobTypes) {
-        ImGui::Text ((lume::GrobSet (gt).name () + ":").c_str ());
+        ImGui::Text ("%s", (lume::GrobSet (gt).name () + ":").c_str ());
     }
     ImGui::Text ("box min:");
     ImGui::Text ("box max:");
