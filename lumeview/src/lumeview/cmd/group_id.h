@@ -34,6 +34,7 @@ enum class GroupId
 
     Scene,
     Scene_Mesh,
+    Scene_Mesh_Refine,
 
     InvalidGroupId,              // always second to last!
     NumGroupIds = InvalidGroupId // always last!

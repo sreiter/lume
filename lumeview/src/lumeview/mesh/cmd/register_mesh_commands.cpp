@@ -44,7 +44,7 @@ void RegisterMeshCommands ()
         .arg (Type::String, "filename", "The name of the file containing the mesh data to load.");
 
     Factory::add_command <Refine, SPMeshContent> (
-        "Refine", GroupId::Scene_Mesh)
+        "Refine", GroupId::Scene_Mesh_Refine)
         .help ("Refines the specified mesh.")
         .arg (Type::MeshContent, "mesh", "The mesh that shall be refined.");
 }

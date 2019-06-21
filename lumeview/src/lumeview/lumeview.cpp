@@ -24,7 +24,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+#include <iostream>
 #include <string>
 
 #include <glad/glad.h>	// include before other OpenGL related includes
@@ -292,6 +292,7 @@ Lumeview::ViewportOffsets Lumeview::draw_scene_gui (float const mainMenuHeight)
     ImGui::SetNextWindowPos  (sceneWidgetPos);
     ImGui::SetNextWindowSize (sceneWidgetSize);
     
+
     if (ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
     {
         newSceneViewportOffsets.m_left = sceneWidgetWidth;
@@ -319,7 +320,6 @@ Lumeview::ViewportOffsets Lumeview::draw_scene_gui (float const mainMenuHeight)
 
     return newSceneViewportOffsets;
 }
-
 
 void Lumeview::render ()
 {

@@ -57,7 +57,8 @@ void Group::init ()
               .add_leaf  (GroupId::File_Load, "Load");
 
         s_root.add_group (GroupId::Scene, "Scene")
-              .add_leaf  (GroupId::Scene_Mesh, "Mesh");
+              .add_group (GroupId::Scene_Mesh, "Mesh")
+              .add_leaf  (GroupId::Scene_Mesh_Refine, "Refine");
     }
 }
 

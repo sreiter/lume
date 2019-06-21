@@ -59,7 +59,7 @@ std::shared_ptr <Command> CommandMenu (Group const& group, Args&& ... args)
 {
     for (auto const& child : group.children ())
     {
-        if (ImGui::BeginMenu (group.name ().c_str ()))
+        if (ImGui::BeginMenu (child->name ().c_str ()))
         {
             auto command = CommandMenu (*child, std::forward <Args> (args)...);
             ImGui::EndMenu();

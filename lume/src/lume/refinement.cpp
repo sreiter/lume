@@ -27,6 +27,7 @@
 #include <lume/topology.h>
 #include <lume/math/tuple_view.h>
 #include <lume/math/grob_math.h>
+#include <lume/parallel_for.h>
 
 namespace lume
 {
@@ -119,6 +120,38 @@ void RefinementCallback (Genealogy genealogy)
     childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
 }
 
+std::vector <index_t> CreateTriangles (Mesh const& parentMesh,
+                                       GrobHashMap <index_t> const& parentEdges)
+{
+    std::vector <index_t> newTris;
+    newTris.resize (parentMesh.num_indices (TRIS) * 4);
+    
+    auto const& grobs = parentMesh.grobs (TRI);
+
+    lume::parallel_for (0, grobs.size (), [&grobs, &parentEdges, &newTris] (size_t grobIndex)
+    {
+        auto const& grob = grobs [grobIndex];
+        std::array <index_t, 3> parentEdgeIndices;
+        for(index_t i = 0; i < 3; ++i) {
+            parentEdgeIndices [i] = parentEdges.at (grob.side (1, i));
+        }
+
+        size_t ito = grobIndex * 12;
+        for (index_t i = 0; i < 3; ++i)
+        {
+            newTris [ito++] = grob.corner (i);
+            newTris [ito++] = parentEdgeIndices [i];
+            newTris [ito++] = parentEdgeIndices [(i+2) % 3];
+        }
+
+        newTris [ito++] = parentEdgeIndices [0];
+        newTris [ito++] = parentEdgeIndices [1];
+        newTris [ito++] = parentEdgeIndices [2];
+    });
+
+    return newTris;
+}
+
 SPMesh RefineTriangles (CSPMesh meshIn)
 {
     if (meshIn == nullptr) {
@@ -145,26 +178,7 @@ SPMesh RefineTriangles (CSPMesh meshIn)
         genealogy.add_parent (VERTEX, entry.first, entry.second);
     }
 
-    std::vector <index_t> newTris;
-    newTris.reserve (parentMesh.num_indices (TRIS) * 4);
-    for (auto const grob : parentMesh.grobs (TRI))
-    {
-        std::array <index_t, 3> parentEdgeIndices;
-        for(index_t i = 0; i < 3; ++i) {
-            parentEdgeIndices [i] = parentEdges [grob.side (1, i)];
-        }
-
-        for (index_t i = 0; i < 3; ++i)
-        {
-            newTris.push_back (grob.corner (i));
-            newTris.push_back (parentEdgeIndices [i]);
-            newTris.push_back (parentEdgeIndices [(i+2) % 3]);
-        }
-
-        newTris.push_back (parentEdgeIndices [0]);
-        newTris.push_back (parentEdgeIndices [1]);
-        newTris.push_back (parentEdgeIndices [2]);
-    }
+    std::vector <index_t> newTris = CreateTriangles (parentMesh, parentEdges);
 
     childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
 
