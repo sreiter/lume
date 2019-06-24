@@ -27,6 +27,7 @@
 #include <atomic>
 #include <cassert>
 #include <future>
+#include <lume/pettyprof.h>
 
 namespace lumeview::cmd
 {
@@ -126,6 +127,8 @@ private:
 
     void runner  ()
     {
+        PEPRO_BEGIN (Command__runner);
+
         assert (status () == Status::Preparing ||
                 status () == Status::Yield);
 
