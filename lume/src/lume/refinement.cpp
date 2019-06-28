@@ -28,6 +28,7 @@
 #include <lume/math/tuple_view.h>
 #include <lume/math/grob_math.h>
 #include <lume/parallel_for.h>
+#include <lume/pettyprof.h>
 
 namespace lume
 {
@@ -154,43 +155,82 @@ std::vector <index_t> CreateTriangles (Mesh const& parentMesh,
 
 SPMesh RefineTriangles (CSPMesh meshIn)
 {
+    PEPRO_FUNC ();
+
+    PEPRO_BEGIN (RefineTriangles__preparations);
     if (meshIn == nullptr) {
         return {};
     }
 
     Mesh const& parentMesh = *meshIn;
     index_t const numOldVertices = static_cast <index_t> (parentMesh.num (VERTEX));
+    PEPRO_END ();
 
+    PEPRO_BEGIN (FindUniqueSidesNumbered);
     GrobHashMap <index_t> parentEdges;
+    parentEdges.reserve (parentMesh.num (EDGE));
     FindUniqueSidesNumbered (parentEdges, parentMesh, TRIS, 1, numOldVertices);
+    PEPRO_END ();
 
+
+    PEPRO_BEGIN (AnalyzingHashMap);
+    std::cout << "HashMap stats:" << std::endl;
+    std::cout << "  bucket_count:     " << parentEdges.bucket_count () << std::endl;
+    size_t minCount = parentMesh.num (EDGE);
+    size_t maxCount = 0;
+    for(size_t i = 0; i < parentEdges.bucket_count (); ++i) {
+        minCount = std::min (minCount, parentEdges.bucket_size (i));
+        maxCount = std::max (maxCount, parentEdges.bucket_size (i));
+    }
+
+    std::cout << "  min bucket size:  " << minCount << std::endl;
+    std::cout << "  max bucket size:  " << maxCount << std::endl;
+    PEPRO_END ();
+
+    PEPRO_BEGIN (interlude);
     index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
     index_t const numNewVertices   = numOldVertices + numParentEdges;
 
     auto childMesh = std::make_shared <Mesh> ();
     Genealogy genealogy (meshIn, childMesh);
+    PEPRO_END ();
 
+    PEPRO_BEGIN (resize_vertices);
     childMesh->resize_vertices (numNewVertices);
+    PEPRO_END ();
 
+    PEPRO_BEGIN (build_genealogy_1);
     genealogy.add_parents (VERTEX, parentMesh.grobs (VERTEX));
+    PEPRO_END ();
 
+    PEPRO_BEGIN (build_genealogy_2);
     for (auto const& entry : parentEdges) {
         genealogy.add_parent (VERTEX, entry.first, entry.second);
     }
+    PEPRO_END ();
 
+    PEPRO_BEGIN (CreateTriangles);
     std::vector <index_t> newTris = CreateTriangles (parentMesh, parentEdges);
+    PEPRO_END ();
 
+    PEPRO_BEGIN (childMesh__set_grobs);
     childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
+    PEPRO_END ();
 
+    PEPRO_BEGIN (build_genealogy_3);
     for (auto const grob : parentMesh.grobs (TRI))
     {
         for(int i = 0; i < 4; ++i) {
             genealogy.add_parent (TRI, grob);
         }
     }
+    PEPRO_END ();
 
+    PEPRO_BEGIN (RefinementCallback);
     RefinementCallback (std::move (genealogy));
+    PEPRO_END ();
 
+    PEPRO_BEGIN (finalizing);
     return childMesh;
 }
 

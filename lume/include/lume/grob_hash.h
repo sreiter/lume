@@ -30,6 +30,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <limits>
 #include "grob.h"
 
 namespace std
@@ -42,12 +43,11 @@ namespace std
         {
         	using namespace lume;
         	const index_t numCorners = grob.num_corners();
-        	std::size_t h = 0;
+        	index_t minIndex = std::numeric_limits <index_t>::max ();
         	for(index_t i = 0; i < numCorners; ++i){
-        		const index_t c = grob.corner(i);
-        		h += c * c;
+        		minIndex = std::min (minIndex, grob.corner(i));
         	}
-        	return 10^8 * (grob.grob_type() + 1) + h;
+        	return 10^8 * (grob.grob_type () + 1) + static_cast <result_type> (minIndex);
         }
     };
 }//	end of namespace std

@@ -64,11 +64,16 @@ public:
         if (!e.mark->m_canceled)
         {
             const auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - e.start);
-            if (dur >= inst().m_outputThreshold)
+            if (dur >= inst().m_outputThreshold) {
                 std::cout << "PEPRO " << e.name << ":\t" << dur.count() / 1.e3 << " (s)" << std::endl;
+            }
         }
         e.mark->m_popOnDestruction = false;
         stack.pop();
+        
+        if (stack.empty ()) {
+            std::cout << "PEPRO =================================================" << std::endl;
+        }
     }
 
     static void set_output_threshold (std::chrono::milliseconds ms)
