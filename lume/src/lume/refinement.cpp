@@ -22,86 +22,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <lume/grob_hash.h>
 #include <lume/refinement.h>
-#include <lume/topology.h>
+
 #include <lume/math/tuple_view.h>
 #include <lume/math/grob_math.h>
+#include <lume/grob_hash.h>
+#include <lume/hierarchy.h>
 #include <lume/parallel_for.h>
 #include <lume/pettyprof.h>
+#include <lume/topology.h>
 
 namespace lume
 {
 
-class Genealogy
+void RefinementCallback (Hierarchy hierarchy)
 {
-public:
-    Genealogy (CSPMesh   parentMesh,
-               SPMesh    childMesh)
-        : m_parentMesh (std::move (parentMesh))
-        , m_childMesh  (std::move (childMesh))
-    {}
-
-    Genealogy (Genealogy& other) = delete;
-
-    Genealogy (Genealogy&& other)
-        : m_parentMesh (std::move (other.m_parentMesh))
-        , m_childMesh  (std::move (other.m_childMesh))
-    {
-        for(size_t i = 0; i < m_parents.size (); ++i) {
-            m_parents [i] = std::move (other.m_parents [i]);
-        }
-    }
-
-    Mesh const& parent_mesh () const {return *m_parentMesh;}
-    Mesh&       child_mesh  ()       {return *m_childMesh;}
-
-    /** Returns an array of grobs referring to the parent mesh. Each such grob
-        corresponds to the child at the same index of type childType in the child mesh.
-        The returned array has the same size and order as `child_mesh ().grob_array (childType)`.*/
-    std::vector <Grob> const& parents (GrobType childType)
-    {
-        assert ((m_childMesh == nullptr &&
-                 m_parents [childType].empty ()) ||
-                (m_childMesh != nullptr &&
-                 m_parents [childType].size () == m_childMesh->num (childType)));
-        return m_parents [childType];
-    }
-
-    void add_parent (GrobType const childType, const Grob& parentGrob)
-    {
-        m_parents [childType].push_back (parentGrob);
-    }
-
-    void add_parent (GrobType const childType, const Grob& parentGrob, size_t const index)
-    {
-        auto& parents = m_parents [childType];
-        if (index >= parents.size ()) {
-            parents.resize (index + 1, Grob (VERTEX, nullptr));
-        }
-
-        parents [index] = parentGrob;
-    }
-
-    template <class Container>
-    void add_parents (GrobType const childType, Container const& newParents)
-    {
-        auto& parents = m_parents [childType];
-        for (auto const& parent : newParents)
-            parents.push_back (parent);
-    }
-
-private:
-    CSPMesh   m_parentMesh;
-    SPMesh    m_childMesh;
-    std::array <std::vector <Grob>, NUM_GROB_TYPES> m_parents;
-};
-
-
-void RefinementCallback (Genealogy genealogy)
-{
-    Mesh const& parentMesh = genealogy.parent_mesh ();
-    Mesh&       childMesh  = genealogy.child_mesh ();
+    Mesh const& parentMesh = hierarchy.parent_mesh ();
+    Mesh&       childMesh  = hierarchy.child_mesh ();
 
     auto const& parentCoords = math::TupleView (parentMesh.annex (keys::vertexCoords));
     auto const  tupleSize = parentCoords.tuple_size ();
@@ -109,13 +46,12 @@ void RefinementCallback (Genealogy genealogy)
     RealArrayAnnex childCoordsAnnex (tupleSize, childMesh.num (VERTEX));
     auto childCoords = math::TupleView (childCoordsAnnex);
 
-    auto const& parents = genealogy.parents (VERTEX);
-    assert (childCoords.size () == parents.size ());
-
-    size_t index = 0;
-    for (auto const& parentGrob : parents)
+    auto const& relations = hierarchy.relationsForChildType (VERTEX);
+    for (auto const& relation : relations)
     {
-        childCoords [index++] = math::GrobCenter (parentGrob, parentCoords);
+        for (index_t childIndex : relation) {
+            childCoords [childIndex] = math::GrobCenter (relation.parent, parentCoords);
+        }
     }
 
     childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
@@ -187,25 +123,32 @@ SPMesh RefineTriangles (CSPMesh meshIn)
     std::cout << "  max bucket size:  " << maxCount << std::endl;
     PEPRO_END ();
 
-    PEPRO_BEGIN (interlude);
+    PEPRO_BEGIN (init_child_mesh);
     index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
     index_t const numNewVertices   = numOldVertices + numParentEdges;
 
     auto childMesh = std::make_shared <Mesh> ();
-    Genealogy genealogy (meshIn, childMesh);
     PEPRO_END ();
 
     PEPRO_BEGIN (resize_vertices);
     childMesh->resize_vertices (numNewVertices);
     PEPRO_END ();
 
-    PEPRO_BEGIN (build_genealogy_1);
-    genealogy.add_parents (VERTEX, parentMesh.grobs (VERTEX));
+    PEPRO_BEGIN (prepare_hierarchy);
+    Hierarchy hierarchy (meshIn, childMesh);
+    hierarchy.reserve (VERTEX, numNewVertices);
     PEPRO_END ();
 
-    PEPRO_BEGIN (build_genealogy_2);
+    PEPRO_BEGIN (build_hierarchy_1);
+    auto const& parentVertices = parentMesh.grobs (VERTEX);
+    for (size_t i = 0; i < parentVertices.size (); ++i) {
+        hierarchy.add_relation (parentVertices [i], VERTEX, static_cast <index_t> (i), 1);
+    }
+    PEPRO_END ();
+
+    PEPRO_BEGIN (build_hierarchy_2);
     for (auto const& entry : parentEdges) {
-        genealogy.add_parent (VERTEX, entry.first, entry.second);
+        hierarchy.add_relation (entry.first, VERTEX, entry.second, 1);
     }
     PEPRO_END ();
 
@@ -217,20 +160,24 @@ SPMesh RefineTriangles (CSPMesh meshIn)
     childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
     PEPRO_END ();
 
-    PEPRO_BEGIN (build_genealogy_3);
-    for (auto const grob : parentMesh.grobs (TRI))
-    {
-        for(int i = 0; i < 4; ++i) {
-            genealogy.add_parent (TRI, grob);
-        }
+    PEPRO_BEGIN (build_hierarchy_3);
+    auto const& parentTris = parentMesh.grobs (TRI);
+    hierarchy.reserve (TRI, parentTris.size ());
+    for (size_t i = 0; i < parentTris.size (); ++i) {
+        hierarchy.add_relation (parentTris [i], TRI, static_cast <index_t> (i), 4);
     }
     PEPRO_END ();
 
+    
+    PEPRO_BEGIN (clearingHash);
+    auto cleanUpFuture = std::async (std::launch::async, [&parentEdges] () {GrobHashMap <index_t> hashDeleter (std::move (parentEdges));});
+
     PEPRO_BEGIN (RefinementCallback);
-    RefinementCallback (std::move (genealogy));
+    RefinementCallback (std::move (hierarchy));
     PEPRO_END ();
 
-    PEPRO_BEGIN (finalizing);
+    cleanUpFuture.wait ();
+    PEPRO_END ();
     return childMesh;
 }
 
