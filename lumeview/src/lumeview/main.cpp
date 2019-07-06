@@ -36,7 +36,6 @@
 #include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/mesh/mesh_content.h>
 #include <lumeview/mesh/cmd/load_from_file.h>
-#include <lumeview/mesh/cmd/refine.h>
 
 using namespace lumeview;
 using std::cout;
@@ -143,13 +142,6 @@ int main (int argc, char** argv)
             for (int i = 1; i < argc; ++i) {
                 auto meshContent = std::make_shared <mesh::MeshContent> (argv [i]);
                 meshContent->schedule (std::make_shared <mesh::cmd::LoadFromFile> (meshContent, argv [i]));
-                meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-                // meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-                // meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-                // meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-                // meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-                // meshContent->schedule (std::make_shared <mesh::cmd::Refine> (meshContent));
-
                 auto node = std::make_shared <scene::Node> (meshContent);
                 lumeview->scene ().add_child (node);
                 nodes.emplace_back (std::move (node));

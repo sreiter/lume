@@ -29,7 +29,6 @@
 #include <lume/grob_hash.h>
 #include <lume/hierarchy.h>
 #include <lume/parallel_for.h>
-#include <lume/pettyprof.h>
 #include <lume/topology.h>
 
 namespace lume
@@ -91,93 +90,52 @@ std::vector <index_t> CreateTriangles (Mesh const& parentMesh,
 
 SPMesh RefineTriangles (CSPMesh meshIn)
 {
-    PEPRO_FUNC ();
-
-    PEPRO_BEGIN (RefineTriangles__preparations);
     if (meshIn == nullptr) {
         return {};
     }
 
     Mesh const& parentMesh = *meshIn;
     index_t const numOldVertices = static_cast <index_t> (parentMesh.num (VERTEX));
-    PEPRO_END ();
 
-    PEPRO_BEGIN (FindUniqueSidesNumbered);
     GrobHashMap <index_t> parentEdges;
     parentEdges.reserve (parentMesh.num (EDGE));
     FindUniqueSidesNumbered (parentEdges, parentMesh, TRIS, 1, numOldVertices);
-    PEPRO_END ();
 
-
-    PEPRO_BEGIN (AnalyzingHashMap);
-    std::cout << "HashMap stats:" << std::endl;
-    std::cout << "  bucket_count:     " << parentEdges.bucket_count () << std::endl;
-    size_t minCount = parentMesh.num (EDGE);
-    size_t maxCount = 0;
-    for(size_t i = 0; i < parentEdges.bucket_count (); ++i) {
-        minCount = std::min (minCount, parentEdges.bucket_size (i));
-        maxCount = std::max (maxCount, parentEdges.bucket_size (i));
-    }
-
-    std::cout << "  min bucket size:  " << minCount << std::endl;
-    std::cout << "  max bucket size:  " << maxCount << std::endl;
-    PEPRO_END ();
-
-    PEPRO_BEGIN (init_child_mesh);
     index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
     index_t const numNewVertices   = numOldVertices + numParentEdges;
 
     auto childMesh = std::make_shared <Mesh> ();
-    PEPRO_END ();
 
-    PEPRO_BEGIN (resize_vertices);
     childMesh->resize_vertices (numNewVertices);
-    PEPRO_END ();
 
-    PEPRO_BEGIN (prepare_hierarchy);
     Hierarchy hierarchy (meshIn, childMesh);
     hierarchy.reserve (VERTEX, numNewVertices);
-    PEPRO_END ();
 
-    PEPRO_BEGIN (build_hierarchy_1);
     auto const& parentVertices = parentMesh.grobs (VERTEX);
     for (size_t i = 0; i < parentVertices.size (); ++i) {
         hierarchy.add_relation (parentVertices [i], VERTEX, static_cast <index_t> (i), 1);
     }
-    PEPRO_END ();
 
-    PEPRO_BEGIN (build_hierarchy_2);
     for (auto const& entry : parentEdges) {
         hierarchy.add_relation (entry.first, VERTEX, entry.second, 1);
     }
-    PEPRO_END ();
 
-    PEPRO_BEGIN (CreateTriangles);
     std::vector <index_t> newTris = CreateTriangles (parentMesh, parentEdges);
-    PEPRO_END ();
 
-    PEPRO_BEGIN (childMesh__set_grobs);
     childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
-    PEPRO_END ();
 
-    PEPRO_BEGIN (build_hierarchy_3);
     auto const& parentTris = parentMesh.grobs (TRI);
     hierarchy.reserve (TRI, parentTris.size ());
     for (size_t i = 0; i < parentTris.size (); ++i) {
         hierarchy.add_relation (parentTris [i], TRI, static_cast <index_t> (i), 4);
     }
-    PEPRO_END ();
 
     
-    PEPRO_BEGIN (clearingHash);
     auto cleanUpFuture = std::async (std::launch::async, [&parentEdges] () {GrobHashMap <index_t> hashDeleter (std::move (parentEdges));});
 
-    PEPRO_BEGIN (RefinementCallback);
     RefinementCallback (std::move (hierarchy));
-    PEPRO_END ();
 
     cleanUpFuture.wait ();
-    PEPRO_END ();
     return childMesh;
 }
 

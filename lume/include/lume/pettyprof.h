@@ -66,12 +66,16 @@ public:
             const auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - e.start);
             if (dur >= inst().m_outputThreshold) {
                 std::cout << "PEPRO " << e.name << ":\t" << dur.count() / 1.e3 << " (s)" << std::endl;
+                ++inst ().m_numOutputsSinceLastSeparator;
             }
         }
         e.mark->m_popOnDestruction = false;
         stack.pop();
         
-        if (stack.empty ()) {
+        if (stack.empty () &&
+            inst ().m_numOutputsSinceLastSeparator > 0)
+        {
+            inst ().m_numOutputsSinceLastSeparator = 0;
             std::cout << "PEPRO =================================================" << std::endl;
         }
     }
@@ -105,6 +109,7 @@ private:
 
     std::stack <Entry>  m_stack;
     clock::duration     m_outputThreshold;
+    size_t              m_numOutputsSinceLastSeparator {0};
 };
 
 
