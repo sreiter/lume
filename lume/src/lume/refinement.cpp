@@ -39,11 +39,11 @@ void RefinementCallback (Hierarchy hierarchy)
     Mesh const& parentMesh = hierarchy.parent_mesh ();
     Mesh&       childMesh  = hierarchy.child_mesh ();
 
-    auto const& parentCoords = math::TupleView (parentMesh.annex (keys::vertexCoords));
+    auto const& parentCoords = math::MakeTupleView (parentMesh.annex (keys::vertexCoords));
     auto const  tupleSize = parentCoords.tuple_size ();
 
     RealArrayAnnex childCoordsAnnex (tupleSize, childMesh.num (VERTEX));
-    auto childCoords = math::TupleView (childCoordsAnnex);
+    auto childCoords = math::MakeTupleView (childCoordsAnnex);
 
     auto const& relations = hierarchy.relationsForChildType (VERTEX);
     for (auto const& relation : relations)

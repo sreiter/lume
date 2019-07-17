@@ -33,6 +33,7 @@
 #include "lume/mesh.h"
 #include "lume/types.h"
 #include "lume/array_annex.h"
+#include "lume/math/tuple_view.h"
 
 namespace lume {
 
@@ -44,15 +45,12 @@ namespace lume {
     not present during call-time. Both have to have a tuple size of 3.
     \{
 */
-void ComputeFaceVertexNormals3 (Mesh& mesh,
-                                const RealArrayAnnex& coordsAnnex,
-                                RealArrayAnnex& normalAnnex);
-
-void ComputeFaceVertexNormals3 (Mesh& mesh,
-                                const RealArrayAnnex& coordsAnnex,
-                                const TypedAnnexKey <RealArrayAnnex> vertexNormalsKey);
 
 void ComputeFaceVertexNormals3 (Mesh& mesh);
+
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                math::ConstTupleView <real_t> coords,
+                                math::TupleView <real_t> normals);
 /** \} */
 
 }// end of namespace lume

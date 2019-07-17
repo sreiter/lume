@@ -28,7 +28,7 @@
 #include <lume/math/tuple.h>
 #include <lume/math/raw/vector_math_raw.h>
 
-namespace lume::math::detail
+namespace lume::math
 {
 
 template <class T>
@@ -37,6 +37,11 @@ class TupleView
 public:
     using value_type = T;
     using value_t = value_type;
+
+    template <class Container>
+    TupleView (Container& container)
+        : TupleView (container.data (), container.num_tuples (), container.tuple_size ())
+    {}
 
     TupleView (T* data, size_t const numTuples, size_t const tupleSize)
         : m_data (data)
@@ -47,9 +52,10 @@ public:
     Tuple <T>      operator [] (size_t const itup)       {return Tuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
     ConstTuple <T> operator [] (size_t const itup) const {return Tuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
 
-    size_t size ()           const {return m_numTuples;}
-    size_t tuple_size ()     const {return m_tupleSize;}
-    size_t num_components () const {return size () * tuple_size ();}
+    T const* data ()           const {return m_data;}
+    size_t   size ()           const {return m_numTuples;}
+    size_t   tuple_size ()     const {return m_tupleSize;}
+    size_t   num_components () const {return size () * tuple_size ();}
 
     TupleView& operator = (T const v) 
     {
@@ -76,17 +82,29 @@ public:
     using value_type = T;
     using value_t = value_type;
 
+    template <class Container>
+    ConstTupleView (Container& container)
+        : ConstTupleView (container.data (), container.num_tuples (), container.tuple_size ())
+    {}
+
     ConstTupleView (T const* data, size_t const numTuples, size_t const tupleSize)
         : m_data (data)
         , m_numTuples (numTuples)
         , m_tupleSize (tupleSize)
     {}
 
+    ConstTupleView (const TupleView <T>& t)
+        : m_data (t.data ())
+        , m_numTuples (t.size ())
+        , m_tupleSize (t.tuple_size ())
+    {}
+
     ConstTuple <T> operator [] (size_t const itup) const {return ConstTuple <T> (m_data + m_tupleSize * itup, m_tupleSize);}
 
-    size_t size ()           const {return m_numTuples;}
-    size_t tuple_size ()     const {return m_tupleSize;}
-    size_t num_components () const {return size () * tuple_size ();}
+    T const* data ()           const {return m_data;}
+    size_t   size ()           const {return m_numTuples;}
+    size_t   tuple_size ()     const {return m_tupleSize;}
+    size_t   num_components () const {return size () * tuple_size ();}
     
 private:
     T const* const m_data;
@@ -94,23 +112,18 @@ private:
     size_t   const m_tupleSize;
 };
 
-}// end of namespace lume::math::detail
-
-namespace lume::math
-{
-
 template <class Container>
-detail::TupleView <typename Container::value_type>
-TupleView (Container& c)
+TupleView <typename Container::value_type>
+MakeTupleView (Container& c)
 {
-    return detail::TupleView <typename Container::value_type> (c.data (), c.num_tuples (), c.tuple_size ());
+    return TupleView <typename Container::value_type> (c.data (), c.num_tuples (), c.tuple_size ());
 }
 
 template <class Container>
-detail::ConstTupleView <typename Container::value_type>
-TupleView (Container const& c)
+ConstTupleView <typename Container::value_type>
+MakeTupleView (Container const& c)
 {
-    return detail::ConstTupleView <typename Container::value_type> (c.data (), c.num_tuples (), c.tuple_size ());
+    return ConstTupleView <typename Container::value_type> (c.data (), c.num_tuples (), c.tuple_size ());
 }
 
 }// end of namespace lume::math

@@ -601,8 +601,8 @@ static void TestComputeFaceVertexNormals3 ()
 {
     auto mesh = CreateMeshFromFile ("meshes/sphere.stl");
     ComputeFaceVertexNormals3 (*mesh);
-    auto coords  = math::TupleView (mesh->annex (keys::vertexCoords));
-    auto normals = math::TupleView (mesh->annex (keys::vertexNormals));
+    auto coords  = math::MakeTupleView (mesh->annex (keys::vertexCoords));
+    auto normals = math::MakeTupleView (mesh->annex (keys::vertexNormals));
 
     SaveMeshToFile (*mesh, "sphere_with_normal_coords.ugx", keys::vertexNormals);
 

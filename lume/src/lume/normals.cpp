@@ -32,16 +32,20 @@
 
 namespace lume {
 
-void ComputeFaceVertexNormals3 (Mesh& mesh,
-                                const RealArrayAnnex& coordsAnnex,
-                                RealArrayAnnex& normalAnnex)
+void ComputeFaceVertexNormals3 (Mesh& mesh)
 {
     if (!mesh.has_annex (keys::vertexCoords))
-        return;
+        throw NoSuchAnnexError () << keys::vertexCoords.name ();
 
-    auto const coords = math::TupleView (coordsAnnex);
-    auto normals      = math::TupleView (normalAnnex);
+    ComputeFaceVertexNormals3 (mesh,
+                               mesh.annex (keys::vertexCoords),
+                               mesh.annex (keys::vertexNormals));
+}
 
+void ComputeFaceVertexNormals3 (Mesh& mesh,
+                                math::ConstTupleView <real_t> coords,
+                                math::TupleView <real_t> normals)
+{
     if (coords.tuple_size() != 3)
         throw BadTupleSizeError () << coords.tuple_size();
     
@@ -64,23 +68,6 @@ void ComputeFaceVertexNormals3 (Mesh& mesh,
     }
 
     normals.normalize ();
-}
-
-void ComputeFaceVertexNormals3 (Mesh& mesh,
-                                const RealArrayAnnex& coordsAnnex,
-						        const TypedAnnexKey <RealArrayAnnex> vertexNormalsKey)
-{
-    if (!mesh.has_annex (vertexNormalsKey))
-        mesh.set_annex (vertexNormalsKey, RealArrayAnnex {3});
-    ComputeFaceVertexNormals3 (mesh, coordsAnnex, mesh.annex (vertexNormalsKey));
-}
-
-void ComputeFaceVertexNormals3 (Mesh& mesh)
-{
-    if (!mesh.has_annex (keys::vertexCoords))
-        throw NoSuchAnnexError () << keys::vertexCoords.name ();
-
-    ComputeFaceVertexNormals3 (mesh, mesh.annex (keys::vertexCoords), mesh.annex (keys::vertexNormals));
 }
 
 }// end of namespace lume

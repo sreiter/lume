@@ -32,7 +32,7 @@ namespace lume::math
 
 template <class T>
 TupleWithStorage <T>
-GrobCenter (Grob const& grob, detail::ConstTupleView <T> const& coords)
+GrobCenter (Grob const& grob, ConstTupleView <T> const& coords)
 {
     assert (grob.num_corners ());
 
