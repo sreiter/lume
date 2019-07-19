@@ -619,8 +619,8 @@ static void TestComputeFaceVertexNormals3 ()
 
 namespace impl {
 	static void TestNeighborValence (NeighborIndices nbrs,
-	                                  const index_t expectedValence,
-	                                  const std::string& linkGrobSetName)
+	                                 const index_t expectedValence,
+	                                 const std::string& linkGrobSetName)
 	{
 		const index_t numNbrs = nbrs.size();
 		COND_FAIL (numNbrs != expectedValence,
