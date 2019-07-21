@@ -41,6 +41,8 @@ set (sources
         src/lumeview/cmd/group.cpp
         src/lumeview/cmd/widgets/command_menu.cpp
 
+        src/lumeview/editor/meshed/meshed.cpp
+
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp
         src/lumeview/gui/imgui_binding.cpp

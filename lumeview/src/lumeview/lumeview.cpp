@@ -27,7 +27,7 @@
 #include <iostream>
 #include <string>
 
-#include <glad/glad.h>	// include before other OpenGL related includes
+#include <glad/glad.h>  // include before other OpenGL related includes
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -84,7 +84,6 @@ public:
 
         if (inst ().m_refCount == 0) {
             lumeview::ImGui_Shutdown();
-            lumeview::ArcBall arcBall;
         }
     }
 
@@ -105,24 +104,7 @@ private:
 namespace lumeview
 {
 
-bool Lumeview::ViewportOffsets::operator == (const ViewportOffsets& vo) const
-{
-    return m_left   == vo.m_left  &&
-           m_top    == vo.m_top   &&
-           m_right  == vo.m_right &&
-           m_bottom == vo.m_bottom;
-
-}
-
-bool Lumeview::ViewportOffsets::operator != (const ViewportOffsets& vo) const
-{
-    return ! operator == (vo);
-}
-
-Lumeview::Lumeview () :
-    m_camera (std::make_shared <camera::Camera> ()),
-    m_cameraInterpolateCommand (std::make_shared<camera::cmd::Interpolate> ()),
-    m_scene (std::make_shared <scene::Node> ())
+Lumeview::Lumeview ()
 {
     StaticDependencies::init ();
 	m_imguiListener = ImGui_GetEventListener ();
@@ -133,23 +115,14 @@ Lumeview::~Lumeview ()
     StaticDependencies::shutdown ();
 }
 
-void Lumeview::clear ()
-{
-    // m_scene->reset();
-}
-
 void Lumeview::mouse_button (int button, int action, int mods)
 {
 	base_t::mouse_button (button, action, mods);
 
 	m_imguiListener->mouse_button (button, action, mods);
 
-	if(!ImGui::GetIO().WantCaptureMouse) {
-		auto newCamera = m_arcBallControl.mouse_button (*m_camera, button, action, mods);
-        if (newCamera) {
-            move_camera (*newCamera, 0.2);
-        }
-    }
+	if(!ImGui::GetIO().WantCaptureMouse)
+		call_editor ([=] (auto& editor) {editor.mouse_button (button, action, mods);});
 }
 
 void Lumeview::mouse_move (const glm::vec2& c)
@@ -158,12 +131,8 @@ void Lumeview::mouse_move (const glm::vec2& c)
 
 	m_imguiListener->mouse_move (c);
 
-	if(!ImGui::GetIO().WantCaptureMouse) {
-		auto newCamera = m_arcBallControl.mouse_move (*m_camera, c);
-        if (newCamera) {
-            move_camera (*newCamera, 0.0);
-        }
-    }
+	if(!ImGui::GetIO().WantCaptureMouse)
+		call_editor ([=] (auto& editor) {editor.mouse_move (c);});
 }
 
 void Lumeview::mouse_scroll (const glm::vec2& o)
@@ -172,46 +141,8 @@ void Lumeview::mouse_scroll (const glm::vec2& o)
 
 	m_imguiListener->mouse_scroll (o);
 
-	if(!ImGui::GetIO().WantCaptureMouse) {
-        auto const& sourceState = m_cameraInterpolateCommand->is_executing ()
-                                ? m_cameraInterpolateCommand->target_state ()
-                                : *m_camera;
-                                
-		auto newCamera = m_arcBallControl.mouse_scroll (sourceState, o);
-
-        if (newCamera) {
-            move_camera (*newCamera, 0.1);
-        }
-    }
-}
-
-std::shared_ptr<camera::Camera> Lumeview::camera ()
-{
-    return m_camera;
-}
-
-void Lumeview::schedule_camera_command (std::shared_ptr <cmd::Command> command)
-{
-    m_cameraCommandQueue.enqueue (std::move (command));
-}
-
-void Lumeview::move_camera (const camera::Camera& to, const double duration)
-{
-    // if the interpolation command is currently running, we will tick it once more, so that
-    // the camera is actually moving before the interpolation is cancelled again.
-    if (m_cameraInterpolateCommand->is_executing ()) {
-        m_cameraCommandQueue.tick ();
-    }
-    
-    m_cameraCommandQueue.cancel_all ();
-    if (duration <= 0) {
-        *m_camera = to;
-    }
-    else
-    {
-        m_cameraInterpolateCommand->set_parameters (m_camera, *m_camera, to, duration);
-        schedule_camera_command (m_cameraInterpolateCommand);
-    }
+	if(!ImGui::GetIO().WantCaptureMouse)
+        call_editor ([=] (auto& editor) {editor.mouse_scroll (o);});
 }
 
 void Lumeview::set_viewport (const camera::Viewport& vp)
@@ -219,7 +150,7 @@ void Lumeview::set_viewport (const camera::Viewport& vp)
 	base_t::set_viewport (vp);
 
     m_imguiListener->set_viewport (vp);
-    update_scene_viewport ();
+    call_editors ([&] (auto& editor) {editor.set_viewport (vp);});
 }
 
 void Lumeview::key (int key, int scancode, int action, int mods)
@@ -227,10 +158,6 @@ void Lumeview::key (int key, int scancode, int action, int mods)
 	base_t::key (key, scancode, action, mods);
 
 	m_imguiListener->key (key, scancode, action, mods);
-
-	// if(!ImGui::GetIO().WantCaptureKeyboard) {
-	// 	m_arcBallControl.key (key, scancode, action, mods);
- //    }
 }
 
 void Lumeview::character (unsigned int c)
@@ -238,15 +165,15 @@ void Lumeview::character (unsigned int c)
 	base_t::character (c);
 
 	m_imguiListener->character (c);
-
-	// if(!ImGui::GetIO().WantCaptureKeyboard) {
-	// 	m_arcBallControl.character (c);
- //    }
 }
 
-scene::Node& Lumeview::scene ()
+void Lumeview::add_editor (std::shared_ptr <editor::Editor> editor)
 {
-    return *m_scene;
+    if (editor != nullptr)
+    {
+        m_activeEditor = editor;
+        m_editors.push_back (std::move (editor));
+    }
 }
 
 void Lumeview::process_gui ()
@@ -271,96 +198,15 @@ void Lumeview::process_gui ()
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
     }
 
-    ViewportOffsets newSceneViewportOffsets = draw_scene_gui (mainMenuSize.y);
+    call_editor ([] (auto& editor) {editor.process_gui ();});
 
 	ImGui::Render();
-
-    if (newSceneViewportOffsets != m_sceneViewportOffsets)
-    {
-        m_sceneViewportOffsets = newSceneViewportOffsets;
-        update_scene_viewport ();
-    }
-}
-
-Lumeview::ViewportOffsets Lumeview::draw_scene_gui (float const mainMenuHeight)
-{
-    ViewportOffsets newSceneViewportOffsets;
-    const float sceneWidgetWidth = 300.f;
-    const float detailsWidgetHeight = 200.f;
-    ImVec2 sceneWidgetPos  (0, mainMenuHeight);
-    ImVec2 sceneWidgetSize (sceneWidgetWidth, m_camera->viewport ().height () - mainMenuHeight - detailsWidgetHeight);
-    ImGui::SetNextWindowPos  (sceneWidgetPos);
-    ImGui::SetNextWindowSize (sceneWidgetSize);
-    
-
-    if (ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
-    {
-        newSceneViewportOffsets.m_left = sceneWidgetWidth;
-        m_scene->draw_scene_tree_gui ();
-        m_scene->collect_selection (m_selectedNodes);
-        
-        ImGui::SetNextWindowPos  (ImVec2 (0, sceneWidgetPos.y + sceneWidgetSize.y));
-        ImGui::SetNextWindowSize (ImVec2 (sceneWidgetWidth, detailsWidgetHeight));
-        if (ImGui::Begin("Details", nullptr, ImGuiWindowFlags_NoTitleBar |
-                                             ImGuiWindowFlags_NoMove |
-                                             ImGuiWindowFlags_NoResize |
-                                             ImGuiWindowFlags_NoCollapse))
-        {
-            if (m_selectedNodes.size () == 1)
-            {
-                if (auto selectedNode = m_selectedNodes.front ().lock ())
-                {
-                    selectedNode->draw_details_gui ();
-                }
-            }
-        }
-        ImGui::End();
-    }
-    ImGui::End();
-
-    return newSceneViewportOffsets;
 }
 
 void Lumeview::render ()
 {
-	glEnable (GL_DEPTH_TEST);
-
-	glClearColor (0.25f, 0.25f, 0.25f, 1.0f);
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	auto const bbox = m_scene->bounding_box ();
-    if (bbox) {
-        m_camera->adjust_z_clip_dists (*bbox);
-    }
-    else {
-        m_camera->set_z_clip_dists (glm::vec2 (0.001, 2));
-    }
-
-    auto const& vp = m_camera->viewport ();
-    glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
-
-    m_scene->render (*m_camera);
-
+	call_editor ([] (auto& editor) {editor.render ();});
 	lumeview::ImGui_Display();
-}
-
-void Lumeview::update_scene_viewport ()
-{
-    const auto vp       = viewport ();
-    const auto& offsets = m_sceneViewportOffsets;
-
-    camera::Viewport sceneVP (static_cast <int> (vp.x ()       + offsets.m_left),
-                              static_cast <int> (vp.y ()       + offsets.m_top),
-                              static_cast <int> (vp.width ()   - (offsets.m_left + offsets.m_right)),
-                              static_cast <int> (vp.height ()  - (offsets.m_top  + offsets.m_bottom)));
-
-    if (sceneVP.width  () <= 0 ||
-        sceneVP.height () <= 0)
-    {
-        sceneVP = camera::Viewport (0, 0, 1, 1);
-    }
-    
-    m_camera->set_viewport (sceneVP);
 }
 
 }//	end of namespace lumeview

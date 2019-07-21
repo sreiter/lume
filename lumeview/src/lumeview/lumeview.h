@@ -28,13 +28,8 @@
 #define __H__lumeview_lumeview
 
 #include <memory>
-#include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/gui/window_event_listener.h>
-#include <lumeview/camera/camera.h>
-#include <lumeview/scene/node.h>
-#include <lumeview/cmd/command.h>
-#include <lumeview/cmd/command_queue.h>
-#include <lumeview/camera/cmd/interpolate.h>
+#include <lumeview/editor/editor.h>
 
 namespace lumeview {
 
@@ -44,9 +39,6 @@ public:
 	Lumeview ();
     ~Lumeview ();
 
-	void clear();
-	
-	// OVERRIDES FOR WindowEventListener
 	void mouse_button (int button, int action, int mods) override;
   	void mouse_move (const glm::vec2& c) override;
   	void mouse_scroll (const glm::vec2& o) override;
@@ -56,50 +48,38 @@ public:
   	void key (int key, int scancode, int action, int mods) override;
   	void character (unsigned int c) override;
 
-    scene::Node& scene ();
+    void add_editor (std::shared_ptr <editor::Editor> editor);
 
   	void process_gui ();
 
   	void render ();
 
-    std::shared_ptr<camera::Camera> camera ();
-
-    void schedule_camera_command (std::shared_ptr <cmd::Command> command);
-
-    void move_camera (const camera::Camera& to, const double duration);
-
 private:
-    struct ViewportOffsets {
-        bool operator == (const ViewportOffsets& vo) const;
-        bool operator != (const ViewportOffsets& vo) const;
-        float m_left   {0};
-        float m_top    {0};
-        float m_right  {0};
-        float m_bottom {0};
-    };
-
     using base_t = WindowEventListener;
 
 private:
-    ViewportOffsets draw_scene_gui (float const mainMenuHeight);
-    void update_scene_viewport ();
+    template <class Function>
+    void call_editor (Function&& function)
+    {
+        if (m_activeEditor != nullptr)
+            function (*m_activeEditor);
+    }
+
+    template <class Function>
+    void call_editors (Function&& function)
+    {
+        for (auto& editor : m_editors)
+            if (editor != nullptr)
+                function (*editor);
+    }
 
 private:
-	WindowEventListener* m_imguiListener;
+	WindowEventListener*                           m_imguiListener;
+    std::vector <std::shared_ptr <editor::Editor>> m_editors;
+    std::shared_ptr <editor::Editor>               m_activeEditor;
 
-    std::shared_ptr <camera::Camera>           m_camera;
-    std::shared_ptr <camera::cmd::Interpolate> m_cameraInterpolateCommand;
-	ArcBallControl		                       m_arcBallControl;
-    std::shared_ptr <scene::Node>              m_scene;
-    std::vector <std::weak_ptr <scene::Node>>  m_selectedNodes;
-
-    ViewportOffsets m_sceneViewportOffsets;
-
-	bool  m_guiShowScene {true};
-	bool  m_guiShowDemo  {false};
-
-    cmd::CommandQueue m_cameraCommandQueue;
-
+    bool  m_guiShowScene {true};
+    bool  m_guiShowDemo  {false};
 };
 
 }//	end of namespace lumeview

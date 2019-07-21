@@ -156,11 +156,12 @@ std::optional <util::FBox> Node::bounding_box ()
 
 void Node::draw_scene_tree_gui ()
 {
-    if (m_content != nullptr
-        && !m_content->name (). empty ())
+    const bool isLeaf = m_children.empty ();
+    bool nodeOpen = false;
+
+    if (m_content != nullptr &&
+        !m_content->name (). empty ())
     {
-        // const bool isLeaf = m_children.empty () && !m_content->has_imgui ();
-        const bool isLeaf = m_children.empty ();
         ImGuiTreeNodeFlags nodeFlags = //ImGuiTreeNodeFlags_OpenOnArrow
                                        ImGuiTreeNodeFlags_OpenOnDoubleClick
                                      | (m_isSelected ? ImGuiTreeNodeFlags_Selected : 0)
@@ -170,7 +171,7 @@ void Node::draw_scene_tree_gui ()
                                                   | ImGuiTreeNodeFlags_Bullet)
                                                 : 0);
 
-        bool const nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, "%s", m_content->name ().c_str ());
+        nodeOpen = ImGui::TreeNodeEx (static_cast <void*> (this), nodeFlags, "%s", m_content->name ().c_str ());
         
         if (ImGui::BeginPopupContextItem ())
         {
@@ -180,23 +181,25 @@ void Node::draw_scene_tree_gui ()
         else if (ImGui::IsItemClicked()) {
             node_clicked (*this);
         }
+    }
+
+    if (!isLeaf)
+    {
+        traverse_children ([](auto& node) {
+                                node.draw_scene_tree_gui ();
+                                ImGui::Separator ();
+                            });
 
         if (nodeOpen) {
             ImGui::TreePop();
         }
     }
-
-    traverse_children ([](auto& node) {
-                            node.draw_scene_tree_gui ();
-                            ImGui::Separator ();
-                        });
 }
 
 void Node::draw_details_gui ()
 {
     if (m_content->has_imgui ()) {
         m_content->do_imgui ();
-        // ImGui::Separator ();
     }
 }
 
