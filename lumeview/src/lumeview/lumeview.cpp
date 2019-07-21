@@ -83,6 +83,7 @@ public:
         }
 
         if (inst ().m_refCount == 0) {
+            lumeview::cmd::CommandFactory::clear_command_descs ();
             lumeview::ImGui_Shutdown();
         }
     }

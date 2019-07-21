@@ -57,7 +57,7 @@ public:
     template <class Cmd, class ... Args>
     static CommandDesc& add_command (std::string name, GroupId groupId)
     {
-        auto& entry = s_commandDescs [std::make_pair (name, groupId)];
+        auto& entry = command_desc_map () [std::make_pair (name, groupId)];
         entry = Entry {CommandDesc (name, groupId),
                        &CommandFactory::make_command <Cmd, Args...>};
 
@@ -68,13 +68,13 @@ public:
 
     inline static CommandDesc const& command_desc (std::string const& name, GroupId const groupId)
     {
-        return s_commandDescs.at (std::make_pair (name, groupId)).m_commandDesc;
+        return command_desc_map ().at (std::make_pair (name, groupId)).m_commandDesc;
     }
 
     inline static std::shared_ptr <Command> new_command (CommandDesc const& desc,
                                                           std::vector <Variant> const& params)
     {
-        Entry const& entry = s_commandDescs.at (std::make_pair (desc.name (), desc.group_id ()));
+        Entry const& entry = command_desc_map ().at (std::make_pair (desc.name (), desc.group_id ()));
         
         if (entry.m_makeCommandFct != nullptr) {
             return entry.m_makeCommandFct (params);
@@ -83,7 +83,24 @@ public:
         return {};
     }
 
+    inline static void clear_command_descs ()
+    {
+        s_commandDescMap.release ();
+    }
+
 private:
+    using CommandDescMap = std::map <std::pair <std::string, GroupId>, Entry>;
+
+private:
+    static CommandDescMap& command_desc_map ()
+    {
+        if (s_commandDescMap == nullptr)
+        {
+            s_commandDescMap = std::make_unique <CommandDescMap> ();
+        }
+        return *s_commandDescMap;
+    }
+
     template <class Cmd>
     static
     std::shared_ptr <Command> make_command (std::vector <Variant> const& params)
@@ -110,7 +127,7 @@ private:
     }
 
 private:
-    static inline std::map <std::pair <std::string, GroupId>, Entry> s_commandDescs;
+    static inline std::unique_ptr <CommandDescMap> s_commandDescMap;
 };
 
 }// end of namespace lumeview::cmd
