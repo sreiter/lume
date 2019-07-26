@@ -46,6 +46,8 @@ public:
     float width () const        {return m_max.x - m_min.x;}
     float height () const       {return m_max.y - m_min.y;}
 
+    vec2 size () const          {return m_max - m_min;}
+
     vec2& min ()             {return m_min;}
     const vec2& min () const {return m_min;}
 

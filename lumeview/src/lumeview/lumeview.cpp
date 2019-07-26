@@ -182,7 +182,8 @@ void Lumeview::process_gui ()
     ImGui::GetStyle().FrameRounding = 0;
 	lumeview::ImGui_NewFrame();
 
-    ImVec2 mainMenuSize (0, 0);
+    auto editorFrame = viewport ().to_rect ();
+
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Panels"))
@@ -191,7 +192,7 @@ void Lumeview::process_gui ()
             ImGui::MenuItem("Show ImGui Demo", NULL, &m_guiShowDemo);
             ImGui::EndMenu();
         }
-        mainMenuSize = ImGui::GetWindowSize ();
+        editorFrame.min ().y += ImGui::GetWindowSize ().y;
         ImGui::EndMainMenuBar();
     }
 
@@ -199,7 +200,7 @@ void Lumeview::process_gui ()
 		ImGui::ShowDemoWindow (&m_guiShowDemo);
     }
 
-    call_editor ([] (auto& editor) {editor.process_gui ();});
+    call_editor ([&] (auto& editor) {editor.process_gui (editorFrame);});
 
 	ImGui::Render();
 }

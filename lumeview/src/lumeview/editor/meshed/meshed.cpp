@@ -36,22 +36,9 @@ Meshed::Meshed ()
 {
 }
 
-bool Meshed::ViewportOffsets::operator == (const ViewportOffsets& vo) const
-{
-    return m_left   == vo.m_left  &&
-           m_top    == vo.m_top   &&
-           m_right  == vo.m_right &&
-           m_bottom == vo.m_bottom;
-}
-
-bool Meshed::ViewportOffsets::operator != (const ViewportOffsets& vo) const
-{
-    return ! operator == (vo);
-}
-
 void Meshed::mouse_button (int button, int action, int mods)
 {
-    base_t::mouse_button (button, action, mods);
+    Editor::mouse_button (button, action, mods);
 
     auto newCamera = m_arcBallControl.mouse_button (*m_camera, button, action, mods);
     if (newCamera) {
@@ -61,7 +48,7 @@ void Meshed::mouse_button (int button, int action, int mods)
 
 void Meshed::mouse_move (const glm::vec2& c)
 {
-    base_t::mouse_move (c);
+    Editor::mouse_move (c);
 
     auto newCamera = m_arcBallControl.mouse_move (*m_camera, c);
     if (newCamera) {
@@ -71,7 +58,7 @@ void Meshed::mouse_move (const glm::vec2& c)
 
 void Meshed::mouse_scroll (const glm::vec2& o)
 {
-    base_t::mouse_scroll (o);
+    Editor::mouse_scroll (o);
     auto const& sourceState = m_cameraInterpolateCommand->is_executing ()
                             ? m_cameraInterpolateCommand->target_state ()
                             : *m_camera;
@@ -117,40 +104,40 @@ scene::Node& Meshed::scene ()
     return *m_scene;
 }
 
-bool Meshed::process_gui ()
-{
-    ImVec2 mainMenuSize (0, 0);
-    
-    ViewportOffsets newSceneViewportOffsets = draw_scene_gui (mainMenuSize.y);
+bool Meshed::process_gui (util::Rect const& frame)
+{    
+    bool guiWasExpanded = m_guiExpanded;
+    m_guiExpanded = draw_scene_gui (frame);
 
-    if (newSceneViewportOffsets != m_sceneViewportOffsets)
+    if (m_guiExpanded != guiWasExpanded)
     {
-        m_sceneViewportOffsets = newSceneViewportOffsets;
-        update_scene_viewport ();
+        util::Rect newFrame = frame;
+        if (m_guiExpanded)
+        {
+            newFrame.min ().x += m_sceneWidgetWidth;
+        }
+
+        m_camera->set_viewport (camera::Viewport::from_rect (newFrame));
     }
 
     return true;
 }
 
-Meshed::ViewportOffsets Meshed::draw_scene_gui (float const mainMenuHeight)
+bool Meshed::draw_scene_gui (util::Rect const& frame)
 {
-    ViewportOffsets newSceneViewportOffsets;
-    const float sceneWidgetWidth = 300.f;
-    const float detailsWidgetHeight = 200.f;
-    ImVec2 sceneWidgetPos  (0, mainMenuHeight);
-    ImVec2 sceneWidgetSize (sceneWidgetWidth, m_camera->viewport ().height () - mainMenuHeight - detailsWidgetHeight);
+    ImVec2 sceneWidgetPos  (frame.min ().x, frame.min ().y);
+    ImVec2 sceneWidgetSize (m_sceneWidgetWidth, frame.height () - m_detailsWidgetHeight);
     ImGui::SetNextWindowPos  (sceneWidgetPos);
     ImGui::SetNextWindowSize (sceneWidgetSize);
     
-
-    if (ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
+    bool guiExpanded = ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    if (guiExpanded)
     {
-        newSceneViewportOffsets.m_left = sceneWidgetWidth;
         m_scene->draw_scene_tree_gui ();
         m_scene->collect_selection (m_selectedNodes);
         
         ImGui::SetNextWindowPos  (ImVec2 (0, sceneWidgetPos.y + sceneWidgetSize.y));
-        ImGui::SetNextWindowSize (ImVec2 (sceneWidgetWidth, detailsWidgetHeight));
+        ImGui::SetNextWindowSize (ImVec2 (m_sceneWidgetWidth, m_detailsWidgetHeight));
         if (ImGui::Begin("Details", nullptr, ImGuiWindowFlags_NoTitleBar |
                                              ImGuiWindowFlags_NoMove |
                                              ImGuiWindowFlags_NoResize |
@@ -168,7 +155,7 @@ Meshed::ViewportOffsets Meshed::draw_scene_gui (float const mainMenuHeight)
     }
     ImGui::End();
 
-    return newSceneViewportOffsets;
+    return guiExpanded;
 }
 
 void Meshed::render ()
@@ -190,25 +177,6 @@ void Meshed::render ()
     glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
 
     m_scene->render (*m_camera);
-}
-
-void Meshed::update_scene_viewport ()
-{
-    const auto  vp      = viewport ();
-    const auto& offsets = m_sceneViewportOffsets;
-
-    camera::Viewport sceneVP (static_cast <int> (vp.x ()       + offsets.m_left),
-                              static_cast <int> (vp.y ()       + offsets.m_top),
-                              static_cast <int> (vp.width ()   - (offsets.m_left + offsets.m_right)),
-                              static_cast <int> (vp.height ()  - (offsets.m_top  + offsets.m_bottom)));
-
-    if (sceneVP.width  () <= 0 ||
-        sceneVP.height () <= 0)
-    {
-        sceneVP = camera::Viewport (0, 0, 1, 1);
-    }
-    
-    m_camera->set_viewport (sceneVP);
 }
 
 }// end of namespace lumeview::editor::meshed

@@ -24,13 +24,14 @@
 
 #pragma once
 
-#include <lumeview/editor/editor.h>
-#include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/camera/camera.h>
-#include <lumeview/scene/node.h>
+#include <lumeview/camera/cmd/interpolate.h>
 #include <lumeview/cmd/command.h>
 #include <lumeview/cmd/command_queue.h>
-#include <lumeview/camera/cmd/interpolate.h>
+#include <lumeview/editor/editor.h>
+#include <lumeview/gui/arc_ball_control.h>
+#include <lumeview/scene/node.h>
+#include <lumeview/util/rect.h>
 
 namespace lumeview::editor::meshed
 {
@@ -44,7 +45,7 @@ public:
     void mouse_move   (const glm::vec2& c) override;
     void mouse_scroll (const glm::vec2& o) override;
 
-    bool process_gui () override;
+    bool process_gui (util::Rect const& frame) override;
     void render      () override;
 
     scene::Node& scene ();
@@ -56,20 +57,7 @@ public:
     void move_camera (const camera::Camera& to, const double duration);
 
 private:
-    struct ViewportOffsets {
-        bool operator == (const ViewportOffsets& vo) const;
-        bool operator != (const ViewportOffsets& vo) const;
-        float m_left   {0};
-        float m_top    {0};
-        float m_right  {0};
-        float m_bottom {0};
-    };
-
-    using base_t = Editor;
-
-private:
-    ViewportOffsets draw_scene_gui (float const mainMenuHeight);
-    void update_scene_viewport ();
+    bool draw_scene_gui (util::Rect const& frame);
 
 private:
     ArcBallControl                             m_arcBallControl;
@@ -78,9 +66,12 @@ private:
     std::shared_ptr <scene::Node>              m_scene;
     std::vector <std::weak_ptr <scene::Node>>  m_selectedNodes;
 
-    ViewportOffsets m_sceneViewportOffsets;
-
     cmd::CommandQueue m_cameraCommandQueue;
+
+    bool m_guiExpanded {false};
+
+    const float m_sceneWidgetWidth = 300.f;
+    const float m_detailsWidgetHeight = 200.f;
 };
 
 }// end of namespace lumeview::editor::meshed

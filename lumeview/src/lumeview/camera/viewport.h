@@ -26,6 +26,7 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include <lumeview/util/rect.h>
 
 namespace lumeview::camera
 {
@@ -54,12 +55,22 @@ public:
     glm::vec2  size_f ()   const    {return glm::vec2  (static_cast<float> (m_width), static_cast<float> (m_height));}
     glm::ivec4 to_ivec4 () const    {return glm::ivec4 (m_x, m_y, m_width, m_height);}
     
-    void from_ivec4 (const glm::ivec4& v) 
+    util::Rect to_rect () const     {return {static_cast <float> (x ()),
+                                             static_cast <float> (y ()),
+                                             static_cast <float> (x () + width ()),
+                                             static_cast <float> (y () + height ())};}
+
+    static Viewport from_ivec4 (const glm::ivec4& v) 
     {
-        m_x      = v.x;
-        m_y      = v.y;
-        m_width  = v.z;
-        m_height = v.w;
+        return {v.x, v.y, v.z, v.w};
+    }
+
+    static Viewport from_rect (const util::Rect& rect) 
+    {
+        return {static_cast <int> (rect.min ().x),
+                static_cast <int> (rect.min ().y),
+                static_cast <int> (rect.width ()),
+                static_cast <int> (rect.height ())};
     }
     
 private:

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <lumeview/gui/window_event_listener.h>
+#include <lumeview/util/rect.h>
 
 namespace lumeview::editor
 {
@@ -34,7 +35,7 @@ class Editor : public WindowEventListener
 public:
     virtual ~Editor () {}
 
-    virtual bool process_gui () = 0;
+    virtual bool process_gui (util::Rect const& frame) = 0;
     virtual void render      () = 0;
 };
 
