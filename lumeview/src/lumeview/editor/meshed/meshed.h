@@ -31,7 +31,6 @@
 #include <lumeview/editor/editor.h>
 #include <lumeview/gui/arc_ball_control.h>
 #include <lumeview/scene/node.h>
-#include <lumeview/util/rect.h>
 
 namespace lumeview::editor::meshed
 {

@@ -173,9 +173,6 @@ void Meshed::render ()
         m_camera->set_z_clip_dists (glm::vec2 (0.001, 2));
     }
 
-    auto const& vp = m_camera->viewport ();
-    glViewport (vp.x (), vp.y (), vp.width (), vp.height ());
-
     m_scene->render (*m_camera);
 }
 
