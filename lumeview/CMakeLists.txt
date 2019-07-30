@@ -42,6 +42,7 @@ set (sources
         src/lumeview/cmd/widgets/command_menu.cpp
 
         src/lumeview/editor/meshed/meshed.cpp
+        src/lumeview/editor/isodraw/isodraw.cpp
 
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp
@@ -49,6 +50,7 @@ set (sources
         src/lumeview/gui/window_event_listener.cpp
 
         src/lumeview/mesh/mesh_content.cpp
+        src/lumeview/mesh/mesh_factory.cpp
         src/lumeview/mesh/status_messages.cpp
         src/lumeview/mesh/cmd/register_mesh_commands.cpp
 
