@@ -81,8 +81,9 @@ template <class T> class ArrayAnnex;
 
 namespace keys
 {
-    const TypedAnnexKey <ArrayAnnex <real_t>> vertexCoords ("coords", VERTEX);
+    const TypedAnnexKey <ArrayAnnex <real_t>> vertexCoords  ("coords", VERTEX);
     const TypedAnnexKey <ArrayAnnex <real_t>> vertexNormals ("normal", VERTEX);
+    const TypedAnnexKey <ArrayAnnex <real_t>> vertexUV      ("uv",     VERTEX);
 }
 
 inline std::string to_string (const AnnexKey& v) {
