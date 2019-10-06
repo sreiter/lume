@@ -40,12 +40,7 @@ Isodraw::Isodraw ()
     m_camera.set_translation (glm::vec3 (0, 0, 2.f));
 }
 
-Isodraw::~Isodraw ()
-{
-
-}
-
-void delete_framebuffer ()
+void Isodraw::delete_framebuffer ()
 {
     if (m_framebuffer != 0)
     {

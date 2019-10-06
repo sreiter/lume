@@ -42,7 +42,7 @@ set (sources
         src/lumeview/cmd/widgets/command_menu.cpp
 
         src/lumeview/editor/meshed/meshed.cpp
-        src/lumeview/editor/isodraw/isodraw.cpp
+        # src/lumeview/editor/isodraw/isodraw.cpp
 
         src/lumeview/gui/arc_ball.cpp
         src/lumeview/gui/arc_ball_control.cpp

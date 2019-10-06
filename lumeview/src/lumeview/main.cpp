@@ -35,7 +35,7 @@
 #include <lumeview/camera/cmd/focus_nodes.h>
 #include <lumeview/cmd/active_command_queues.h>
 #include <lumeview/editor/meshed/meshed.h>
-#include <lumeview/editor/isodraw/isodraw.h>
+// #include <lumeview/editor/isodraw/isodraw.h>
 #include <lumeview/mesh/mesh_content.h>
 #include <lumeview/mesh/cmd/load_from_file.h>
 
@@ -137,25 +137,25 @@ int main (int argc, char** argv)
         g_lumeview = lumeview;
 
     //  Create a mesh editor and load specified meshes
-        auto isodraw = std::make_shared <editor::isodraw::Isodraw> ();
-        lumeview->add_editor (isodraw);
+        // auto isodraw = std::make_shared <editor::isodraw::Isodraw> ();
+        // lumeview->add_editor (isodraw);
         
-        // auto meshed = std::make_shared <editor::meshed::Meshed> ();
-        // lumeview->add_editor (meshed);
+        auto meshed = std::make_shared <editor::meshed::Meshed> ();
+        lumeview->add_editor (meshed);
         
-        // // auto barrier = std::make_shared <cmd::Barrier> ();
-        // // std::vector <std::shared_ptr <scene::Node>> nodes;
+        // auto barrier = std::make_shared <cmd::Barrier> ();
+        // std::vector <std::shared_ptr <scene::Node>> nodes;
 
-        // if (argc >= 2) {
-        //     for (int i = 1; i < argc; ++i) {
-        //         auto meshContent = std::make_shared <mesh::MeshContent> (argv [i]);
-        //         meshContent->schedule (std::make_shared <mesh::cmd::LoadFromFile> (meshContent, argv [i]));
-        //         auto node = std::make_shared <scene::Node> (meshContent);
-        //         meshed->scene ().add_child (node);
-        //         // nodes.emplace_back (std::move (node));
-        //         // meshContent->schedule (barrier);
-        //     }
-        // }
+        if (argc >= 2) {
+            for (int i = 1; i < argc; ++i) {
+                auto meshContent = std::make_shared <mesh::MeshContent> (argv [i]);
+                meshContent->schedule (std::make_shared <mesh::cmd::LoadFromFile> (meshContent, argv [i]));
+                auto node = std::make_shared <scene::Node> (meshContent);
+                meshed->scene ().add_child (node);
+                // nodes.emplace_back (std::move (node));
+                // meshContent->schedule (barrier);
+            }
+        }
 
         // if (!nodes.empty ())
         // {
