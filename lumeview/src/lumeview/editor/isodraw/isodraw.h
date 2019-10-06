@@ -45,9 +45,13 @@ public:
 
 private:
     const float m_sceneWidgetWidth = 300.f;
+    const int   m_textureSize      = 512;
 
     camera::Camera           m_camera;
     render::TriangleRenderer m_canvas;
+
+    GLuint glGenFramebuffers {0};
+    GLuint m_texture {0};
 };
 
 }// end of namespace lumeview::editor::isodraw

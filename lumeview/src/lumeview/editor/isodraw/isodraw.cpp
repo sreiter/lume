@@ -40,6 +40,52 @@ Isodraw::Isodraw ()
     m_camera.set_translation (glm::vec3 (0, 0, 2.f));
 }
 
+Isodraw::~Isodraw ()
+{
+
+}
+
+void delete_framebuffer ()
+{
+    if (m_framebuffer != 0)
+    {
+        glDeleteFrameBuffers (1, &m_framebuffer);
+        m_framebuffer = 0;
+    }
+}
+
+void Isodraw::init ()
+{
+    if (m_framebuffer != 0)
+    {
+        return;
+    }
+
+    glGenFramebuffers (1, &m_framebuffer);
+    glBindFramebuffer (GL_FRAMEBUFFER, m_framebuffer);
+
+    if (glCheckFramebufferStatus (m_framebuffer) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        delete_framebuffer ();
+        throw lumeview::FramebufferCreationFailed ();
+    }
+
+    if (m_texture != 0)
+    {
+        return;
+    }
+
+    glGenTextures (1, &m_texture);
+    glBindTexture (GL_TEXTURE_2D, m_texture);
+      
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, m_textureSize, m_textureSize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0);
+}
+
 bool Isodraw::process_gui (util::Rect const& frame)
 {
     ImVec2 sceneWidgetPos  (frame.min ().x, frame.min ().y);
@@ -58,12 +104,17 @@ bool Isodraw::process_gui (util::Rect const& frame)
 
 void Isodraw::render ()
 {
+    if (m_framebuffer == 0)
+    {
+        init ();
+    }
+
     glEnable (GL_DEPTH_TEST);
 
     glClearColor (0.25f, 0.25f, 0.25f, 1.0f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    m_camera.set_viewport (vieport ());
+    m_camera.set_viewport (viewport ());
     m_canvas.render (m_camera);
 }
 
