@@ -98,7 +98,16 @@ target_include_directories(lumeview
 target_link_libraries(lumeview glfw3 ${OPENGL_LIBRARIES} lume )
 
 if (UNIX)
-    target_link_libraries(lumeview dl X11 Xcursor Xxf86vm Xrandr Xinerama)
+    if(APPLE)
+        # macOS
+        find_library(COCOA Cocoa)
+        find_library(COREVIDEO CoreVideo)
+        find_library(IOKIT IOKit)
+        target_link_libraries(lumeview dl ${COCOA} ${COREVIDEO} ${IOKIT})
+    else(APPLE)
+        # Linux, BSD etc.
+        target_link_libraries(lumeview dl X11 Xcursor Xxf86vm Xrandr Xinerama)
+    endif(APPLE)
 endif (UNIX)
 
 add_definitions (-DGLM_ENABLE_EXPERIMENTAL)
