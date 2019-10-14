@@ -47,46 +47,52 @@ public:
         : m_vector (1)
     {}
 
+  ArrayAnnex (ArrayAnnex&& aa)
+      : m_vector (std::move (aa.m_vector))
+      , m_defaultValue (aa.m_defaultValue)
+  {}
+
+  ArrayAnnex (TupleVector <T>&& vec)
+      : m_vector (std::move (vec))
+  {}
+
 	ArrayAnnex (const size_type tupleSize)
         : m_vector (tupleSize)
-    {}
+  {}
 
-    ArrayAnnex (const size_type tupleSize, const size_type numTuples)
-        : m_vector (tupleSize, numTuples)
-    {}
+  ArrayAnnex (const size_type tupleSize, const size_type numTuples)
+      : m_vector (tupleSize, numTuples)
+  {}
 
-    ArrayAnnex (ArrayAnnex&& aa)
-        : m_vector (std::move (aa.m_vector))
-    {}
+  ArrayAnnex (const size_type tupleSize, std::vector <T>&& vec)
+      : m_vector (tupleSize, std::move (vec))
+  {}
 
-    ArrayAnnex (const size_type tupleSize, std::vector <T>&& vec)
-        : m_vector (tupleSize, std::move (vec))
-    {}
-
-    ArrayAnnex (TupleVector <T>&& vec)
-        : m_vector (std::move (vec))
-    {}
+  ArrayAnnex (const size_type tupleSize, const T& defaultValue)
+      : m_vector (tupleSize)
+      , m_defaultValue (defaultValue)
+  {}
 
 	const char* class_name () const override	{return "ArrayAnnex";}
 
-    void update (const Mesh& mesh, std::optional <GrobType> grobType) override
-    {
-        if (grobType)
-            m_vector.set_num_tuples (mesh.num (*grobType));
-    }
+  void update (const Mesh& mesh, std::optional <GrobType> grobType) override
+  {
+      if (grobType)
+          m_vector.set_num_tuples (mesh.num (*grobType), m_defaultValue);
+  }
 
-    bool empty() const { return m_vector.empty(); }
+  bool empty() const { return m_vector.empty(); }
 
-    /// total number of entries, counting individual components
-    inline size_type size () const            {return m_vector.size ();}
+  /// total number of entries, counting individual components
+  inline size_type size () const            {return m_vector.size ();}
 
-    inline size_type num_tuples () const      {return m_vector.num_tuples ();}
+  inline size_type num_tuples () const      {return m_vector.num_tuples ();}
 
-    /// number of individual components making up a tuple
-    inline size_type tuple_size () const       {return m_vector.tuple_size ();}
+  /// number of individual components making up a tuple
+  inline size_type tuple_size () const       {return m_vector.tuple_size ();}
 
-    inline T* data()                        {return m_vector.data ();}
-    inline const T* data () const           {return m_vector.data ();}
+  inline T* data()                        {return m_vector.data ();}
+  inline const T* data () const           {return m_vector.data ();}
 
 	inline T& operator [] (const size_type i)				{return m_vector[i];}
 	inline const T& operator [] (const size_type i) const	{return m_vector[i];}
@@ -104,6 +110,7 @@ public:
 
 private:
 	TupleVector <T>	m_vector;
+  T m_defaultValue;
 };
 
 using RealArrayAnnex		= ArrayAnnex <real_t>;

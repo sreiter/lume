@@ -216,7 +216,7 @@ index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
                                  const index_t indexOffset)
 {
     index_t numInsertions = 0;
-    index_t const startIndex = hashMapInOut.size () + indexOffset;
+    index_t const startIndex = static_cast <index_t> (hashMapInOut.size ()) + indexOffset;
     for(auto grobType : grobSet) {
         const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
 
@@ -238,7 +238,7 @@ index_t InsertGrobsNumbered (GrobHashMap <index_t>& hashMapInOut,
                              const index_t indexOffset)
 {
     index_t numInsertions = 0;
-    index_t const startIndex = hashMapInOut.size () + indexOffset;
+    index_t const startIndex = static_cast <index_t> (hashMapInOut.size ()) + indexOffset;
     for(auto grobType : grobSet) {
         for(auto grob : mesh.grobs (grobType)) {
             auto const entry = std::make_pair (grob, startIndex + numInsertions);

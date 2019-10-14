@@ -88,11 +88,12 @@ public:
     inline T* data()                            {return m_vector.data ();}
     inline const T* data () const               {return m_vector.data ();}
 
-    inline void clear ()                                  {m_vector.clear();}
-    inline void resize (const size_type s)                {m_vector.resize (s);}
-    inline void resize (const size_type s, const T& v)    {m_vector.resize (s, v);}
-    inline void set_num_tuples (const size_type num)      {m_vector.resize (num * tuple_size ());}
-    inline void reserve (const size_type s)               {m_vector.reserve (s);}
+    inline void clear ()                                         {m_vector.clear();}
+    inline void resize (const size_type s)                       {m_vector.resize (s);}
+    inline void resize (const size_type s, const T& v)           {m_vector.resize (s, v);}
+    inline void set_num_tuples (const size_type num)             {m_vector.resize (num * tuple_size ());}
+    inline void set_num_tuples (const size_type num, const T& v) {m_vector.resize (num * tuple_size (), v);}
+    inline void reserve (const size_type s)                      {m_vector.reserve (s);}
 
     inline T& operator [] (const size_type i)             {return m_vector[i];}
     inline const T& operator [] (const size_type i) const {return m_vector[i];}
