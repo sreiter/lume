@@ -97,11 +97,16 @@ public:
 		return !((*this) == g);
 	}
 
-	inline index_t dim () const							{return m_desc.dim ();}
+  inline index_t operator [] (const index_t i) const
+  {
+    return corner (i);
+  }
+
+	inline index_t dim () const        {return m_desc.dim ();}
 	
-	inline GrobType grob_type () const					{return m_desc.grob_type ();}
+	inline GrobType grob_type () const {return m_desc.grob_type ();}
 	
-	inline GrobDesc desc () const 						{return m_desc;}
+	inline GrobDesc desc () const      {return m_desc;}
 
 	inline void set_global_corner_array (const index_t* corners)
 	{
