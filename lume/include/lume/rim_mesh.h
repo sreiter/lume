@@ -41,14 +41,14 @@ void CreateRimMesh (SPMesh rimMeshOut,
                     	visFunc = [](const GrobIndex&){return true;},
                     const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>&
                       	gotRimGrobFunc = [](const GrobIndex&, const GrobIndex&){},
-					const Neighborhoods* nbrhds = nullptr);
+					          const Neighborhoods* nbrhds = nullptr);
 
 
 void CreateRimMesh (SPMesh rimMeshOut,
                     SPMesh mesh,
                     GrobSet grobSet,
                     const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
-					const Neighborhoods* nbrhds = nullptr);
+					          const Neighborhoods* nbrhds = nullptr);
 
 SPMesh CreateRimMesh (SPMesh mesh,
                       GrobSet grobSet,
@@ -56,14 +56,13 @@ SPMesh CreateRimMesh (SPMesh mesh,
                       	  visFunc = [](const GrobIndex&){return true;},
                       const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>&
                           gotRimGrobFunc = [](const GrobIndex&, const GrobIndex&){},
-					  const Neighborhoods* nbrhds = nullptr);
+					            const Neighborhoods* nbrhds = nullptr);
 
 
 SPMesh CreateRimMesh (SPMesh mesh,
                       GrobSet grobSet,
                       const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
-					  const Neighborhoods* nbrhds = nullptr);
-
+					            const Neighborhoods* nbrhds = nullptr);
 
 }//	end of namespace lume
 

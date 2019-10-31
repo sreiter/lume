@@ -43,56 +43,56 @@ class Neighborhoods {
 
 public:
 
-    Neighborhoods ();
+  Neighborhoods ();
 
-    /// Creates a neighborhood between grobs of different type and dimension
-    /** \note it has to hold true: centerGrobTypes != neighborGrobTypes
-     * \{ */
-    Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
-    void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
-    /** \} */
+  /// Creates a neighborhood between grobs of different type and dimension
+  /** \note it has to hold true: centerGrobTypes != neighborGrobTypes
+   * \{ */
+  Neighborhoods (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+  void refresh (SPMesh mesh, GrobSet centerGrobTypes, GrobSet neighborGrobTypes);
+  /** \} */
 
-	/// Creates a neighborhood between grobs of the same type using the specified grobConnections as links
-	/** To create a neighborhoods between faces, where two faces are neighbors if
-	 * they are connected by a vertex, one could execute the following code:
-	 * \code
-	 * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, VERTICES, FACES));
-	 * \endcode
-	 *
-	 * To receive a neighborhood between faces connected by their edges, this code would work:
-	 * \code
-	 * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, EDGES, FACES));
-	 * \endcode
-	 *
-	 * \param neighborGrobTypes	the following properties have to hold true:
-	 *									- `grobConnections.center_grob_types() != grobTypes`
-	 *									- `grobConnections.neighbor_grob_types() == grobTypes`
-	 * \{ */
-    Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
-	void refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
-	/** \} */
+/// Creates a neighborhood between grobs of the same type using the specified grobConnections as links
+/** To create a neighborhoods between faces, where two faces are neighbors if
+ * they are connected by a vertex, one could execute the following code:
+ * \code
+ * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, VERTICES, FACES));
+ * \endcode
+ *
+ * To receive a neighborhood between faces connected by their edges, this code would work:
+ * \code
+ * Neighborhoods faceNbrs (mesh, FACES, Neighborhoods (mesh, EDGES, FACES));
+ * \endcode
+ *
+ * \param neighborGrobTypes	the following properties have to hold true:
+ *									- `grobConnections.center_grob_types() != grobTypes`
+ *									- `grobConnections.neighbor_grob_types() == grobTypes`
+ * \{ */
+  Neighborhoods (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
+  void refresh (SPMesh mesh, GrobSet grobTypes, const Neighborhoods& grobConnections);
+/** \} */
 
-    SPMesh mesh ();
+  SPMesh mesh ();
 
-    NeighborIndices neighbor_indices (const GrobIndex gi) const;
-    NeighborGrobs neighbor_grobs (const GrobIndex gi) const;
+  NeighborIndices neighbor_indices (const GrobIndex gi) const;
+  NeighborGrobs neighbor_grobs (const GrobIndex gi) const;
 
-    index_t num_neighbors (const GrobIndex gi) const;
+  index_t num_neighbors (const GrobIndex gi) const;
 
-    GrobSet center_grob_set () const	{return m_centerGrobTypes;}
-    GrobSet neighbor_grob_set () const	{return m_neighborGrobTypes;}
+  GrobSet center_grob_set () const	{return m_centerGrobTypes;}
+  GrobSet neighbor_grob_set () const	{return m_neighborGrobTypes;}
     
 private:
 	index_t base_index (const GrobIndex gi) const;
 	index_t offset_index (const GrobIndex& gi) const;
 	const index_t* first_neighbor (const GrobIndex& gi) const;
 
-    TupleVector <index_t> m_offsets;
-    TupleVector <index_t> m_nbrs {2};
-    index_t         m_grobBaseInds [NUM_GROB_TYPES];
-    SPMesh			m_mesh;
-    GrobSet			m_centerGrobTypes;
-    GrobSet			m_neighborGrobTypes;
+  TupleVector <index_t> m_offsets;
+  TupleVector <index_t> m_nbrs {2};
+  index_t         m_grobBaseInds [NUM_GROB_TYPES];
+  SPMesh			m_mesh;
+  GrobSet			m_centerGrobTypes;
+  GrobSet			m_neighborGrobTypes;
 };
 
 

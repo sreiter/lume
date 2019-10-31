@@ -30,11 +30,11 @@
 namespace lume {
 
 void CreateRimMesh (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet,
-                      const std::function <bool (const GrobIndex& gi)>& visFunc,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
-                      const Neighborhoods* nbrhds)
+                    SPMesh mesh,
+                    GrobSet grobSet,
+                    const std::function <bool (const GrobIndex& gi)>& visFunc,
+                    const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                    const Neighborhoods* nbrhds)
 {
 	rimMeshOut->link_mesh (mesh, VERTICES);
 
@@ -66,7 +66,7 @@ void CreateRimMesh (SPMesh rimMeshOut,
 			if (numVis == 1) {
 				rimMeshOut->insert_grob (rimGrob);
 				gotRimGrobFunc (GrobIndex(rimGrobType,
-                                          static_cast <index_t> (rimMeshOut->num (rimGrobType))),
+                                  static_cast <index_t> (rimMeshOut->num (rimGrobType))),
 				                visNbrGrobIndex);
 			}
 		}
@@ -74,13 +74,17 @@ void CreateRimMesh (SPMesh rimMeshOut,
 }
 
 void CreateRimMesh (SPMesh rimMeshOut,
-                      SPMesh mesh,
-                      GrobSet grobSet,
-                      const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
-                      const Neighborhoods* nbrhds)
+                    SPMesh mesh,
+                    GrobSet grobSet,
+                    const std::function <void (const GrobIndex& rimGrob, const GrobIndex& srcGrob)>& gotRimGrobFunc,
+                    const Neighborhoods* nbrhds)
 {
-	CreateRimMesh (rimMeshOut, mesh, grobSet, [](const GrobIndex&){return true;},
-	                 gotRimGrobFunc, nbrhds);
+	CreateRimMesh (rimMeshOut,
+                 mesh,
+                 grobSet,
+                 [](const GrobIndex&){return true;},
+	               gotRimGrobFunc,
+                 nbrhds);
 }
 
 
@@ -105,7 +109,5 @@ SPMesh CreateRimMesh (SPMesh mesh,
 	CreateRimMesh (rimMesh, mesh, grobSet, gotRimGrobFunc, nbrhds);
 	return rimMesh;
 }
-
-
 
 }//	end of namespace lume
