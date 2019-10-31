@@ -63,7 +63,10 @@ public:
     for(auto grobType : grobTypes)
     {
       if (grobs_allocated (grobType))
+      {
         grob_array (grobType).clear();
+        annex_update (grobType);
+      }
     }
   }
 
@@ -72,7 +75,10 @@ public:
     for(auto grobType : grobSet)
     {
       if (grobs_allocated (grobType))
+      {
         grob_array (grobType).clear();
+        annex_update (grobType);
+      }
     }
   }
 
