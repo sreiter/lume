@@ -86,7 +86,7 @@ set (headers
 
 set (privateHeaders)
 
-add_library (lume ${sources} ${headers} ${privateHeaders})
+add_library (lume STATIC ${sources} ${headers} ${privateHeaders})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
