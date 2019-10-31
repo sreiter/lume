@@ -215,21 +215,43 @@ index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
                                  const index_t sideDim,
                                  const index_t indexOffset)
 {
-    index_t numInsertions = 0;
-    index_t const startIndex = static_cast <index_t> (hashMapInOut.size ()) + indexOffset;
-    for(auto grobType : grobSet) {
-        const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
+  index_t numInsertions = 0;
+  index_t const startIndex = static_cast <index_t> (hashMapInOut.size ()) + indexOffset;
+  for(auto grobType : grobSet) {
+    const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
 
-        for(auto grob : mesh.grobs (grobType)) {
-            for(index_t iside = 0; iside < numSides; ++iside) {
-                auto const entry = std::make_pair (grob.side (sideDim, iside), startIndex + numInsertions);
-                const auto r = hashMapInOut.insert(entry);
-                numInsertions += static_cast<index_t> (r.second);
-            }
-        }
+    for(auto grob : mesh.grobs (grobType)) {
+      for(index_t iside = 0; iside < numSides; ++iside) {
+        auto const entry = std::make_pair (grob.side (sideDim, iside), startIndex + numInsertions);
+        const auto r = hashMapInOut.insert(entry);
+        numInsertions += static_cast<index_t> (r.second);
+      }
     }
+  }
 
-    return numInsertions;
+  return numInsertions;
+}
+
+index_t FindUniqueSidesRefCounted (GrobHashMap <index_t>& hashMapInOut,
+                                   const Mesh& mesh,
+                                   const GrobSet grobSet,
+                                   const index_t sideDim)
+{
+  index_t numInsertions = 0;
+  for(auto grobType : grobSet) {
+    const index_t numSides = GrobDesc (grobType).num_sides (sideDim);
+
+    for(auto grob : mesh.grobs (grobType)) {
+      for(index_t iside = 0; iside < numSides; ++iside) {
+        auto const entry = std::make_pair (grob.side (sideDim, iside), 0);
+        const auto r = hashMapInOut.insert(entry);
+        ++r.first->second;
+        numInsertions += static_cast<index_t> (r.second);
+      }
+    }
+  }
+
+  return numInsertions;
 }
 
 index_t InsertGrobsNumbered (GrobHashMap <index_t>& hashMapInOut,

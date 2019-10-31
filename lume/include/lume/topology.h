@@ -124,6 +124,19 @@ index_t FindUniqueSidesNumbered (GrobHashMap <index_t>& hashMapInOut,
                                  const index_t sideDim,
                                  const index_t indexOffset = 0);
 
+/// Collects all sides of the specified *sideDim* of the *grobs* in the specified grob set.
+/** The returned map associates the reference count of each side, i.e., how many grobs in the
+* specified grob set have a specific side.
+*
+* \note  `hashMapInOut` is not cleared during this function. It is thus possible to
+*         call this method repeatedly on different grobSets to
+*         find all sides of a hybrid grid.
+* \returns  The number of newly inserted grobs.*/
+index_t FindUniqueSidesRefCounted (GrobHashMap <index_t>& hashMapInOut,
+                                   const Mesh& mesh,
+                                   const GrobSet grobSet,
+                                   const index_t sideDim);
+
 /// Inserts all *grobs* in the specified grob set into the provided *hashMapInOut*.
 /** The grobs are numbered in sequential order according to when they were first encountered
 * during iteration over the grob set. The index is derivied from the size of the provided
