@@ -262,6 +262,14 @@ index_t FindUniqueSidesRefCounted (GrobHashMap <index_t>& hashMapInOut,
   return numInsertions;
 }
 
+GrobHashMap <index_t> FindUniqueSidesRefCounted (GrobArray const& grobs,
+                                                 const index_t sideDim)
+{
+  GrobHashMap <index_t> hashMap;
+  FindUniqueSidesRefCounted (hashMap, grobs, sideDim);
+  return hashMap;
+}
+
 index_t InsertGrobsNumbered (GrobHashMap <index_t>& hashMapInOut,
                              Mesh& mesh,
                              const GrobSet grobSet,

@@ -28,6 +28,7 @@
 #define __H__lume__topology
 
 #include <utility>
+#include <functional>
 #include "array_annex.h"
 #include "grob.h"
 #include "grob_hash.h"
@@ -142,6 +143,22 @@ index_t FindUniqueSidesRefCounted (GrobHashMap <index_t>& hashMapInOut,
                                    GrobArray const& grobs,
                                    const index_t sideDim);
 /** \} */
+
+/// Returns all sides of the specified *sideDim* of the specified *grobs*.
+GrobHashMap <index_t> FindUniqueSidesRefCounted (GrobArray const& grobs,
+                                                 const index_t sideDim);
+
+/// Returns all grobs in `grobHashMap` with the given grobType and the given value.
+template <class Value>
+GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
+                        GrobType const grobType,
+                        Value const& value);
+
+/// Returns all grobs in `grobHashMap` for which the given predicate returns true
+template <class Value>
+GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
+                        GrobType const grobType,
+                        std::function <bool (Grob const&, Value const&)> const predicate);
 
 /// Inserts all *grobs* in the specified grob set into the provided *hashMapInOut*.
 /** The grobs are numbered in sequential order according to when they were first encountered

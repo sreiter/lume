@@ -74,6 +74,36 @@ void GrobHashToIndexArray (TIndexVector& indArrayInOut,
 	}
 }
 
+template <class Value>
+GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
+                        GrobType const grobType,
+                        Value const& refValue)
+{
+  return ExtractGrobs <Value> (grobHashMap,
+                               grobType,
+                               [&refValue] (auto const&, auto const& value)
+                               {
+                                return value == refValue;
+                               });
+}
+
+template <class Value>
+GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
+                        GrobType const grobType,
+                        std::function <bool (Grob const&, Value const&)> const predicate)
+{
+  GrobArray grobs {grobType};
+  for (auto const& [grob, value] : grobHashMap)
+  {
+    if (grob.grob_type () == grobType &&
+        predicate (grob, value))
+    {
+      grobs.push_back (grob);
+    }
+  }
+  return grobs;
+}
+
 }//	end of namespace lume
 
 #endif	//__H__lume_topology_impl
