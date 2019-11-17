@@ -40,43 +40,45 @@ class GrobArray {
 public:
 	using iterator = GrobIterator;
 	using const_iterator = GrobIterator;
-    using size_type = TupleVector<index_t>::size_type;
-    using value_type = index_t;
+  using size_type = TupleVector<index_t>::size_type;
+  using value_type = index_t;
 
-    GrobArray (GrobArray&& grobArray)
-        : m_grobDesc (std::move (grobArray.m_grobDesc))
-        , m_array (std::move (grobArray.m_array))
-    {}
+  GrobArray (GrobArray&& grobArray)
+    : m_grobDesc (std::move (grobArray.m_grobDesc))
+    , m_array (std::move (grobArray.m_array))
+  {}
 
 	GrobArray (GrobType grobType) :
 		m_grobDesc (grobType),
 		m_array (m_grobDesc.num_corners ())
 	{}
 
-    GrobArray (GrobType grobType, std::vector <index_t>&& inds) :
-        m_grobDesc (grobType),
-        m_array (m_grobDesc.num_corners (), std::move (inds))
-    {}
+  GrobArray (GrobType grobType, std::vector <index_t>&& inds) :
+    m_grobDesc (grobType),
+    m_array (m_grobDesc.num_corners (), std::move (inds))
+  {}
 
-    GrobArray (GrobType grobType, TupleVector <index_t>&& inds) :
-        m_grobDesc (grobType),
-        m_array (std::move (inds))
-    {}
+  GrobArray (GrobType grobType, TupleVector <index_t>&& inds) :
+    m_grobDesc (grobType),
+    m_array (std::move (inds))
+  {}
 
 	inline void clear ()					{m_array.clear();}
 
 	bool empty() const 						{return m_array.empty();}
 
+  inline GrobType grob_type () const    {return m_grobDesc.grob_type ();}
+
 	/// total number of grobs
-	inline size_type size () const			{return m_array.num_tuples ();}
+	inline size_type size () const			  {return m_array.num_tuples ();}
 	inline size_type num_indices () const	{return m_array.size ();}
 
-	inline index_t* data() 				    {return m_array.data();}
+	inline index_t* data() 				        {return m_array.data();}
 	inline const index_t* data () const 	{return m_array.data();}
 
-	inline void resize (const size_type s)					{m_array.resize (s * m_array.tuple_size ());}
+	inline void resize (const size_type s)					        {m_array.resize (s * m_array.tuple_size ());}
 	inline void resize (const size_type s, const index_t v)	{m_array.resize (s * m_array.tuple_size (), v);}
-	inline void reserve (const size_type s)					{m_array.reserve (s * m_array.tuple_size ());}
+	inline void reserve (const size_type s)					        {m_array.reserve (s * m_array.tuple_size ());}
 
 	inline void push_back (std::initializer_list <index_t> inds)
 	{
@@ -103,6 +105,18 @@ public:
 		for(index_t i = 0; i < grob.num_corners(); ++i)
 			m_array.push_back (grob.corner(i));
 	}
+
+  void append (GrobArray const& other)
+  {
+    if (grob_type () != other.grob_type ()) {
+      assert (false);
+      return;
+    }
+
+    reserve (size () + other.size ());
+    for (auto const& grob : other)
+      push_back (grob);
+  }
 
 	inline const Grob operator [] (const size_type i) const	{return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
 

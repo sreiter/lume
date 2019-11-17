@@ -30,6 +30,7 @@ project (lume LANGUAGES CXX)
 set (sources
         src/lume/commands/arguments.cpp
         src/lume/commands/types.cpp
+        src/lume/edge_mesh_2d.cpp
         src/lume/file_io_in.cpp
         src/lume/file_io_out.cpp
         src/lume/grob.cpp

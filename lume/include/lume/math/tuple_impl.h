@@ -75,7 +75,7 @@ template <class Storage>
 TupleTemplate <Storage>& TupleTemplate <Storage>:: operator *= (value_type const& v)
 {
     for(size_t i = 0; i < size (); ++i) {
-        value (i) *= v [i];
+        value (i) *= v;
     }
     return *this;
 }
@@ -181,8 +181,10 @@ TupleTemplate <Storage>::
 normalize ()
 {
     auto const len = length ();
-    if (len == 0) {
-        return (*this) *= 0;
+    if (len == 0)
+    {
+        (*this) *= 0;
+        return *this;
     }
 
     (*this) /= len;

@@ -122,7 +122,7 @@ public:
 
     template <class Array>
     TupleTemplate (Array& t)
-        : m_storage (t.m_data ())
+        : m_storage (t.data ())
         , m_size (t.size ())
     {}
 
