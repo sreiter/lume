@@ -37,7 +37,7 @@ option (BUILD_LUMEVIEW  "Build the lumeview binary, a cross platform viewer for 
 
 message (STATUS "BUILD_LUMETESTS: " ${BUILD_LUMETESTS})
 message (STATUS "BUILD_LUMESHELL: " ${BUILD_LUMESHELL})
-message (STATUS "BUILD_LUMESHELL: " ${BUILD_LUMEVIEW})
+message (STATUS "BUILD_LUMEVIEW:  " ${BUILD_LUMEVIEW})
 
 add_subdirectory (lume)
 

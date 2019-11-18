@@ -26,6 +26,8 @@
 
 #include <array>
 
+#include <lume/math/raw/vector_math_raw.h>
+
 namespace lume::math::detail::tuple_storage
 {
 
