@@ -29,6 +29,7 @@
 #define __H__lume__grob
 
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <string>
 #include "grob_desc.h"
@@ -37,10 +38,15 @@
 
 namespace lume {
 
-/// A Grob represents a **grid object**, specified by its corner indices.
+// TODO: CREATE CONST GROB
+  
+/// A Grob represents a reference to a **grid object**, specified by its corner indices.
 /** To create a `Grob`, pass the `grobType` and an array of corner-indices
  * (`corners`) to the constructor. `corners`has to have at least length
  * `GridDesc(grobType).num_corners()`.
+ *
+ * A Grob behaves like a reference object, i.e., assigning corners (or another grob)
+ * will change the content of the underlying corner array.
  *
  * \warning	Since a `Grob` instance stores a pointer to the specified array
  *			of corners, an instance is invalidated once the pointer does no longer
@@ -49,21 +55,57 @@ namespace lume {
  *			temporary object and should only be used if it is clear that the
  *			underlying coner-array is still valid.
  */
-class Grob {
+class Grob
+{
 public:
-    /// Defines the maximum number of corners that any `Grob` may have.
-    /** For all Grobs `g` holds: `g.num_grobs() <= Grob::maxNumCorners`.
-        \note This limitation arises from the use of Array_16_4 which is used to
-              store local corner indices*/
-    static constexpr index_t maxNumCorners = 16;
+  /// Defines the maximum number of corners that any `Grob` may have.
+  /** For all Grobs `g` holds: `g.num_grobs() <= Grob::maxNumCorners`.
+      \note This limitation arises from the use of Array_16_4 which is used to
+            store local corner indices*/
+  static constexpr index_t maxNumCorners = 16;
 
-    using CornerIndexContainer = std::array <index_t, maxNumCorners>;
+  using CornerIndexContainer = std::array <index_t, maxNumCorners>;
 
-	Grob (GrobType grobType, const index_t* corners = nullptr) :
+  Grob () = default;
+
+	Grob (GrobType grobType, index_t* corners = nullptr) :
 		m_globCornerInds (corners),
 		m_cornerOffsets (impl::Array_16_4::ascending_order ()),
 		m_desc (grobType)
 	{}
+
+  Grob (Grob const& other)
+    : m_globCornerInds {other.m_globCornerInds}
+    , m_cornerOffsets {other.m_cornerOffsets}
+    , m_desc {other.m_desc}
+  {}
+
+  Grob (Grob&& other)
+    : m_globCornerInds {other.m_globCornerInds}
+    , m_cornerOffsets {other.m_cornerOffsets}
+    , m_desc {other.m_desc}
+  {}
+
+  Grob& operator = (Grob const& other)
+  {
+    assert (m_globCornerInds != nullptr);
+    assert (other.m_globCornerInds != nullptr);
+    assert (other.grob_type () == grob_type ());
+    assert (other.num_corners () == num_corners ());
+
+    index_t const numCorners = num_corners ();
+    for (index_t i = 0; i < numCorners; ++i)
+    {
+      set_corner (i, other [i]);
+    }
+
+    return *this;
+  }
+
+  Grob& operator = (Grob&& other)
+  {
+    return this->operator = (other);
+  }
 
 	///	only compares corners, ignores order and orientation.
 	bool operator == (const Grob& g) const
@@ -108,7 +150,7 @@ public:
 	
 	inline GrobDesc desc () const      {return m_desc;}
 
-	inline void set_global_corner_array (const index_t* corners)
+	inline void set_global_corner_array (index_t* corners)
 	{
 		m_globCornerInds = corners;
 	}
@@ -118,13 +160,27 @@ public:
 		return m_globCornerInds;
 	}
 
+  inline index_t* global_corner_array ()
+  {
+    return m_globCornerInds;
+  }
+
 	inline index_t num_corners () const					{return m_desc.num_corners();}
 
 	/// returns the global index of the i-th corner
 	inline index_t corner (const index_t i) const
 	{
+    assert (m_globCornerInds != nullptr);
 		return m_globCornerInds [m_cornerOffsets.get(i)];
 	}
+
+  /// sets the point index of the i-th corner
+  inline void set_corner (const index_t cornerIndex, const index_t pointIndex)
+  {
+    assert (m_globCornerInds != nullptr);
+    assert (cornerIndex < num_corners ());
+    m_globCornerInds [m_cornerOffsets.get(cornerIndex)] = pointIndex;
+  }
 
 	/// collects the global indices of corners
 	/** \param cornersOut	Array of size `Grob::max_num_corners(). Only the first
@@ -134,6 +190,7 @@ public:
 	 */
 	inline index_t collect_corners (CornerIndexContainer& cornersOut) const
 	{
+    assert (m_globCornerInds != nullptr);
 		const index_t numCorners = num_corners();
 		for(index_t i = 0; i < numCorners; ++i)
 			cornersOut[i] = static_cast<index_t> (m_globCornerInds [m_cornerOffsets.get(i)]);
@@ -152,6 +209,7 @@ public:
 
 	Grob side (const index_t sideDim, const index_t sideIndex) const
 	{
+    assert (m_globCornerInds != nullptr);
 		impl::Array_16_4 cornerOffsets;
 		const index_t numCorners = m_desc.side_desc(sideDim, sideIndex).num_corners();
 		const index_t* locCorners = m_desc.local_side_corners (sideDim, sideIndex);
@@ -179,15 +237,15 @@ public:
 	}
 
 private:
-	Grob (GrobType grobType, const index_t* globCornerInds, const impl::Array_16_4& cornerOffsets) :
+	Grob (GrobType grobType, index_t* globCornerInds, const impl::Array_16_4& cornerOffsets) :
 		m_globCornerInds (globCornerInds),
 		m_cornerOffsets (cornerOffsets),
 		m_desc (grobType)
 	{}
 
-	const index_t*		m_globCornerInds;
-	impl::Array_16_4	m_cornerOffsets;
-	GrobDesc			m_desc;
+	index_t*         m_globCornerInds {nullptr};
+	impl::Array_16_4 m_cornerOffsets;
+	GrobDesc         m_desc {lume::VERTEX};
 };
 
 }//	end of namespace lume

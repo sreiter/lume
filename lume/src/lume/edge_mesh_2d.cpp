@@ -121,12 +121,33 @@ void EdgeMesh2d::remove_edge (Edge const& edge)
   remove_connection (edge.to, edge.from);
 }
 
-void EdgeMesh2d::remove_edges_with_vertex (index_t vertex)
+void EdgeMesh2d::remove_edges_with_vertex (index_t vertex, bool addBoundaryMarkers)
 {
   auto& connections = vertex_connections (vertex);
+
+  if (addBoundaryMarkers &&
+      connections.size () > 1)
+  {
+    for (size_t i = 0; i < connections.size (); ++i)
+    {
+      size_t const k = (i + connections.size () - 1) % connections.size ();
+      size_t const j = (i + 1) % connections.size ();
+
+      auto& iCons = vertex_connections (connections [i].to);
+      auto kIter = find_connection (iCons, connections [k].to);
+      if (kIter != iCons.end ())
+        kIter->boundary = Boundary::Right;
+
+      auto jIter = find_connection (iCons, connections [j].to);
+      if (jIter != iCons.end ())
+        jIter->boundary = Boundary::Left;
+    }
+  }
+
+  // remove connections from connected vertices to this one
   for (auto const& c : connections) {
     assert (c.to != vertex);
-    remove_edge ({vertex, c.to});
+    remove_connection (c.to, vertex);
   }
 
   connections.clear ();
@@ -143,6 +164,11 @@ auto EdgeMesh2d::vertex_connections (index_t vertex) const -> Connections const&
 {
   assert (vertex < m_connections.size ());
   return m_connections [vertex];
+}
+
+auto EdgeMesh2d::connections (index_t vertex) const -> Connections const&
+{
+  return vertex_connections (vertex);
 }
 
 GrobArray EdgeMesh2d::create_triangles () const

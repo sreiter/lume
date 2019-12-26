@@ -118,18 +118,39 @@ public:
       push_back (grob);
   }
 
-	inline const Grob operator [] (const size_type i) const	{return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
+  iterator erase (iterator begin, iterator end)
+  {
+    auto newIter = m_array.erase (tuple_iterator (begin), tuple_iterator (end));
+    if (newIter == m_array.end ())
+      return this->end ();
+    return GrobIterator (m_grobDesc.grob_type (), m_array.data () + (newIter - m_array.begin ()));
+  }
 
-	inline iterator begin () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.data());}
-	inline iterator end () const						{return GrobIterator (m_grobDesc.grob_type(), m_array.data() + m_array.size());}
+	inline Grob operator [] (const size_type i)            {return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
+  inline ConstGrob operator [] (const size_type i) const {return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
 
-	GrobDesc grob_desc () const							{return m_grobDesc;}
+	inline iterator begin ()             {return GrobIterator (m_grobDesc.grob_type(), m_array.data());}
+  inline const_iterator begin () const {return ConstGrobIterator (m_grobDesc.grob_type(), m_array.data());}
+
+	inline iterator end () 	           {return GrobIterator (m_grobDesc.grob_type(), m_array.data() + m_array.size());}
+  inline const_iterator end () const {return ConstGrobIterator (m_grobDesc.grob_type(), m_array.data() + m_array.size());}
+
+	GrobDesc grob_desc () const	{return m_grobDesc;}
 
 	TupleVector <index_t>& underlying_array ()				{return m_array;}
 	const TupleVector <index_t>& underlying_array () const	{return m_array;}
 
 private:
 	inline index_t num_grob_corners () const			{return m_grobDesc.num_corners();}
+  inline TupleVector <index_t>::iterator tuple_iterator (iterator const& i)
+  {
+    auto const* p = i->global_corner_array ();
+    assert (p > m_array.data ());
+    assert (static_cast <size_t> (p - m_array.data ()) <= m_array.size ());
+    return TupleVector <index_t>::iterator (m_array.begin () + (p - m_array.data ()));
+  }
+
+private:
 	GrobDesc				m_grobDesc;
 	TupleVector <index_t>	m_array;
 };

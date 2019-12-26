@@ -38,23 +38,61 @@ public:
 	using iterator_category = std::bidirectional_iterator_tag;
 	using value_type = Grob;
 	using difference_type = std::ptrdiff_t;
-	using pointer = const Grob*;
-	using reference = const Grob&;
+	using pointer = Grob*;
+  using const_pointer = const Grob*;
+	using reference = Grob&;
+  using const_reference = const Grob&;
 
-	GrobIterator (GrobType grobType, const index_t* globalCornerArray) :
+  GrobIterator () = default;
+  
+  GrobIterator (GrobIterator const& other)
+   : m_grob (other.m_grob)
+   , m_numCorners (other.m_numCorners)
+  {}
+
+  GrobIterator (GrobIterator&& other)
+   : m_grob (other.m_grob)
+   , m_numCorners (other.m_numCorners)
+  {}
+
+	GrobIterator (GrobType grobType, index_t* globalCornerArray) :
 		m_grob (grobType, globalCornerArray),
 		m_numCorners (m_grob.num_corners ())
 	{}
 
-	reference operator * () const
+  GrobIterator& operator = (GrobIterator const& other)
+  {
+    m_grob       = other.m_grob;
+    m_numCorners = other.m_numCorners;
+    return *this;
+  }
+
+  GrobIterator& operator = (GrobIterator&& other)
+  {
+    m_grob       = other.m_grob;
+    m_numCorners = other.m_numCorners;
+    return *this;
+  }
+
+	reference operator * ()
 	{
 		return m_grob;
 	}
 
-	reference operator -> () const
+  const_reference operator * () const
+  {
+    return m_grob;
+  }
+
+	pointer operator -> ()
 	{
-		return m_grob;
+		return &m_grob;
 	}
+
+  const_pointer operator -> () const
+  {
+    return &m_grob;
+  }
 
 	bool operator == (const GrobIterator& i) const
 	{
@@ -80,12 +118,12 @@ public:
 		return *this;
 	}
 
-	GrobIterator operator + (difference_type n) const
+	GrobIterator operator + (difference_type n)
 	{
 		return GrobIterator (m_grob.grob_type(), shifted_corner_array (n));
 	}
 
-	GrobIterator operator - (difference_type n) const
+	GrobIterator operator - (difference_type n)
 	{
 		return GrobIterator (m_grob.grob_type(), shifted_corner_array (-n));
 	}
@@ -117,7 +155,7 @@ public:
 	}
 
 private:
-	const index_t* shifted_corner_array (difference_type n) const
+	index_t* shifted_corner_array (difference_type n)
 	{
 		return m_grob.global_corner_array () + n * m_numCorners;
 	}
