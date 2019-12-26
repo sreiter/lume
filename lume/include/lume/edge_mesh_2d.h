@@ -79,12 +79,12 @@ public:
   bool add_edge (Edge const& edge, Boundary boundary = Boundary::None);
   bool has_edge (Edge const& edge) const;
   void remove_edge (Edge const& edge);
-  void remove_edges_with_vertex (index_t vertex);
+  void remove_edges_with_vertex (index_t vertex, bool addBoundaryMarkers);
   
+  Connections const& connections (index_t vertex) const;
+
   bool swap_edge (Edge const& edge);
   
-  Connections const& vertex_connections (index_t vertex) const;
-
   GrobArray create_triangles () const;
 
 private:
@@ -97,6 +97,7 @@ private:
   double compute_pseudo_angle (index_t const from, index_t const to) const;
   bool is_valid (Edge const& edge) const;
 
+  Connections const& vertex_connections (index_t vertex) const;
   Connections& vertex_connections (index_t vertex);
 
   bool has_connection (index_t const from, index_t const to) const;

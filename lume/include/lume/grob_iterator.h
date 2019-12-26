@@ -33,98 +33,138 @@
 
 namespace lume {
 
-class GrobIterator {
+template <class Grob>
+class GenericGrobIterator
+{
 public:
 	using iterator_category = std::bidirectional_iterator_tag;
 	using value_type = Grob;
 	using difference_type = std::ptrdiff_t;
-	using pointer = const Grob*;
-	using reference = const Grob&;
+	using pointer = Grob*;
+	using reference = Grob&;
 
-	GrobIterator (GrobType grobType, const index_t* globalCornerArray) :
+  GenericGrobIterator () = default;
+  
+  template <class GrobIterator>
+  GenericGrobIterator (GrobIterator const& other)
+   : m_grob (*other)
+   , m_numCorners (other->num_corners ())
+  {}
+
+	GenericGrobIterator (GrobType grobType, index_t* globalCornerArray) :
 		m_grob (grobType, globalCornerArray),
 		m_numCorners (m_grob.num_corners ())
 	{}
 
-	reference operator * () const
+  GenericGrobIterator (GrobType grobType, index_t const* globalCornerArray) :
+    m_grob (grobType, globalCornerArray),
+    m_numCorners (m_grob.num_corners ())
+  {}
+
+  GenericGrobIterator& operator = (GenericGrobIterator const& other)
+  {
+    m_grob.reset (other.m_grob);
+    m_numCorners = other.m_numCorners;
+    return *this;
+  }
+
+	Grob& operator * ()
 	{
 		return m_grob;
 	}
 
-	reference operator -> () const
+  Grob const& operator * () const
+  {
+    return m_grob;
+  }
+
+	Grob* operator -> ()
 	{
-		return m_grob;
+		return &m_grob;
 	}
 
-	bool operator == (const GrobIterator& i) const
+  Grob const* operator -> () const
+  {
+    return &m_grob;
+  }
+
+	bool operator == (const GenericGrobIterator& i) const
 	{
 		return	m_grob.global_corner_array () == i.m_grob.global_corner_array ()
 				&&	m_grob.grob_type () == i.m_grob.grob_type ();
 	}
 
-	bool operator != (const GrobIterator& i) const
+	bool operator != (const GenericGrobIterator& i) const
 	{
 		return	m_grob.global_corner_array () != i.m_grob.global_corner_array ()
 				||	m_grob.grob_type () != i.m_grob.grob_type ();
 	}
 
-	GrobIterator& operator += (difference_type n)
+	GenericGrobIterator& operator += (difference_type n)
 	{
 		m_grob.set_global_corner_array (shifted_corner_array (n));
 		return *this;
 	}
 
-	GrobIterator& operator -= (difference_type n)
+	GenericGrobIterator& operator -= (difference_type n)
 	{
 		m_grob.set_global_corner_array (shifted_corner_array (-n));
 		return *this;
 	}
 
-	GrobIterator operator + (difference_type n) const
+	GenericGrobIterator operator + (difference_type n) const
 	{
-		return GrobIterator (m_grob.grob_type(), shifted_corner_array (n));
+		return GenericGrobIterator (m_grob.grob_type(), shifted_corner_array (n));
 	}
 
-	GrobIterator operator - (difference_type n) const
+	GenericGrobIterator operator - (difference_type n) const
 	{
-		return GrobIterator (m_grob.grob_type(), shifted_corner_array (-n));
+		return GenericGrobIterator (m_grob.grob_type(), shifted_corner_array (-n));
 	}
 
-	GrobIterator& operator ++ ()
+	GenericGrobIterator& operator ++ ()
 	{
 		m_grob.set_global_corner_array (shifted_corner_array (1));
 		return *this;
 	}
 
-	GrobIterator operator ++ (int)
+	GenericGrobIterator operator ++ (int)
 	{
-		GrobIterator i = *this;
+		GenericGrobIterator i = *this;
 		m_grob.set_global_corner_array (shifted_corner_array (1));
 		return i;
 	}
 
-	GrobIterator& operator -- ()
+	GenericGrobIterator& operator -- ()
 	{
 		m_grob.set_global_corner_array (shifted_corner_array (-1));
 		return *this;
 	}
 
-	GrobIterator operator -- (int)
+	GenericGrobIterator operator -- (int)
 	{
-		GrobIterator i = *this;
+		GenericGrobIterator i = *this;
 		m_grob.set_global_corner_array (shifted_corner_array (-1));
 		return i;
 	}
 
 private:
-	const index_t* shifted_corner_array (difference_type n) const
+  /** Note: This method always returns a non-const index array, even for const types.
+            The resulting array is however never used for manipulation and is instead
+            re-cast to the constness of the underlying type by all callers
+            The reason for this hack is to allow one iterator implementation for both
+            `Grob` and `ConstGrob`.*/
+	index_t* shifted_corner_array (difference_type n) const
 	{
-		return m_grob.global_corner_array () + n * m_numCorners;
+		return const_cast <index_t*> (m_grob.global_corner_array ()) + n * m_numCorners;
 	}
 
 	Grob m_grob;
 	index_t m_numCorners;
 };
+
+using GrobIterator = GenericGrobIterator <Grob>;
+using ConstGrobIterator = GenericGrobIterator <ConstGrob>;
 
 }//	end of namespace lume
 

@@ -34,73 +34,73 @@ namespace lume
 class Hierarchy
 {
 public:
-    struct Relation
+  struct Relation
+  {
+    class ChildIterator
     {
-        class ChildIterator
-        {
-        public:
-            ChildIterator (index_t index) : m_index (index) {}
+    public:
+      ChildIterator (index_t index) : m_index (index) {}
 
-            bool           operator != (const ChildIterator& i) const {return m_index != i.m_index;}
-            index_t        operator *  () const                       {return m_index;}
-            ChildIterator& operator ++ ()                             {++m_index; return *this;}
+      bool           operator != (const ChildIterator& i) const {return m_index != i.m_index;}
+      index_t        operator *  () const                       {return m_index;}
+      ChildIterator& operator ++ ()                             {++m_index; return *this;}
 
-        private:
-            index_t m_index;
-        };
-
-        Grob    parent;
-        index_t firstChild;
-        index_t numChildren;
-
-        ChildIterator begin () const {return ChildIterator (firstChild);}
-        ChildIterator end   () const {return ChildIterator (firstChild + numChildren);}
+    private:
+      index_t m_index;
     };
 
+    ConstGrob parent;
+    index_t firstChild;
+    index_t numChildren;
+
+    ChildIterator begin () const {return ChildIterator (firstChild);}
+    ChildIterator end   () const {return ChildIterator (firstChild + numChildren);}
+  };
+
 public:
-    Hierarchy (CSPMesh   parentMesh,
-               SPMesh    childMesh)
-        : m_parentMesh (std::move (parentMesh))
-        , m_childMesh  (std::move (childMesh))
-    {}
+  Hierarchy (CSPMesh   parentMesh,
+             SPMesh    childMesh)
+    : m_parentMesh (std::move (parentMesh))
+    , m_childMesh  (std::move (childMesh))
+  {}
 
-    Hierarchy (Hierarchy& other) = delete;
+  Hierarchy (Hierarchy& other) = delete;
 
-    Hierarchy (Hierarchy&& other)
-        : m_parentMesh (std::move (other.m_parentMesh))
-        , m_childMesh  (std::move (other.m_childMesh))
-    {
-        for(size_t i = 0; i < m_relationsByChildType.size (); ++i) {
-            m_relationsByChildType [i] = std::move (other.m_relationsByChildType [i]);
-        }
+  Hierarchy (Hierarchy&& other)
+    : m_parentMesh (std::move (other.m_parentMesh))
+    , m_childMesh  (std::move (other.m_childMesh))
+  {
+    for(size_t i = 0; i < m_relationsByChildType.size (); ++i) {
+      m_relationsByChildType [i] = std::move (other.m_relationsByChildType [i]);
     }
+  }
 
-    Mesh const& parent_mesh () const {return *m_parentMesh;}
-    Mesh&       child_mesh  ()       {return *m_childMesh;}
+  Mesh const& parent_mesh () const {return *m_parentMesh;}
+  Mesh&       child_mesh  ()       {return *m_childMesh;}
 
-    void reserve (GrobType childType, size_t const numParents)
-    {
-        m_relationsByChildType [childType].reserve (numParents);
-    }
+  void reserve (GrobType childType, size_t const numParents)
+  {
+    m_relationsByChildType [childType].reserve (numParents);
+  }
 
-    /** Returns an array of relations between parents and their consecutive children.*/
-    std::vector <Relation> const& relationsForChildType (GrobType childType)
-    {
-        return m_relationsByChildType [childType];
-    }
+  /** Returns an array of relations between parents and their consecutive children.*/
+  std::vector <Relation> const& relationsForChildType (GrobType childType)
+  {
+    return m_relationsByChildType [childType];
+  }
 
-    void add_relation (const Grob& parent,
-                       GrobType const childType,
-                       index_t const firstChild,
-                       index_t const numChildren)
-    {
-        m_relationsByChildType [childType].emplace_back (Relation {parent, firstChild, numChildren});
-    }
+  void add_relation (const ConstGrob& parent,
+                     GrobType const childType,
+                     index_t const firstChild,
+                     index_t const numChildren)
+  {
+    m_relationsByChildType [childType].emplace_back (Relation {parent, firstChild, numChildren});
+  }
 
 private:
-    CSPMesh   m_parentMesh;
-    SPMesh    m_childMesh;
-    std::array <std::vector <Relation>, NUM_GROB_TYPES> m_relationsByChildType;
+  CSPMesh   m_parentMesh;
+  SPMesh    m_childMesh;
+  std::array <std::vector <Relation>, NUM_GROB_TYPES> m_relationsByChildType;
 };
 
 }// end of namespace lume
