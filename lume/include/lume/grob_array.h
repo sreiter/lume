@@ -39,7 +39,7 @@ namespace lume {
 class GrobArray {
 public:
 	using iterator = GrobIterator;
-	using const_iterator = GrobIterator;
+	using const_iterator = ConstGrobIterator;
   using size_type = TupleVector<index_t>::size_type;
   using value_type = index_t;
 
@@ -93,7 +93,7 @@ public:
 			m_array.push_back (i);
 	}
 
-	inline void push_back (const Grob& grob)
+	inline void push_back (const ConstGrob& grob)
 	{
 		using std::string;
 		using std::to_string;
@@ -127,7 +127,7 @@ public:
   }
 
 	inline Grob operator [] (const size_type i)            {return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
-  inline ConstGrob operator [] (const size_type i) const {return Grob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
+  inline ConstGrob operator [] (const size_type i) const {return ConstGrob (m_grobDesc.grob_type(), m_array.data () + i * num_grob_corners());}
 
 	inline iterator begin ()             {return GrobIterator (m_grobDesc.grob_type(), m_array.data());}
   inline const_iterator begin () const {return ConstGrobIterator (m_grobDesc.grob_type(), m_array.data());}

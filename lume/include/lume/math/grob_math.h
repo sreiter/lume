@@ -32,21 +32,21 @@ namespace lume::math
 
 template <class T>
 TupleWithStorage <T>
-GrobCenter (Grob const& grob, ConstTupleView <T> const& coords)
+GrobCenter (ConstGrob const& grob, ConstTupleView <T> const& coords)
 {
-    assert (grob.num_corners ());
+  assert (grob.num_corners ());
 
-    auto sum = TupleWithStorage <T>::uninitialized (coords.tuple_size ());
-    sum = T (0);
+  auto sum = TupleWithStorage <T>::uninitialized (coords.tuple_size ());
+  sum = T (0);
 
-    index_t const numCorners = grob.num_corners ();
-    for(index_t i = 0; i < numCorners; ++i) {
-        sum += coords [grob.corner (i)];
-    }
+  index_t const numCorners = grob.num_corners ();
+  for(index_t i = 0; i < numCorners; ++i) {
+    sum += coords [grob.corner (i)];
+  }
 
-    sum /= static_cast <T> (numCorners);
+  sum /= static_cast <T> (numCorners);
 
-    return sum;
+  return sum;
 }
 
 }// end of namespace lume::math

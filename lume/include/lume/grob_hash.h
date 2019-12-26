@@ -35,29 +35,31 @@
 
 namespace std
 {
-    template<> struct hash<lume::Grob>
+  template<> struct hash <lume::ConstGrob>
+  {
+    using argument_type = lume::ConstGrob;
+    using result_type = std::size_t;
+
+    result_type operator() (argument_type const& grob) const noexcept
     {
-        typedef lume::Grob argument_type;
-        typedef std::size_t result_type;
-        result_type operator()(argument_type const& grob) const noexcept
-        {
-        	using namespace lume;
-        	const index_t numCorners = grob.num_corners();
-        	index_t minIndex = std::numeric_limits <index_t>::max ();
-        	for(index_t i = 0; i < numCorners; ++i){
-        		minIndex = std::min (minIndex, grob.corner(i));
-        	}
-        	return 10^8 * (grob.grob_type () + 1) + static_cast <result_type> (minIndex);
-        }
-    };
-}//	end of namespace std
+      using namespace lume;
+      const index_t numCorners = grob.num_corners();
+      index_t minIndex = std::numeric_limits <index_t>::max ();
+      for(index_t i = 0; i < numCorners; ++i){
+        minIndex = std::min (minIndex, grob.corner(i));
+      }
+      return 10^8 * (grob.grob_type () + 1) + static_cast <result_type> (minIndex);
+    }
+  };
+}//  end of namespace std
 
 
-namespace lume {
-	using GrobHash = std::unordered_set <Grob>;
+namespace lume
+{
+  using GrobHash = std::unordered_set <ConstGrob>;
 
-	template <class T>
-	using GrobHashMap = std::unordered_map <Grob, T>;
-}//	end of namespace lume
+  template <class T>
+  using GrobHashMap = std::unordered_map <ConstGrob, T>;
+}//  end of namespace lume
 
-#endif	//__H__lume_grob_hash
+#endif  //__H__lume_grob_hash

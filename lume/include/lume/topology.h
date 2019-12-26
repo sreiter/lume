@@ -158,7 +158,7 @@ GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
 template <class Value>
 GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
                         GrobType const grobType,
-                        std::function <bool (Grob const&, Value const&)> const predicate);
+                        std::function <bool (ConstGrob const&, Value const&)> const predicate);
 
 /// Inserts all *grobs* in the specified grob set into the provided *hashMapInOut*.
 /** The grobs are numbered in sequential order according to when they were first encountered

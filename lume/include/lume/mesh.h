@@ -142,12 +142,22 @@ public:
     annex_update (grobType);
   }
 
+  GrobArray& grobs (const GrobType grobType)
+  {
+    return grob_array (grobType);
+  }
+
   const GrobArray& grobs (const GrobType grobType) const
   {
     return grob_array (grobType);
   }
 
-  Grob grob (const GrobIndex& grobIndex) const
+  Grob grob (const GrobIndex& grobIndex)
+  {
+    return grobs (grobIndex.grob_type ()) [grobIndex.index ()];
+  }
+
+  ConstGrob grob (const GrobIndex& grobIndex) const
   {
     return grobs (grobIndex.grob_type ()) [grobIndex.index ()];
   }

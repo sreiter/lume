@@ -36,107 +36,106 @@ namespace lume
 
 void RefinementCallback (Hierarchy hierarchy)
 {
-    Mesh const& parentMesh = hierarchy.parent_mesh ();
-    Mesh&       childMesh  = hierarchy.child_mesh ();
+  Mesh const& parentMesh = hierarchy.parent_mesh ();
+  Mesh&       childMesh  = hierarchy.child_mesh ();
 
-    auto const& parentCoords = math::MakeTupleView (parentMesh.annex (keys::vertexCoords));
-    auto const  tupleSize = parentCoords.tuple_size ();
+  auto const& parentCoords = math::MakeTupleView (parentMesh.annex (keys::vertexCoords));
+  auto const  tupleSize = parentCoords.tuple_size ();
 
-    RealArrayAnnex childCoordsAnnex (tupleSize, childMesh.num (VERTEX));
-    auto childCoords = math::MakeTupleView (childCoordsAnnex);
+  RealArrayAnnex childCoordsAnnex (tupleSize, childMesh.num (VERTEX));
+  auto childCoords = math::MakeTupleView (childCoordsAnnex);
 
-    auto const& relations = hierarchy.relationsForChildType (VERTEX);
-    for (auto const& relation : relations)
-    {
-        for (index_t childIndex : relation) {
-            childCoords [childIndex] = math::GrobCenter (relation.parent, parentCoords);
-        }
+  auto const& relations = hierarchy.relationsForChildType (VERTEX);
+  for (auto const& relation : relations)
+  {
+    for (index_t childIndex : relation) {
+      childCoords [childIndex] = math::GrobCenter (relation.parent, parentCoords);
     }
+  }
 
-    childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
+  childMesh.set_annex (keys::vertexCoords, std::move (childCoordsAnnex));
 }
 
 std::vector <index_t> CreateTriangles (Mesh const& parentMesh,
                                        GrobHashMap <index_t> const& parentEdges)
 {
-    std::vector <index_t> newTris;
-    newTris.resize (parentMesh.num_indices (TRIS) * 4);
-    
-    auto const& grobs = parentMesh.grobs (TRI);
+  std::vector <index_t> newTris;
+  newTris.resize (parentMesh.num_indices (TRIS) * 4);
+  
+  auto const& grobs = parentMesh.grobs (TRI);
 
-    lume::parallel_for (0, grobs.size (), [&grobs, &parentEdges, &newTris] (size_t grobIndex)
+  lume::parallel_for (0, grobs.size (), [&grobs, &parentEdges, &newTris] (size_t grobIndex)
+  {
+    auto const& grob = grobs [grobIndex];
+    std::array <index_t, 3> parentEdgeIndices;
+    for(index_t i = 0; i < 3; ++i) {
+        parentEdgeIndices [i] = parentEdges.at (grob.side (1, i));
+    }
+
+    size_t ito = grobIndex * 12;
+    for (index_t i = 0; i < 3; ++i)
     {
-        auto const& grob = grobs [grobIndex];
-        std::array <index_t, 3> parentEdgeIndices;
-        for(index_t i = 0; i < 3; ++i) {
-            parentEdgeIndices [i] = parentEdges.at (grob.side (1, i));
-        }
+        newTris [ito++] = grob.corner (i);
+        newTris [ito++] = parentEdgeIndices [i];
+        newTris [ito++] = parentEdgeIndices [(i+2) % 3];
+    }
 
-        size_t ito = grobIndex * 12;
-        for (index_t i = 0; i < 3; ++i)
-        {
-            newTris [ito++] = grob.corner (i);
-            newTris [ito++] = parentEdgeIndices [i];
-            newTris [ito++] = parentEdgeIndices [(i+2) % 3];
-        }
+    newTris [ito++] = parentEdgeIndices [0];
+    newTris [ito++] = parentEdgeIndices [1];
+    newTris [ito++] = parentEdgeIndices [2];
+  });
 
-        newTris [ito++] = parentEdgeIndices [0];
-        newTris [ito++] = parentEdgeIndices [1];
-        newTris [ito++] = parentEdgeIndices [2];
-    });
-
-    return newTris;
+  return newTris;
 }
 
 SPMesh RefineTriangles (CSPMesh meshIn)
 {
-    if (meshIn == nullptr) {
-        return {};
-    }
+  if (meshIn == nullptr) {
+    return {};
+  }
 
-    Mesh const& parentMesh = *meshIn;
-    index_t const numOldVertices = static_cast <index_t> (parentMesh.num (VERTEX));
+  Mesh const& parentMesh = *meshIn;
+  index_t const numOldVertices = static_cast <index_t> (parentMesh.num (VERTEX));
 
-    GrobHashMap <index_t> parentEdges;
-    parentEdges.reserve (parentMesh.num (EDGE));
-    FindUniqueSidesNumbered (parentEdges, parentMesh, TRIS, 1, numOldVertices);
+  GrobHashMap <index_t> parentEdges;
+  parentEdges.reserve (parentMesh.num (EDGE));
+  FindUniqueSidesNumbered (parentEdges, parentMesh, TRIS, 1, numOldVertices);
 
-    index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
-    index_t const numNewVertices   = numOldVertices + numParentEdges;
+  index_t const numParentEdges = static_cast <index_t> (parentEdges.size ());
+  index_t const numNewVertices   = numOldVertices + numParentEdges;
 
-    auto childMesh = std::make_shared <Mesh> ();
+  auto childMesh = std::make_shared <Mesh> ();
 
-    childMesh->resize_vertices (numNewVertices);
+  childMesh->resize_vertices (numNewVertices);
 
-    Hierarchy hierarchy (meshIn, childMesh);
-    hierarchy.reserve (VERTEX, numNewVertices);
+  Hierarchy hierarchy (meshIn, childMesh);
+  hierarchy.reserve (VERTEX, numNewVertices);
 
-    auto const& parentVertices = parentMesh.grobs (VERTEX);
-    for (size_t i = 0; i < parentVertices.size (); ++i) {
-        hierarchy.add_relation (parentVertices [i], VERTEX, static_cast <index_t> (i), 1);
-    }
+  auto const& parentVertices = parentMesh.grobs (VERTEX);
+  for (size_t i = 0; i < parentVertices.size (); ++i) {
+    hierarchy.add_relation (parentVertices [i], VERTEX, static_cast <index_t> (i), 1);
+  }
 
-    for (auto const& entry : parentEdges) {
-        hierarchy.add_relation (entry.first, VERTEX, entry.second, 1);
-    }
+  for (auto const& entry : parentEdges) {
+    hierarchy.add_relation (entry.first, VERTEX, entry.second, 1);
+  }
 
-    std::vector <index_t> newTris = CreateTriangles (parentMesh, parentEdges);
+  std::vector <index_t> newTris = CreateTriangles (parentMesh, parentEdges);
 
-    childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
+  childMesh->set_grobs (GrobArray (TRI, std::move (newTris)));
 
-    auto const& parentTris = parentMesh.grobs (TRI);
-    hierarchy.reserve (TRI, parentTris.size ());
-    for (size_t i = 0; i < parentTris.size (); ++i) {
-        hierarchy.add_relation (parentTris [i], TRI, static_cast <index_t> (i), 4);
-    }
+  auto const& parentTris = parentMesh.grobs (TRI);
+  hierarchy.reserve (TRI, parentTris.size ());
+  for (size_t i = 0; i < parentTris.size (); ++i) {
+    hierarchy.add_relation (parentTris [i], TRI, static_cast <index_t> (i), 4);
+  }
 
-    
-    auto cleanUpFuture = std::async (std::launch::async, [&parentEdges] () {GrobHashMap <index_t> hashDeleter (std::move (parentEdges));});
+  auto cleanUpFuture = std::async (std::launch::async, [&parentEdges] () {GrobHashMap <index_t> hashDeleter (std::move (parentEdges));});
 
-    RefinementCallback (std::move (hierarchy));
+  RefinementCallback (std::move (hierarchy));
 
-    cleanUpFuture.wait ();
-    return childMesh;
+  cleanUpFuture.wait ();
+  return childMesh;
 }
 
 }// end of namespace lume

@@ -90,7 +90,7 @@ GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
 template <class Value>
 GrobArray ExtractGrobs (GrobHashMap <Value> const& grobHashMap,
                         GrobType const grobType,
-                        std::function <bool (Grob const&, Value const&)> const predicate)
+                        std::function <bool (ConstGrob const&, Value const&)> const predicate)
 {
   GrobArray grobs {grobType};
   for (auto const& [grob, value] : grobHashMap)
