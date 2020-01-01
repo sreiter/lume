@@ -25,6 +25,10 @@
 #ifndef __H__lume_array_16_4
 #define __H__lume_array_16_4
 
+#include <cstdint>
+
+#include <lume/types.h>
+
 namespace lume {
 namespace impl {
 
@@ -46,9 +50,14 @@ public:
         m_data = 0;
     }
 
+    index_t operator [] (const index_t i) const {
+      return get (i);
+    }
+
     index_t get (const index_t i) const {
         return (m_data >> i*4) & 0xF;
     }
+
     void set (const index_t i, const index_t v) {
         m_data &= ~(0xF << i*4);    // set i-th entry to 0 (important!)
         m_data |= (v & 0xF) << i*4; // set i-th entry to v
