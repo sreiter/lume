@@ -41,4 +41,8 @@ void SaveMeshToFile (Mesh const& mesh,
                      std::string filename,
                      TypedAnnexKey <RealArrayAnnex> const& vertexCoordsKey = keys::vertexCoords);
 
+void SaveGrobsToFile (GrobArray const& grobs,
+                      std::string const& filename,
+                      RealArrayAnnex const& coordinates);
+
 }//	end of namespace lume

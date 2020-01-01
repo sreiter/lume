@@ -31,14 +31,14 @@
 namespace lume {
 
 enum GrobType {
-    VERTEX,
-    EDGE,
-    TRI,
-    QUAD,
-    TET,
-    HEX,
-    PYRA,
-    PRISM
+  VERTEX,
+  EDGE,
+  TRI,
+  QUAD,
+  TET,
+  HEX,
+  PYRA,
+  PRISM
 };
 
 static const index_t NUM_GROB_TYPES = PRISM + 1;
