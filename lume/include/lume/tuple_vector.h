@@ -35,86 +35,94 @@
 namespace lume {
 
 template <class T>
-class TupleVector {
+class TupleVector
+{
 public:
-    using value_type = T;
-    using value_t = value_type;
-    using size_type = size_t;
-    using iterator = typename std::vector<T>::iterator;
-    using const_iterator = typename std::vector<T>::const_iterator;
+  using value_type = T;
+  using value_t = value_type;
+  using size_type = size_t;
+  using iterator = typename std::vector<T>::iterator;
+  using const_iterator = typename std::vector<T>::const_iterator;
 
-    TupleVector ()
-        : m_tupleSize (1)
-    {}
+  TupleVector ()
+    : m_tupleSize (1)
+  {}
 
-    TupleVector (const size_type tupleSize)
-        : m_tupleSize (tupleSize)
-    {
-        assert (tupleSize != 0);
-    }
+  TupleVector (const size_type tupleSize)
+    : m_tupleSize (tupleSize)
+  {
+    assert (tupleSize != 0);
+  }
 
-    TupleVector (const size_type tupleSize, const size_type numTuples)
-        : m_vector (tupleSize * numTuples)
-        , m_tupleSize (tupleSize)
-    {
-        assert (tupleSize != 0);
-    }
+  TupleVector (const size_type tupleSize, const size_type numTuples)
+    : m_vector (tupleSize * numTuples)
+    , m_tupleSize (tupleSize)
+  {
+    assert (tupleSize != 0);
+  }
 
-    TupleVector (TupleVector&& tv)
-        : m_vector (std::move (tv.m_vector))
-        , m_tupleSize (tv.m_tupleSize)
-    {}
+  TupleVector (TupleVector&& tv)
+    : m_vector (std::move (tv.m_vector))
+    , m_tupleSize (tv.m_tupleSize)
+  {}
 
-    TupleVector (const size_type tupleSize, std::vector <T>&& vec)
-        : m_vector (std::move (vec))
-        , m_tupleSize (tupleSize)
-    {
-        assert (tupleSize != 0);
-        const size_t numTuples = m_vector.size () / m_tupleSize;
-        if (m_vector.size () != m_tupleSize * numTuples)
-            m_vector.resize (m_tupleSize * numTuples);
-    }
+  TupleVector (const size_type tupleSize, std::vector <T>&& vec)
+    : m_vector (std::move (vec))
+    , m_tupleSize (tupleSize)
+  {
+    assert (tupleSize != 0);
+    const size_t numTuples = m_vector.size () / m_tupleSize;
+    if (m_vector.size () != m_tupleSize * numTuples)
+      m_vector.resize (m_tupleSize * numTuples);
+  }
 
-    bool empty() const                      { return m_vector.empty(); }
+  TupleVector& operator = (TupleVector&& other)
+  {
+    m_vector = std::move (other.m_vector);
+    m_tupleSize = other.m_tupleSize;
+    return *this;
+  }
 
-    /// total number of entries, counting individual components
-    inline size_type size () const            {return m_vector.size();}
+  bool empty() const                   { return m_vector.empty(); }
 
-    inline size_type num_tuples () const      {return size() / tuple_size();}
+  /// total number of entries, counting individual components
+  inline size_type size () const       {return m_vector.size();}
 
-    /// number of individual components making up a tuple
-    inline size_type tuple_size () const        {return m_tupleSize;}
+  inline size_type num_tuples () const {return size() / tuple_size();}
 
-    inline T* data()                            {return m_vector.data ();}
-    inline const T* data () const               {return m_vector.data ();}
+  /// number of individual components making up a tuple
+  inline size_type tuple_size () const {return m_tupleSize;}
 
-    inline void clear ()                                             {m_vector.clear();}
-    inline void resize (const size_type s)                           {m_vector.resize (s);}
-    inline void resize (const size_type s, const T& v)               {m_vector.resize (s, v);}
-    inline void set_num_tuples (const size_type num)                 {m_vector.resize (num * tuple_size ());}
-    inline void set_num_tuples (const size_type num, const T& v)     {m_vector.resize (num * tuple_size (), v);}
-    inline void reserve (const size_type s)                          {m_vector.reserve (s);}
-    inline iterator erase (const iterator begin, const iterator end) {return m_vector.erase (begin, end);}
+  inline T* data()                     {return m_vector.data ();}
+  inline const T* data () const        {return m_vector.data ();}
 
-    inline T& operator [] (const size_type i)             {return m_vector[i];}
-    inline const T& operator [] (const size_type i) const {return m_vector[i];}
+  inline void clear ()                                             {m_vector.clear();}
+  inline void resize (const size_type s)                           {m_vector.resize (s);}
+  inline void resize (const size_type s, const T& v)               {m_vector.resize (s, v);}
+  inline void set_num_tuples (const size_type num)                 {m_vector.resize (num * tuple_size ());}
+  inline void set_num_tuples (const size_type num, const T& v)     {m_vector.resize (num * tuple_size (), v);}
+  inline void reserve (const size_type s)                          {m_vector.reserve (s);}
+  inline iterator erase (const iterator begin, const iterator end) {return m_vector.erase (begin, end);}
 
-    inline T& at (const size_type i)                  {return m_vector.at(i);}
-    inline const T& at (const size_type i) const      {return m_vector.at(i);}
+  inline T& operator [] (const size_type i)             {return m_vector[i];}
+  inline const T& operator [] (const size_type i) const {return m_vector[i];}
 
-    inline T& back ()                       {return m_vector.back();}
-    inline const T& back () const           {return m_vector.back();}
+  inline T& at (const size_type i)                  {return m_vector.at(i);}
+  inline const T& at (const size_type i) const      {return m_vector.at(i);}
 
-    inline iterator begin ()                {return m_vector.begin();}
-    inline iterator end ()                  {return m_vector.end();}
-    inline const_iterator begin () const    {return m_vector.begin();}
-    inline const_iterator end () const      {return m_vector.end();}
+  inline T& back ()                       {return m_vector.back();}
+  inline const T& back () const           {return m_vector.back();}
 
-    inline void push_back (const T& t)      {m_vector.push_back (t);}
+  inline iterator begin ()                {return m_vector.begin();}
+  inline iterator end ()                  {return m_vector.end();}
+  inline const_iterator begin () const    {return m_vector.begin();}
+  inline const_iterator end () const      {return m_vector.end();}
+
+  inline void push_back (const T& t)      {m_vector.push_back (t);}
 
 private:
-    std::vector <T> m_vector;
-    size_type       m_tupleSize;
+  std::vector <T> m_vector;
+  size_type       m_tupleSize;
 };
 
 }//    end of namespace lume

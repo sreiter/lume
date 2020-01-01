@@ -63,6 +63,13 @@ public:
     m_array (std::move (inds))
   {}
 
+  GrobArray& operator = (GrobArray&& other)
+  {
+    m_grobDesc = std::move (other.m_grobDesc);
+    m_array = std::move (other.m_array);
+    return *this;
+  }
+
 	inline void clear ()					{m_array.clear();}
 
 	bool empty() const 						{return m_array.empty();}
@@ -151,7 +158,7 @@ private:
   }
 
 private:
-	GrobDesc				m_grobDesc;
+	GrobDesc m_grobDesc;
 	TupleVector <index_t>	m_array;
 };
 
