@@ -22,6 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <fstream>
 #include <lume/edge_mesh_2d.h>
 
 namespace lume
@@ -124,23 +125,34 @@ void EdgeMesh2d::remove_edge (Edge const& edge)
 void EdgeMesh2d::remove_edges_with_vertex (index_t vertex, bool addBoundaryMarkers)
 {
   auto& connections = vertex_connections (vertex);
+  auto const p = coordinate (vertex);
 
   if (addBoundaryMarkers &&
       connections.size () > 1)
   {
     for (size_t i = 0; i < connections.size (); ++i)
     {
-      size_t const k = (i + connections.size () - 1) % connections.size ();
       size_t const j = (i + 1) % connections.size ();
 
-      auto& iCons = vertex_connections (connections [i].to);
-      auto kIter = find_connection (iCons, connections [k].to);
-      if (kIter != iCons.end ())
-        kIter->boundary = Boundary::Right;
+      auto const iTo = connections [i].to;
+      auto const jTo = connections [j].to;
 
-      auto jIter = find_connection (iCons, connections [j].to);
+      if (connections [i].boundary == Boundary::Left ||
+          connections [j].boundary == Boundary::Right ||
+          !triangle_is_ccw (p, coordinate (iTo), coordinate (jTo)))
+      {
+        continue;
+      }
+
+      auto& iCons = vertex_connections (iTo);
+      auto jIter = find_connection (iCons, jTo);
       if (jIter != iCons.end ())
         jIter->boundary = Boundary::Left;
+
+      auto& jCons = vertex_connections (jTo);
+      auto iIter = find_connection (jCons, iTo);
+      if (iIter != jCons.end ())
+        iIter->boundary = Boundary::Right;
     }
   }
 
@@ -151,6 +163,11 @@ void EdgeMesh2d::remove_edges_with_vertex (index_t vertex, bool addBoundaryMarke
   }
 
   connections.clear ();
+}
+
+size_t EdgeMesh2d::num_vertices () const
+{
+  return m_connections.size ();
 }
 
 auto EdgeMesh2d::vertex_connections (index_t vertex) -> Connections&
@@ -176,6 +193,7 @@ GrobArray EdgeMesh2d::create_triangles () const
   GrobArray tris {TRI};
   for (index_t iVrt = 0; iVrt < static_cast <index_t> (m_connections.size ()); ++iVrt)
   {
+    auto const p = coordinate (iVrt);
     auto const connections = m_connections [iVrt];
     auto const numConnections = connections.size ();
     for (size_t iCon = 0; iCon < numConnections; ++iCon)
@@ -188,7 +206,7 @@ GrobArray EdgeMesh2d::create_triangles () const
 
       if (iVrt < to0 &&
           iVrt < to1 &&
-          normal (iVrt, to0).dot (direction (iVrt, to1)) > 0)
+          triangle_is_ccw (p, coordinate (to0), coordinate (to1)))
       {
         tris.push_back ({iVrt, to0, to1});
       }
@@ -196,6 +214,39 @@ GrobArray EdgeMesh2d::create_triangles () const
   }
 
   return tris;
+}
+
+void EdgeMesh2d::save_connections (std::string const& filename) const
+{
+  std::ofstream out (filename);
+  if (!out)
+    return;
+
+  for (index_t i = 0; i < num_vertices (); ++i)
+  {
+    auto c = coordinate (i);
+    out << "v " << c [0] << " " << c [1] << " 0" << std::endl;
+  }
+
+  std::array <const char*, 3> subsetNames {"inner", "leftBnd", "rightBnd"};
+
+  for (size_t iSubset = 0; iSubset < subsetNames.size (); ++iSubset)
+  {
+    out << "o " << subsetNames [iSubset] << std::endl;
+    out << "usemtl (null)" << std::endl;
+
+    Boundary boundary = static_cast <Boundary> (iSubset);
+    for (size_t iVrt = 0; iVrt < num_vertices (); ++iVrt)
+    {
+      for (auto const& c : m_connections [iVrt])
+      {
+        if (c.boundary == boundary)
+        {
+          out << "f " << iVrt + 1 << " " << c.to + 1 << std::endl;
+        }
+      }
+    }
+  }
 }
 
 bool EdgeMesh2d::insert_connection (index_t const from, index_t const to, Boundary boundary)
@@ -225,9 +276,11 @@ void EdgeMesh2d::remove_connection (index_t const from, index_t const to)
 
 double EdgeMesh2d::compute_pseudo_angle (index_t const iFrom, index_t const iTo) const
 {
-  auto const from = coordinate (iFrom);
-  auto const to = coordinate (iTo);
+  return compute_pseudo_angle (coordinate (iFrom), coordinate (iTo));
+}
 
+double EdgeMesh2d::compute_pseudo_angle (Coordinate const& from, Coordinate const& to) const
+{
   auto dir = to - from;
   dir.normalize ();
 
@@ -235,6 +288,32 @@ double EdgeMesh2d::compute_pseudo_angle (index_t const iFrom, index_t const iTo)
     return 0.25 - 0.25 * dir [0];
   else
     return 0.75 + 0.25 * dir [0];
+}
+
+double EdgeMesh2d::pseudo_angle_distance_ccw (double fromAngle, double toAngle) const
+{
+  auto const t = toAngle - fromAngle;
+  if (t < 0)
+    return 1.0 - t;
+  return t;
+}
+
+bool EdgeMesh2d::is_left_of (Coordinate const& a, Coordinate const& b, Coordinate const& c) const
+{
+  static constexpr double threshold = 1.e-12;
+  auto const angleBA = compute_pseudo_angle (b, a);
+  auto const angleBC = compute_pseudo_angle (b, c);
+  auto const angleCB = compute_pseudo_angle (c, b);
+
+  return pseudo_angle_distance_ccw (angleBC, angleBA) > threshold &&
+         pseudo_angle_distance_ccw (angleBA, angleCB) > threshold;
+}
+
+bool EdgeMesh2d::triangle_is_ccw (Coordinate const& a, Coordinate const& b, Coordinate const& c) const
+{
+  return is_left_of (a, b, c) &&
+         is_left_of (b, c, a) &&
+         is_left_of (c, a, b);
 }
 
 bool EdgeMesh2d::is_valid (Edge const& edge) const

@@ -81,11 +81,15 @@ public:
   void remove_edge (Edge const& edge);
   void remove_edges_with_vertex (index_t vertex, bool addBoundaryMarkers);
   
+  size_t num_vertices () const;
+  
   Connections const& connections (index_t vertex) const;
 
   bool swap_edge (Edge const& edge);
   
   GrobArray create_triangles () const;
+
+  void save_connections (std::string const& filename) const;
 
 private:
   using CoordinateCallback = std::function <std::tuple <double, double> (index_t)>;
@@ -95,6 +99,13 @@ private:
   bool insert_connection (index_t const from, index_t const to, Boundary boundary);
   void remove_connection (index_t const from, index_t const to);
   double compute_pseudo_angle (index_t const from, index_t const to) const;
+  double compute_pseudo_angle (Coordinate const& from, Coordinate const& to) const;
+
+  double pseudo_angle_distance_ccw (double fromAngle, double toAngle) const;
+  
+  bool is_left_of (Coordinate const& a, Coordinate const& b, Coordinate const& c) const;
+  bool triangle_is_ccw (Coordinate const& a, Coordinate const& b, Coordinate const& c) const;
+
   bool is_valid (Edge const& edge) const;
 
   Connections const& vertex_connections (index_t vertex) const;
